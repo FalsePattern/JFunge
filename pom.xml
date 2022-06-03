@@ -13,6 +13,7 @@
         <lombok.version>1.18.22</lombok.version>
         <junit.version>5.8.2</junit.version>
         <trove.version>3.0.3</trove.version>
+        <joml.version>1.10.2</joml.version>
         <project.encoding>UTF-8</project.encoding>
         <project.distribution.name>mavenpattern</project.distribution.name>
         <project.distribution.url>https://maven.falsepattern.com/</project.distribution.url>
@@ -36,6 +37,11 @@
             <groupId>net.sf.trove4j</groupId>
             <artifactId>trove4j</artifactId>
             <version>${trove.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.joml</groupId>
+            <artifactId>joml</artifactId>
+            <version>${joml.version}</version>
         </dependency>
     </dependencies>
 

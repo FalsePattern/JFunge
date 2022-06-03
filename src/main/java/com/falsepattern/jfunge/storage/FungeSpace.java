@@ -3,8 +3,8 @@ package com.falsepattern.jfunge.storage;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.*;
-
-import java.awt.*;
+import org.joml.Vector4i;
+import org.joml.Vector4ic;
 
 import static com.falsepattern.jfunge.storage.Chunk.*;
 
@@ -17,10 +17,9 @@ public class FungeSpace {
     private Chunk cacheChunk;
 
     private boolean boundsRecheck = false;
-    private Rectangle bounds = new Rectangle(0, 0, 0, 0);
+    private final Vector4i bounds = new Vector4i();
 
-    @NonNull
-    private int defaultValue;
+    private final int defaultValue;
 
     public int get(int x, int y) {
         val cX = toChunk(x);
@@ -72,6 +71,15 @@ public class FungeSpace {
         });
     }
 
+    public void wipe() {
+        storage.clear();
+        boundsRecheck = false;
+        bounds.x = 0;
+        bounds.y = 0;
+        bounds.z = 0;
+        bounds.w = 0;
+    }
+
     private static int max(int[] arr) {
         int max = Integer.MIN_VALUE;
         for (int i = 0; i < arr.length; i++) {
@@ -79,6 +87,7 @@ public class FungeSpace {
         }
         return max;
     }
+
     private static int min(int[] arr) {
         int max = Integer.MAX_VALUE;
         for (int i = 0; i < arr.length; i++) {
@@ -87,7 +96,7 @@ public class FungeSpace {
         return max;
     }
 
-    public Rectangle getBounds() {
+    public Vector4ic bounds() {
         recheckBounds();
         return bounds;
     }
@@ -97,7 +106,7 @@ public class FungeSpace {
         gc();
         boundsRecheck = false;
         if (storage.size() == 0) {
-            bounds = new Rectangle(0, 0, 0, 0);
+            bounds.set(0, 0, 0, 0);
             return;
         }
         int top = Integer.MAX_VALUE;
@@ -139,6 +148,6 @@ public class FungeSpace {
                 right = Math.max(right, fromChunk(cXRight) + chunk.right());
             }
         }
-        bounds = new Rectangle(left, top, right, bottom);
+        bounds.set(left, top, right, bottom);
     }
 }

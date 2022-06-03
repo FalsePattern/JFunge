@@ -1,6 +1,7 @@
 package com.falsepattern.jfunge.storage;
 
 import lombok.val;
+import org.joml.Vector4i;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -38,25 +39,26 @@ public class TestFungeSpace {
     @Test
     public void testBounds() {
         val space = new FungeSpace(0);
-        Assertions.assertEquals(new Rectangle(0, 0, 0, 0), space.getBounds());
+        val expected = new Vector4i();
+        Assertions.assertEquals(expected.set(0, 0, 0, 0), space.bounds());
         space.set(0, 0, 1);
-        Assertions.assertEquals(new Rectangle(0, 0, 0, 0), space.getBounds());
+        Assertions.assertEquals(expected.set(0, 0, 0, 0), space.bounds());
         space.set(0, 1, 1);
         space.set(1, 0, 2);
-        Assertions.assertEquals(new Rectangle(0, 0, 1, 1), space.getBounds());
+        Assertions.assertEquals(expected.set(0, 0, 1, 1), space.bounds());
         space.set(0, 0, 0);
         space.set(0, 1, 0);
         space.set(1, 0, 0);
-        Assertions.assertEquals(new Rectangle(0, 0, 0, 0), space.getBounds());
+        Assertions.assertEquals(expected.set(0, 0, 0, 0), space.bounds());
         space.set(-10, -5, 10);
         space.set(127, 5, 8);
         space.set(5, 127, 5);
-        Assertions.assertEquals(new Rectangle(-10, -5, 127, 127), space.getBounds());
+        Assertions.assertEquals(expected.set(-10, -5, 127, 127), space.bounds());
         space.set(-10, -5, 0);
-        Assertions.assertEquals(new Rectangle(5, 5, 127, 127), space.getBounds());
+        Assertions.assertEquals(expected.set(5, 5, 127, 127), space.bounds());
         space.set(127, 5, 0);
-        Assertions.assertEquals(new Rectangle(5, 127, 5, 127), space.getBounds());
+        Assertions.assertEquals(expected.set(5, 127, 5, 127), space.bounds());
         space.set(5, 127, 0);
-        Assertions.assertEquals(new Rectangle(0, 0, 0, 0), space.getBounds());
+        Assertions.assertEquals(expected.set(0, 0, 0, 0), space.bounds());
     }
 }

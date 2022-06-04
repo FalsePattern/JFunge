@@ -1,12 +1,9 @@
 package com.falsepattern.jfunge.interpreter.instructions.fingerprints;
 
+import com.falsepattern.jfunge.interpreter.ExecutionContext;
 import com.falsepattern.jfunge.interpreter.instructions.Funge98;
-import com.falsepattern.jfunge.interpreter.instructions.Instruction;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
-import java.util.function.IntConsumer;
-import java.util.function.ObjIntConsumer;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MODU implements Fingerprint {
@@ -15,26 +12,26 @@ public class MODU implements Fingerprint {
     private static int safeMod(int a, int b) {
         return b == 0 ? 0 : a % b;
     }
-    @Override
-    public void load(ObjIntConsumer<Instruction> instructionSet) {
-        instructionSet.accept((ctx) -> Funge98.binop(ctx, (a, b) -> {
-            return (b < 0 ? -1 : 1) * safeMod(a, b);
-        }), 'M');
-        instructionSet.accept((ctx) -> Funge98.binop(ctx, (a, b) -> {
+
+    @Instr('M')
+    public static void signedResult(ExecutionContext ctx) {
+        Funge98.binop(ctx, (a, b) -> (b < 0 ? -1 : 1) * safeMod(a, b));
+    }
+
+    @Instr('U')
+    public static void samHolden(ExecutionContext ctx) {
+        Funge98.binop(ctx, (a, b) -> {
             if (b < 0) {
                 a = -a;
                 b = -b;
             }
             return safeMod(a, b);
-        }), 'U');
-        instructionSet.accept((ctx) -> Funge98.binop(ctx, (a, b) -> safeMod(a, b)), 'R');
+        });
     }
 
-    @Override
-    public void unload(IntConsumer instructionSet) {
-        instructionSet.accept('M');
-        instructionSet.accept('U');
-        instructionSet.accept('R');
+    @Instr('R')
+    public static void remainder(ExecutionContext ctx) {
+        Funge98.binop(ctx, MODU::safeMod);
     }
 
     @Override

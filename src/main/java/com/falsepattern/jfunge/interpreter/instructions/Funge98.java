@@ -19,220 +19,281 @@ import java.util.function.ObjIntConsumer;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Funge98 implements InstructionSet {
     public static final Funge98 INSTANCE = new Funge98();
-    @Override
-    public void load(ObjIntConsumer<Instruction> instructionSet) {
-        for (int i = 0; i <= 9; i++) {
-            int finalI = i;
-            instructionSet.accept((ctx) -> ctx.IP().stackStack.TOSS().push(finalI), '0' + i);
+
+    @Instr('>')
+    public static void east(ExecutionContext ctx) {ctx.IP().delta.set(1, 0, 0);}
+
+    @Instr('v')
+    public static void south(ExecutionContext ctx) {ctx.IP().delta.set(0, 1, 0);}
+
+    @Instr('<')
+    public static void west(ExecutionContext ctx) {ctx.IP().delta.set(-1, 0, 0);}
+
+    @Instr('^')
+    public static void north(ExecutionContext ctx) {ctx.IP().delta.set(0, -1, 0);}
+
+    @Instr('[')
+    public static void turnLeft(ExecutionContext ctx) {
+        val d = ctx.IP().delta;
+        d.set(d.y, -d.x, d.z);
+    }
+
+    @Instr(']')
+    public static void turnRight(ExecutionContext ctx) {
+        val d = ctx.IP().delta;
+        d.set(-d.y, d.x, d.z);
+    }
+
+    @Instr('#')
+    public static void trampoline(ExecutionContext ctx) {ctx.IP().position.add(ctx.IP().delta);}
+
+    @Instr('j')
+    public static void jumpNTimes(ExecutionContext ctx) {
+        int n = ctx.IP().stackStack.TOSS().pop();
+        ctx.IP().position.add(new Vector3i(ctx.IP().delta).mul(n));
+    }
+
+    @Instr('x')
+    public static void absoluteDelta(ExecutionContext ctx) {
+        val s = ctx.IP().stackStack.TOSS();
+        if (ctx.dimensions() == 3) {
+            s.pop3(ctx.IP().delta);
+        } else {
+            val tmp = s.pop2();
+            ctx.IP().delta.set(tmp.x, tmp.y, 0);
         }
-        for (int i = 0; i <= 5; i++) {
-            int finalI = i;
-            instructionSet.accept((ctx) -> ctx.IP().stackStack.TOSS().push(10 + finalI), 'a' + i);
+    }
+
+    @Instr('k')
+    public static void doNTimes(ExecutionContext ctx) {
+        val s = ctx.IP().stackStack.TOSS();
+        int n = s.pop();
+        if (n > 0) {
+            val snapshot = new Vector3i(ctx.IP().position);
+            ctx.step(ctx.IP());
+            int i = ctx.fungeSpace().get(ctx.IP().position);
+            ctx.IP().position.set(snapshot);
+            for (int j = 0; j < n; j++) {
+                ctx.interpret(i);
+            }
+        } else {
+            ctx.interpret('#');
         }
-        instructionSet.accept((ctx) -> ctx.IP().delta.set(1, 0, 0), '>');
-        instructionSet.accept((ctx) -> ctx.IP().delta.set(0, 1, 0), 'v');
-        instructionSet.accept((ctx) -> ctx.IP().delta.set(-1, 0, 0), '<');
-        instructionSet.accept((ctx) -> ctx.IP().delta.set(0, -1, 0), '^');
-        instructionSet.accept((ctx) -> {
-            val d = ctx.IP().delta;
-            d.set(d.y, -d.x, d.z);
-        }, '[');
-        instructionSet.accept((ctx) -> {
-            val d = ctx.IP().delta;
-            d.set(-d.y, d.x, d.z);
-        }, ']');
-        instructionSet.accept((ctx) -> ctx.IP().position.add(ctx.IP().delta), '#');
-        instructionSet.accept((ctx) -> {
-            int n = ctx.IP().stackStack.TOSS().pop();
-            ctx.IP().position.add(new Vector3i(ctx.IP().delta).mul(n));
-        }, 'j');
-        instructionSet.accept((ctx) -> {
-            val s = ctx.IP().stackStack.TOSS();
-            if (ctx.dimensions() == 3) {
-                s.pop3(ctx.IP().delta);
-            } else {
-                val tmp = s.pop2();
-                ctx.IP().delta.set(tmp.x, tmp.y, 0);
-            }
-        }, 'x');
-        instructionSet.accept((ctx) -> {
-            val s = ctx.IP().stackStack.TOSS();
-            int n = s.pop();
-            if (n > 0) {
-                val snapshot = new Vector3i(ctx.IP().position);
-                ctx.step(ctx.IP());
-                int i = ctx.fungeSpace().get(ctx.IP().position);
-                ctx.IP().position.set(snapshot);
-                for (int j = 0; j < n; j++) {
-                    ctx.interpret(i);
-                }
-            } else {
-                ctx.interpret('#');
-            }
-        }, 'k');
-        instructionSet.accept((ctx) -> System.out.printf("%d ", ctx.IP().stackStack.TOSS().pop()), '.');
-        instructionSet.accept((ctx) -> System.out.print((char)ctx.IP().stackStack.TOSS().pop()), ',');
-        instructionSet.accept((ctx) -> ctx.IP().delta.mul(-1), 'r');
-        instructionSet.accept((ctx) -> ctx.IP().die(), '@');
-        instructionSet.accept((ctx) -> ctx.IP().stackStack.TOSS().pop(), '$');
-        instructionSet.accept((ctx) -> ctx.IP().stackStack.TOSS().clear(), 'n');
-        instructionSet.accept((ctx) -> ctx.interpret(ctx.IP().stackStack.TOSS().pop() == 0 ? '>' : '<'), '_');
-        instructionSet.accept((ctx) -> ctx.interpret(ctx.IP().stackStack.TOSS().pop() == 0 ? 'v' : '^'), '|');
-        instructionSet.accept((ctx) -> {
-            int i = ctx.fungeSpace().get(new Vector3i(ctx.IP().position).add(ctx.IP().delta));
-            ctx.IP().stackStack.TOSS().push(i);
-            ctx.interpret('#');
-        }, '\'');
-        instructionSet.accept((ctx) -> {
-            ctx.fungeSpace().set(new Vector3i(ctx.IP().position).add(ctx.IP().delta), ctx.IP().stackStack.TOSS().pop());
-            ctx.interpret('#');
-        }, 's');
-        instructionSet.accept((ctx) -> {
-            val s = ctx.IP().stackStack.TOSS();
-            val b = s.pop();
-            val a = s.pop();
-            if (a > b) {
-                ctx.interpret(']');
-            } else if (a < b) {
-                ctx.interpret('[');
-            } else {
-                ctx.interpret('z');
-            }
-        }, 'w');
-        instructionSet.accept((ctx) -> {}, 'z');
-        instructionSet.accept((ctx) -> binop(ctx, Integer::sum), '+');
-        instructionSet.accept((ctx) -> binop(ctx, (a, b) -> a - b), '-');
-        instructionSet.accept((ctx) -> binop(ctx, (a, b) -> a * b), '*');
-        instructionSet.accept((ctx) -> binop(ctx, (a, b) -> a > b ? 1 : 0), '`');
-        instructionSet.accept((ctx) -> binop(ctx, (a, b) -> b == 0 ? 0 : a / b), '/');
-        instructionSet.accept((ctx) -> binop(ctx, (a, b) -> b == 0 ? 0 : a % b), '%');
-        instructionSet.accept((ctx) -> stack(ctx, (toss) -> {
+    }
+
+    @Instr('.')
+    public static void printNumber(ExecutionContext ctx) {System.out.printf("%d ", ctx.IP().stackStack.TOSS().pop());}
+
+    @Instr(',')
+    public static void printChar(ExecutionContext ctx) {System.out.print((char) ctx.IP().stackStack.TOSS().pop());}
+
+    @Instr('r')
+    public static void reflect(ExecutionContext ctx) {ctx.IP().delta.mul(-1);}
+
+    @Instr('@')
+    public static void die(ExecutionContext ctx) {ctx.IP().die();}
+
+    @Instr('$')
+    public static void pop(ExecutionContext ctx) {ctx.IP().stackStack.TOSS().pop();}
+
+    @Instr('n')
+    public static void clearStack(ExecutionContext ctx) {ctx.IP().stackStack.TOSS().clear();}
+
+    @Instr('_')
+    public static void branchEastWest(ExecutionContext ctx) {ctx.interpret(ctx.IP().stackStack.TOSS().pop() == 0 ? '>' : '<');}
+
+    @Instr('|')
+    public static void branchNorthSouth(ExecutionContext ctx) {ctx.interpret(ctx.IP().stackStack.TOSS().pop() == 0 ? 'v' : '^');}
+
+    @Instr('\'')
+    public static void getNext(ExecutionContext ctx) {
+        int i = ctx.fungeSpace().get(new Vector3i(ctx.IP().position).add(ctx.IP().delta));
+        ctx.IP().stackStack.TOSS().push(i);
+        ctx.interpret('#');
+    }
+
+    @Instr('s')
+    public static void putNext(ExecutionContext ctx) {
+        ctx.fungeSpace().set(new Vector3i(ctx.IP().position).add(ctx.IP().delta), ctx.IP().stackStack.TOSS().pop());
+        ctx.interpret('#');
+    }
+
+    @Instr('w')
+    public static void conditionalTurn(ExecutionContext ctx) {
+        val s = ctx.IP().stackStack.TOSS();
+        val b = s.pop();
+        val a = s.pop();
+        if (a > b) {
+            ctx.interpret(']');
+        } else if (a < b) {
+            ctx.interpret('[');
+        } else {
+            ctx.interpret('z');
+        }
+    }
+
+    @Instr('z')
+    public static void noop(ExecutionContext ctx) {}
+
+    @Instr('+')
+    public static void add(ExecutionContext ctx) {binop(ctx, Integer::sum);}
+
+    @Instr('-')
+    public static void sub(ExecutionContext ctx) {binop(ctx, (a, b) -> a - b);}
+
+    @Instr('*')
+    public static void mul(ExecutionContext ctx) {binop(ctx, (a, b) -> a * b);}
+
+    @Instr('`')
+    public static void greater(ExecutionContext ctx) {binop(ctx, (a, b) -> a > b ? 1 : 0);}
+
+    @Instr('/')
+    public static void div(ExecutionContext ctx) {binop(ctx, (a, b) -> b == 0 ? 0 : a / b);}
+
+    @Instr('%')
+    public static void mod(ExecutionContext ctx) {binop(ctx, (a, b) -> b == 0 ? 0 : a % b);}
+
+    @Instr('\\')
+    public static void swap(ExecutionContext ctx) {
+        stack(ctx, (toss) -> {
             int b = toss.pop();
             int a = toss.pop();
             toss.push(b);
             toss.push(a);
-        }), '\\');
-        instructionSet.accept((ctx) -> {
-            val ip = ctx.IP();
-            val toss = ip.stackStack.TOSS();
-            if (ctx.dimensions() == 3) {
-                val vec = toss.pop3().add(ip.storageOffset);
-                val i = toss.pop();
-                ctx.fungeSpace().set(vec, i);
-            } else {
-                val vec = toss.pop2().add(ip.storageOffset.x, ip.storageOffset.y);
-                val i = toss.pop();
-                ctx.fungeSpace().set(vec.x, vec.y, ip.storageOffset.z, i);
-            }
-        }, 'p');
-        instructionSet.accept((ctx) -> {
-            val ip = ctx.IP();
-            val toss = ip.stackStack.TOSS();
-            if (ctx.dimensions() == 3) {
-                val vec = toss.pop3().add(ip.storageOffset);
-                toss.push(ctx.fungeSpace().get(vec));
-            } else {
-                val vec = toss.pop2().add(ip.storageOffset.x, ip.storageOffset.y);
-                toss.push(ctx.fungeSpace().get(vec.x, vec.y, ip.storageOffset.z));
-            }
-        }, 'g');
-        instructionSet.accept((ctx) -> stack(ctx, (toss) -> toss.push(toss.pop() == 0 ? 1 : 0)), '!');
-        instructionSet.accept((ctx) -> stack(ctx, (toss) -> {
+        });
+    }
+
+    @Instr('p')
+    public static void put(ExecutionContext ctx) {
+        val ip = ctx.IP();
+        val toss = ip.stackStack.TOSS();
+        if (ctx.dimensions() == 3) {
+            val vec = toss.pop3().add(ip.storageOffset);
+            val i = toss.pop();
+            ctx.fungeSpace().set(vec, i);
+        } else {
+            val vec = toss.pop2().add(ip.storageOffset.x, ip.storageOffset.y);
+            val i = toss.pop();
+            ctx.fungeSpace().set(vec.x, vec.y, ip.storageOffset.z, i);
+        }
+    }
+
+    @Instr('g')
+    public static void get(ExecutionContext ctx) {
+        val ip = ctx.IP();
+        val toss = ip.stackStack.TOSS();
+        if (ctx.dimensions() == 3) {
+            val vec = toss.pop3().add(ip.storageOffset);
+            toss.push(ctx.fungeSpace().get(vec));
+        } else {
+            val vec = toss.pop2().add(ip.storageOffset.x, ip.storageOffset.y);
+            toss.push(ctx.fungeSpace().get(vec.x, vec.y, ip.storageOffset.z));
+        }
+    }
+
+    @Instr('!')
+    public static void logicalNot(ExecutionContext ctx) {stack(ctx, (toss) -> toss.push(toss.pop() == 0 ? 1 : 0));}
+
+    @Instr(':')
+    public static void duplicate(ExecutionContext ctx) {
+        stack(ctx, (toss) -> {
             int x = toss.pop();
             toss.push(x);
             toss.push(x);
-        }), ':');
-        instructionSet.accept((ctx) -> {
-            if (!ctx.IP().stackStack.pushStackStack()) {
-                ctx.interpret('r');
-                return;
-            }
-            val SOSS = ctx.IP().stackStack.SOSS().get();
-            val TOSS = ctx.IP().stackStack.TOSS();
-            int n = SOSS.pop();
-            if (n > 0) {
-                val tmp = new Stack();
-                for (int i = 0; i < n; i++) {
-                    tmp.push(SOSS.pop());
-                }
-                for (int i = 0; i < n; i++) {
-                    TOSS.push(tmp.pop());
-                }
-            }
-            if (n < 0) {
-                for (int i = 0; i < -n; i++) {
-                    SOSS.push(0);
-                }
-            }
-            if (ctx.dimensions() == 3) {
-                SOSS.push3(ctx.IP().storageOffset);
-            } else {
-                SOSS.push2(new Vector2i(ctx.IP().storageOffset.x, ctx.IP().storageOffset.y));
-            }
-            val snapshot = new Vector3i(ctx.IP().position);
-            ctx.step(ctx.IP());
-            ctx.IP().storageOffset.set(ctx.IP().position);
-            ctx.IP().position.set(snapshot);
-        }, '{');
-        instructionSet.accept((ctx) -> {
-            val TOSS = ctx.IP().stackStack.TOSS();
-            val SOSSt = ctx.IP().stackStack.SOSS();
-            if (!SOSSt.isPresent() || !ctx.IP().stackStack.popStackStack()) {
-                ctx.interpret('r');
-                return;
-            }
-            val SOSS = SOSSt.get();
-            int n = TOSS.pop();
-
-            if (ctx.dimensions() == 3) {
-                SOSS.pop3(ctx.IP().storageOffset);
-            } else {
-                val tmp2 = SOSS.pop2();
-                ctx.IP().storageOffset.x = tmp2.x;
-                ctx.IP().storageOffset.y = tmp2.y;
-            }
-            val tmp = new Stack();
-            if (n > 0) {
-                for (int i = 0; i < n; i++) {
-                    tmp.push(TOSS.pop());
-                }
-                for (int i = 0; i < n; i++) {
-                    SOSS.push(tmp.pop());
-                }
-            } else if (n < 0) {
-                for (int i = 0; i < -n; i++) {
-                    SOSS.pop();
-                }
-            }
-
-        }, '}');
-        instructionSet.accept((ctx) -> {
-            val TOSS = ctx.IP().stackStack.TOSS();
-            val SOSSt = ctx.IP().stackStack.SOSS();
-            if (!SOSSt.isPresent()) {
-                ctx.interpret('r');
-                return;
-            }
-            val SOSS = SOSSt.get();
-            val n = TOSS.pop();
-            if (n > 0) {
-                for (int i = 0; i < n; i++) {
-                    TOSS.push(SOSS.pop());
-                }
-            } else if (n < 0) {
-                for (int i = 0; i < -n; i++) {
-                    SOSS.push(TOSS.pop());
-                }
-            }
-        }, 'u');
-        instructionSet.accept(this::sysInfo, 'y');
-        instructionSet.accept((ctx) -> {
-            int q = ctx.IP().stackStack.TOSS().pop();
-            System.exit(q);
-        }, 'q');
+        });
     }
 
-    private void sysInfo(ExecutionContext ctx) {
+    @Instr('{')
+    public static void blockStart(ExecutionContext ctx) {
+        if (!ctx.IP().stackStack.pushStackStack()) {
+            ctx.interpret('r');
+            return;
+        }
+        val SOSS = ctx.IP().stackStack.SOSS().get();
+        val TOSS = ctx.IP().stackStack.TOSS();
+        int n = SOSS.pop();
+        if (n > 0) {
+            val tmp = new Stack();
+            for (int i = 0; i < n; i++) {
+                tmp.push(SOSS.pop());
+            }
+            for (int i = 0; i < n; i++) {
+                TOSS.push(tmp.pop());
+            }
+        }
+        if (n < 0) {
+            for (int i = 0; i < -n; i++) {
+                SOSS.push(0);
+            }
+        }
+        if (ctx.dimensions() == 3) {
+            SOSS.push3(ctx.IP().storageOffset);
+        } else {
+            SOSS.push2(new Vector2i(ctx.IP().storageOffset.x, ctx.IP().storageOffset.y));
+        }
+        val snapshot = new Vector3i(ctx.IP().position);
+        ctx.step(ctx.IP());
+        ctx.IP().storageOffset.set(ctx.IP().position);
+        ctx.IP().position.set(snapshot);
+    }
+
+    @Instr('}')
+    public static void blockEnd(ExecutionContext ctx) {
+        val TOSS = ctx.IP().stackStack.TOSS();
+        val SOSSt = ctx.IP().stackStack.SOSS();
+        if (!SOSSt.isPresent() || !ctx.IP().stackStack.popStackStack()) {
+            ctx.interpret('r');
+            return;
+        }
+        val SOSS = SOSSt.get();
+        int n = TOSS.pop();
+
+        if (ctx.dimensions() == 3) {
+            SOSS.pop3(ctx.IP().storageOffset);
+        } else {
+            val tmp2 = SOSS.pop2();
+            ctx.IP().storageOffset.x = tmp2.x;
+            ctx.IP().storageOffset.y = tmp2.y;
+        }
+        val tmp = new Stack();
+        if (n > 0) {
+            for (int i = 0; i < n; i++) {
+                tmp.push(TOSS.pop());
+            }
+            for (int i = 0; i < n; i++) {
+                SOSS.push(tmp.pop());
+            }
+        } else if (n < 0) {
+            for (int i = 0; i < -n; i++) {
+                SOSS.pop();
+            }
+        }
+
+    }
+
+    @Instr('u')
+    public static void stackUnderStack(ExecutionContext ctx) {
+        val TOSS = ctx.IP().stackStack.TOSS();
+        val SOSSt = ctx.IP().stackStack.SOSS();
+        if (!SOSSt.isPresent()) {
+            ctx.interpret('r');
+            return;
+        }
+        val SOSS = SOSSt.get();
+        val n = TOSS.pop();
+        if (n > 0) {
+            for (int i = 0; i < n; i++) {
+                TOSS.push(SOSS.pop());
+            }
+        } else if (n < 0) {
+            for (int i = 0; i < -n; i++) {
+                SOSS.push(TOSS.pop());
+            }
+        }
+    }
+
+    @Instr('y')
+    public static void sysInfo(ExecutionContext ctx) {
         val s = ctx.IP().stackStack.TOSS();
         val tossSize = ctx.IP().stackStack.TOSS().size();
         val n = s.pop();
@@ -311,6 +372,25 @@ public class Funge98 implements InstructionSet {
         }
     }
 
+    @Instr('q')
+    public static void quit(ExecutionContext ctx) {
+        int q = ctx.IP().stackStack.TOSS().pop();
+        System.exit(q);
+    }
+
+    @Override
+    public void load(ObjIntConsumer<Instruction> instructionSet) {
+        InstructionSet.super.load(instructionSet);
+        for (int i = 0; i <= 9; i++) {
+            int finalI = i;
+            instructionSet.accept((ctx) -> ctx.IP().stackStack.TOSS().push(finalI), '0' + i);
+        }
+        for (int i = 0; i <= 5; i++) {
+            int finalI = i;
+            instructionSet.accept((ctx) -> ctx.IP().stackStack.TOSS().push(10 + finalI), 'a' + i);
+        }
+    }
+
     public static void stack(ExecutionContext ctx, Consumer<Stack> runner) {
         runner.accept(ctx.IP().stackStack.TOSS());
     }
@@ -328,6 +408,6 @@ public class Funge98 implements InstructionSet {
 
     @Override
     public void unload(IntConsumer instructionSet) {
-
+        throw new UnsupportedOperationException("Cannot unload the base syntax");
     }
 }

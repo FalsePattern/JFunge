@@ -1,7 +1,7 @@
 # JFunge
 A standard-conforming Befunge-98 and Trefunge-98 interpreter.
 
-## Usage
+### Usage
 `jfunge [file] [--3d] [--version] [--license]`
 
 | argument    | usage                                                                                                     |
@@ -11,3 +11,10 @@ A standard-conforming Befunge-98 and Trefunge-98 interpreter.
 | `--version` | Prints the current program version, along with the handprint and version given by befunge's y instruction |
 | `--license` | Prints the license of the program.                                                                        |
 
+### Currently implemented fingerprints
+- ROMA
+- MODU
+
+### Additional goals
+- [ ] File IO
+- [ ] Concurrency

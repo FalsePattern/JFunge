@@ -62,7 +62,7 @@ public class TestFungeSpace {
     @Test
     public void testLoadFile() {
         val space = new FungeSpace(32);
-        space.loadFileAt(0, 0, 0, "abc\ndef\fghi".getBytes(StandardCharsets.UTF_8));
+        space.loadFileAt(0, 0, 0, "abc\ndef\fghi".getBytes(StandardCharsets.UTF_8), true);
         Assertions.assertEquals('a', space.get(0, 0, 0));
         Assertions.assertEquals('b', space.get(1, 0, 0));
         Assertions.assertEquals('c', space.get(2, 0, 0));

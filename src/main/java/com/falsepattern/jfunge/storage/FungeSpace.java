@@ -71,7 +71,7 @@ public class FungeSpace {
         }
         boundsRecheck |= chunk.set(inChunk(x), inChunk(y), inChunk(z), value);
         cacheChunk = chunk;
-        cachePos.set(x, y, z);
+        cachePos.set(cX, cY, cZ);
     }
 
     public void gc() {
@@ -80,6 +80,29 @@ public class FungeSpace {
             row.retainEntries((x, cell) -> !cell.isEmpty());
             return row.size() > 0;
         });
+    }
+
+    public void loadFileAt(int x, int y, int z, byte[] data) {
+        int X = x;
+        int Y = y;
+        int Z = z;
+        for (int i = 0; i < data.length; i++) {
+            int c = Byte.toUnsignedInt(data[i]);
+            switch (c) {
+                case '\r':
+                    if (i < data.length - 1 && data[i + 1] == '\n') continue;
+                case '\n':
+                    X = x;
+                    Y++;
+                    break;
+                case '\f':
+                    X = x;
+                    Y = y;
+                    Z++;
+                    break;
+            }
+            set(X, Y, Z, c);
+        }
     }
 
     public void wipe() {

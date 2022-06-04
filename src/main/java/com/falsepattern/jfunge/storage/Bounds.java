@@ -29,12 +29,4 @@ public class Bounds implements BoundsC {
         this.zMax = zMax;
         return this;
     }
-
-    public boolean inBounds(int x, int y, int z) {
-        return x >= xMin && x <= xMax && y >= yMin && y <= yMax && z >= zMin && z <= zMax;
-    }
-
-    public boolean inBounds(Vector3ic pos) {
-        return inBounds(pos.x(), pos.y(), pos.z());
-    }
 }

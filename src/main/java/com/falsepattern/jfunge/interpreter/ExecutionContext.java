@@ -7,5 +7,7 @@ public interface ExecutionContext {
     InstructionPointer[] allIPs();
     InstructionPointer IP();
     FungeSpace fungeSpace();
+    int dimensions();
     boolean dead();
+    void interpret(int code);
 }

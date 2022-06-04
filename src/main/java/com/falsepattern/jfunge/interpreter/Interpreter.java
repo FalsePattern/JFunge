@@ -24,7 +24,11 @@ public class Interpreter implements ExecutionContext {
 
     private final TIntObjectMap<Deque<Instruction>> instructionMap = new TIntObjectHashMap<>();
 
-    public Interpreter() {
+    @Getter
+    private final int dimensions;
+
+    public Interpreter(boolean trefunge) {
+        dimensions = trefunge ? 3 : 2;
         new Funge98().load((instr, c) -> {
             var q = instructionMap.get(c);
             if (q == null) {
@@ -49,25 +53,62 @@ public class Interpreter implements ExecutionContext {
         return IP.isDead();
     }
 
-
-    private void wrappingStep(InstructionPointer ip) {
-        ip.position.add(ip.delta);
-    }
-    private void step(InstructionPointer ip) {
-        int p;
-        do {
-            wrappingStep(ip);
-            p = fungeSpace.get(ip.position);
-        } while(p == ' ');
-    }
-
-    public void tick() {
-        for (InstructionPointer ip : allIPs()) {
-            int opcode = fungeSpace.get(ip.position);
+    @Override
+    public void interpret(int opcode) {
+        if (opcode == '"') {
+            IP().stringMode = !IP().stringMode;
+        } else if (IP().stringMode) {
+            IP().stackStack.TOSS().push(opcode);
+        } else {
             if (!instructionMap.containsKey(opcode)) {
                 opcode = 'r';
             }
             instructionMap.get(opcode).peek().process(this);
+        }
+    }
+
+
+    private void wrappingStep(InstructionPointer ip) {
+        ip.position.add(ip.delta);
+        if (!fungeSpace().bounds().inBounds(ip.position)) {
+            ip.delta.mul(-1);
+            do {
+                ip.position.add(ip.delta);
+            } while (!fungeSpace().bounds().inBounds(ip.position));
+            do {
+                ip.position.add(ip.delta);
+            } while (fungeSpace().bounds().inBounds(ip.position));
+            ip.delta.mul(-1);
+            do {
+                ip.position.add(ip.delta);
+            } while (!fungeSpace().bounds().inBounds(ip.position));
+        }
+    }
+
+    private void step(InstructionPointer ip) {
+        int p;
+        if (ip.stringMode) {
+            p = fungeSpace.get(ip.position);
+            if (p != ' ') {
+                wrappingStep(ip);
+                return;
+            }
+        }
+        do {
+            wrappingStep(ip);
+            p = fungeSpace.get(ip.position);
+            if (p == ';') {
+                do {
+                    wrappingStep(ip);
+                    p = fungeSpace.get(ip.position);
+                } while (p != ';');
+            }
+        } while (p == ' ');
+    }
+
+    public void tick() {
+        for (InstructionPointer ip : allIPs()) {
+            interpret(fungeSpace().get(ip.position));
             step(ip);
         }
     }

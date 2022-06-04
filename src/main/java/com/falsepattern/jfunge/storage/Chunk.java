@@ -131,17 +131,17 @@ public class Chunk implements Releasable {
 
         Getter gX = new Getter() {
             public int toIndex(int a, int b, int c) {
-                return toIndex(a, b, c);
+                return Chunk.toIndex(a, b, c);
             }
         };
         Getter gY = new Getter() {
             public int toIndex(int a, int b, int c) {
-                return toIndex(b, a, c);
+                return Chunk.toIndex(b, a, c);
             }
         };
         Getter gZ = new Getter() {
             public int toIndex(int a, int b, int c) {
-                return toIndex(c, a, b);
+                return Chunk.toIndex(c, a, b);
             }
         };
     }

@@ -74,6 +74,10 @@ public class FungeSpace {
         cachePos.set(cX, cY, cZ);
     }
 
+    public void set(Vector3ic v, int value) {
+        set(v.x(), v.y(), v.z(), value);
+    }
+
     public void gc() {
         cacheChunk = null;
         storage.retainEntries((y, row) -> {

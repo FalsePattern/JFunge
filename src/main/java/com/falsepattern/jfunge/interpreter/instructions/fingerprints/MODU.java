@@ -2,11 +2,16 @@ package com.falsepattern.jfunge.interpreter.instructions.fingerprints;
 
 import com.falsepattern.jfunge.interpreter.instructions.Funge98;
 import com.falsepattern.jfunge.interpreter.instructions.Instruction;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.function.IntConsumer;
 import java.util.function.ObjIntConsumer;
 
-public class MODU implements Fingerprint{
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class MODU implements Fingerprint {
+    public static final MODU INSTANCE = new MODU();
+
     private static int safeMod(int a, int b) {
         return b == 0 ? 0 : a % b;
     }

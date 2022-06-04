@@ -1,11 +1,15 @@
 package com.falsepattern.jfunge.interpreter.instructions.fingerprints;
 
 import com.falsepattern.jfunge.interpreter.instructions.Instruction;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.function.IntConsumer;
 import java.util.function.ObjIntConsumer;
 
-public class ROMA implements Fingerprint{
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class ROMA implements Fingerprint {
+    public static final ROMA INSTANCE = new ROMA();
     @Override
     public void load(ObjIntConsumer<Instruction> instructionSet) {
         instructionSet.accept((ctx) -> ctx.IP().stackStack.TOSS().push(1), 'I');

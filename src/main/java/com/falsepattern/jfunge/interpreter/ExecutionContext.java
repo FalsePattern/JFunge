@@ -10,4 +10,5 @@ public interface ExecutionContext {
     int dimensions();
     boolean dead();
     void interpret(int code);
+    void step(InstructionPointer ip);
 }

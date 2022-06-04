@@ -73,6 +73,10 @@ public class Stack {
         return pop4(new Vector4i());
     }
 
+    public void clear() {
+        storage.clear();
+    }
+
     public void pushString(String text) {
         val chars = text.toCharArray();
         push(0);

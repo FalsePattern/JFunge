@@ -85,7 +85,7 @@ public class Interpreter implements ExecutionContext {
         }
     }
 
-    private void step(InstructionPointer ip) {
+    public void step(InstructionPointer ip) {
         int p;
         if (ip.stringMode) {
             p = fungeSpace.get(ip.position);
@@ -97,11 +97,15 @@ public class Interpreter implements ExecutionContext {
         do {
             wrappingStep(ip);
             p = fungeSpace.get(ip.position);
-            if (p == ';') {
-                do {
+            if (!ip.stringMode) {
+                while (p == ';') {
+                    do {
+                        wrappingStep(ip);
+                        p = fungeSpace.get(ip.position);
+                    } while (p != ';');
                     wrappingStep(ip);
                     p = fungeSpace.get(ip.position);
-                } while (p != ';');
+                }
             }
         } while (p == ' ');
     }

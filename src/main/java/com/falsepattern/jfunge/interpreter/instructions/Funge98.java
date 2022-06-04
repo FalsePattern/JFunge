@@ -11,7 +11,7 @@ import org.joml.Vector3i;
 
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.function.BiFunction;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.ObjIntConsumer;
@@ -238,11 +238,15 @@ public class Funge98 implements InstructionSet {
         val n = s.pop();
         val sizes = ctx.IP().stackStack.sizes();
         //20 envs
-        ctx.env().forEach((key, value) -> {
+        for (Map.Entry<String, String> entry : ctx.env().entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
             s.pushString(key + "=" + value);
-        });
+        }
         //19 args
-        ctx.args().forEach(s::pushString);
+        for (String s1 : ctx.args()) {
+            s.pushString(s1);
+        }
         s.push(0);
         s.push(0);
         //18 sizes of stack stack

@@ -7,7 +7,6 @@ import lombok.experimental.Accessors;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @NoArgsConstructor
 @Accessors(fluent = true)
@@ -44,7 +43,13 @@ public class StackStack implements Copiable<StackStack> {
     }
 
     public int[] sizes() {
-        return Stream.concat(Stream.of(TOSS), stackStack.stream()).mapToInt(Stack::size).toArray();
+        val sizes = new int[stackStack.size() + 1];
+        sizes[0] = TOSS().size();
+        int i = 1;
+        for (val s: stackStack) {
+            sizes[i++] = s.size();
+        }
+        return sizes;
     }
 
     public boolean popStackStack() {

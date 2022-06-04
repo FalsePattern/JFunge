@@ -4,6 +4,7 @@ import com.falsepattern.jfunge.interpreter.instructions.Funge98;
 import com.falsepattern.jfunge.interpreter.instructions.Instruction;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.Fingerprint;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODU;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.NULL;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ROMA;
 import com.falsepattern.jfunge.ip.InstructionPointer;
 import com.falsepattern.jfunge.storage.FungeSpace;
@@ -62,6 +63,7 @@ public class Interpreter implements ExecutionContext {
         new Funge98().load(this::loadInstruction);
         addFingerprint(new ROMA());
         addFingerprint(new MODU());
+        addFingerprint(new NULL());
     }
 
     @Override

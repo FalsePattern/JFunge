@@ -167,16 +167,6 @@ public class Interpreter implements ExecutionContext {
         return 0;
     }
 
-    @Override
-    public int version() {
-        return 1;
-    }
-
-    @Override
-    public int handprint() {
-        return 0xfa15eba7;
-    }
-
     public void tick() {
         for (InstructionPointer ip : allIPs()) {
             interpret(fungeSpace().get(ip.position));

@@ -17,6 +17,4 @@ public interface ExecutionContext {
     List<String> args();
     Map<String, String> env();
     int paradigm();
-    int version();
-    int handprint();
 }

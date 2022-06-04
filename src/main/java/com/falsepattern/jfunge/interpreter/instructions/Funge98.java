@@ -1,5 +1,6 @@
 package com.falsepattern.jfunge.interpreter.instructions;
 
+import com.falsepattern.jfunge.Globals;
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
 import com.falsepattern.jfunge.ip.Stack;
 import lombok.val;
@@ -286,9 +287,9 @@ public class Funge98 implements InstructionSet {
         //5 operating paradigm
         s.push(ctx.paradigm());
         //4 version
-        s.push(ctx.version());
+        s.push(Globals.FUNGE_VERSION);
         //3 handprint
-        s.push(ctx.handprint());
+        s.push(Globals.HANDPRINT);
         //2 bpc
         s.push(4);
         //1 flags

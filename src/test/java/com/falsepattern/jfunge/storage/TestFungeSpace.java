@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
+import java.nio.charset.StandardCharsets;
 
 import static com.falsepattern.jfunge.storage.Chunk.*;
 
@@ -56,5 +57,20 @@ public class TestFungeSpace {
         Assertions.assertEquals(expected.set(5, 5, 127, 5, 5, 127), space.bounds());
         space.set(5, 5, 127, 0);
         Assertions.assertEquals(expected.set(0, 0, 0, 0, 0, 0), space.bounds());
+    }
+
+    @Test
+    public void testLoadFile() {
+        val space = new FungeSpace(32);
+        space.loadFileAt(0, 0, 0, "abc\ndef\fghi".getBytes(StandardCharsets.UTF_8));
+        Assertions.assertEquals('a', space.get(0, 0, 0));
+        Assertions.assertEquals('b', space.get(1, 0, 0));
+        Assertions.assertEquals('c', space.get(2, 0, 0));
+        Assertions.assertEquals('d', space.get(0, 1, 0));
+        Assertions.assertEquals('e', space.get(1, 1, 0));
+        Assertions.assertEquals('f', space.get(2, 1, 0));
+        Assertions.assertEquals('g', space.get(0, 0, 1));
+        Assertions.assertEquals('h', space.get(1, 0, 1));
+        Assertions.assertEquals('i', space.get(2, 0, 1));
     }
 }

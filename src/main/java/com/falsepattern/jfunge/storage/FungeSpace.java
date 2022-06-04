@@ -94,14 +94,15 @@ public class FungeSpace {
                 case '\n':
                     X = x;
                     Y++;
-                    break;
+                    continue;
                 case '\f':
                     X = x;
                     Y = y;
                     Z++;
-                    break;
+                    continue;
             }
             set(X, Y, Z, c);
+            X++;
         }
     }
 

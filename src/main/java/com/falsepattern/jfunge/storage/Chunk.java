@@ -114,7 +114,7 @@ public class Chunk implements Releasable {
                 for (var c = 0; c < CHUNK_EDGE_SIZE; c++)
                     if (storage[g.toIndex(a, b, c)] != defaultValue)
                         return a;
-        return -1;
+        throw new IllegalStateException();
     }
 
     private int max(Getter g) {
@@ -123,7 +123,7 @@ public class Chunk implements Releasable {
                 for (var c = 0; c < CHUNK_EDGE_SIZE; c++)
                     if (storage[g.toIndex(a, b, c)] != defaultValue)
                         return a;
-        return -1;
+        throw new IllegalStateException();
     }
 
     private interface Getter {

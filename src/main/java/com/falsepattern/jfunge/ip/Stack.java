@@ -77,6 +77,10 @@ public class Stack {
         storage.clear();
     }
 
+    public int pick(int index) {
+        return storage.get(storage.size() - 1 - index);
+    }
+
     public void pushString(String text) {
         val chars = text.toCharArray();
         push(0);
@@ -92,5 +96,9 @@ public class Stack {
             sb.append(c);
         }
         return sb.toString();
+    }
+
+    public int size() {
+        return storage.size();
     }
 }

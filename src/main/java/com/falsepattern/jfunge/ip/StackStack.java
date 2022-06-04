@@ -8,7 +8,10 @@ import lombok.experimental.Accessors;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Accessors(fluent = true)
 public class StackStack {
@@ -23,9 +26,21 @@ public class StackStack {
     }
 
     public boolean pushStackStack() {
-        stackStack.push(TOSS);
-        TOSS(new Stack());
-        return true;
+        try {
+            stackStack.push(TOSS);
+            TOSS(new Stack());
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public int size() {
+        return stackStack.size() + 1;
+    }
+
+    public int[] sizes() {
+        return Stream.concat(Stream.of(TOSS), stackStack.stream()).mapToInt(Stack::size).toArray();
     }
 
     public boolean popStackStack() {

@@ -1,10 +1,13 @@
 package com.falsepattern.jfunge.storage;
 
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.*;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
+
+import java.util.ArrayList;
 
 import static com.falsepattern.jfunge.storage.Chunk.*;
 
@@ -80,13 +83,30 @@ public class FungeSpace {
 
     public void gc() {
         cacheChunk = null;
-        storage.retainEntries((y, row) -> {
-            row.retainEntries((x, cell) -> !cell.isEmpty());
-            return row.size() > 0;
-        });
+        val planes = storage.keys();
+        for (val iPlane: planes) {
+            val plane = storage.get(iPlane);
+            val rows = plane.keys();
+            for (val iRow: rows) {
+                val row = plane.get(iRow);
+                val chunks = row.keys();
+                for (val iChunk: chunks) {
+                    val chunk = row.get(iChunk);
+                    if (chunk.isEmpty()) {
+                        row.remove(iChunk);
+                    }
+                }
+                if (row.isEmpty()) {
+                    plane.remove(iRow);
+                }
+            }
+            if (plane.isEmpty()) {
+                storage.remove(iPlane);
+            }
+        }
     }
 
-    public void loadFileAt(int x, int y, int z, byte[] data) {
+    public void loadFileAt(int x, int y, int z, byte[] data, boolean trefunge) {
         int X = x;
         int Y = y;
         int Z = z;
@@ -100,9 +120,11 @@ public class FungeSpace {
                     Y++;
                     continue;
                 case '\f':
-                    X = x;
-                    Y = y;
-                    Z++;
+                    if (trefunge) {
+                        X = x;
+                        Y = y;
+                        Z++;
+                    }
                     continue;
             }
             set(X, Y, Z, c);

@@ -8,12 +8,12 @@ import lombok.experimental.Accessors;
 @Data
 @NoArgsConstructor
 public class Bounds implements BoundsC<Bounds> {
-    private int xMin;
-    private int yMin;
-    private int zMin;
-    private int xMax;
-    private int yMax;
-    private int zMax;
+    public int xMin;
+    public int yMin;
+    public int zMin;
+    public int xMax;
+    public int yMax;
+    public int zMax;
 
     private Bounds(Bounds original) {
         xMin = original.xMin;

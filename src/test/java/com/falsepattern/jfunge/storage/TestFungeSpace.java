@@ -11,20 +11,19 @@ import java.nio.charset.StandardCharsets;
 import static com.falsepattern.jfunge.storage.Chunk.*;
 
 public class TestFungeSpace {
-    private static int toPos(int fragment) {
-        int sign = -((fragment >>> 2) & 1);
-        return sign + (1 + 2 * sign) * (((fragment >>> 1) & 1) * CHUNK_EDGE_SIZE + (fragment & 1));
+    private static int toPos(int fragment, int es) {
+        int sign = -((fragment >>> 1) & 1);
+        return sign + (1 + 2 * sign) * ((fragment & 1) * es);
     }
     @Test
     public void testSetGet() {
         val fungeSpace = new FungeSpace(0);
-        val count = (int) Math.pow(Math.pow(2, 3), 3);
+        val count = (int) Math.pow(Math.pow(2, 2), 3);
         for (int i = 0; i < count; i++) {
-            System.out.println(toPos(i) + ", " + toPos(i >>> 3) + ", " + toPos(i >>> 6));
-            fungeSpace.set(toPos(i), toPos(i >>> 3), toPos(i >>> 6), i + 1);
+            fungeSpace.set(toPos(i, CHUNK_EDGE_SIZE_X), toPos(i >>> 2, CHUNK_EDGE_SIZE_Y), toPos(i >>> 4, CHUNK_EDGE_SIZE_Z), i + 1);
         }
         for (int i = 0; i < count; i++) {
-            Assertions.assertEquals(i + 1, fungeSpace.get(toPos(i), toPos(i >>> 3), toPos(i >>> 6)));
+            Assertions.assertEquals(i + 1, fungeSpace.get(toPos(i, CHUNK_EDGE_SIZE_X), toPos(i >>> 2, CHUNK_EDGE_SIZE_Y), toPos(i >>> 4, CHUNK_EDGE_SIZE_Z)));
         }
     }
 

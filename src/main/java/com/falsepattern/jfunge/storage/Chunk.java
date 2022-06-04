@@ -14,18 +14,22 @@ import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Chunk implements Releasable, Copiable<Chunk> {
-    public static final int CHUNK_EDGE_SIZE = 32;
-    public static final int CHUNK_CAPACITY = CHUNK_EDGE_SIZE * CHUNK_EDGE_SIZE * CHUNK_EDGE_SIZE;
+    public static final int CHUNK_EDGE_SIZE_X = 16;
+    public static final int CHUNK_EDGE_SIZE_Y = 16;
+    public static final int CHUNK_EDGE_SIZE_Z = 1;
+    public static final int CHUNK_CAPACITY = CHUNK_EDGE_SIZE_X * CHUNK_EDGE_SIZE_Y * CHUNK_EDGE_SIZE_Z;
 
     private static final int BUFFER_CAPACITY = 64;
     private static final List<Chunk> buffer = new LinkedList<>();
 
     private final int[] storage = new int[CHUNK_CAPACITY];
+    private final Bounds bounds = new Bounds();
     private int defaultValue;
     private int populatedCells;
 
     private Chunk(Chunk original) {
         System.arraycopy(original.storage, 0, storage, 0, CHUNK_CAPACITY);
+        bounds.set(original.bounds);
         defaultValue = original.defaultValue;
         populatedCells = original.populatedCells;
     }
@@ -40,19 +44,44 @@ public class Chunk implements Releasable, Copiable<Chunk> {
         Arrays.fill(instance.storage, defaultValue);
         instance.defaultValue = defaultValue;
         instance.populatedCells = 0;
+        instance.bounds.set(-1, -1, -1, -1, -1, -1);
         return instance;
     }
 
-    public static int toChunk(int pos) {
-        return Math.floorDiv(pos, CHUNK_EDGE_SIZE);
+    public static int toChunkX(int pos) {
+        return Math.floorDiv(pos, CHUNK_EDGE_SIZE_X);
     }
 
-    public static int inChunk(int pos) {
-        return Math.floorMod(pos, CHUNK_EDGE_SIZE);
+    public static int toChunkY(int pos) {
+        return Math.floorDiv(pos, CHUNK_EDGE_SIZE_Y);
     }
 
-    public static int fromChunk(int cPos) {
-        return cPos * CHUNK_EDGE_SIZE;
+    public static int toChunkZ(int pos) {
+        return Math.floorDiv(pos, CHUNK_EDGE_SIZE_Z);
+    }
+
+    public static int inChunkX(int pos) {
+        return Math.floorMod(pos, CHUNK_EDGE_SIZE_X);
+    }
+
+    public static int inChunkY(int pos) {
+        return Math.floorMod(pos, CHUNK_EDGE_SIZE_Y);
+    }
+
+    public static int inChunkZ(int pos) {
+        return Math.floorMod(pos, CHUNK_EDGE_SIZE_Z);
+    }
+
+    public static int fromChunkX(int cPos) {
+        return cPos * CHUNK_EDGE_SIZE_X;
+    }
+
+    public static int fromChunkY(int cPos) {
+        return cPos * CHUNK_EDGE_SIZE_Y;
+    }
+
+    public static int fromChunkZ(int cPos) {
+        return cPos * CHUNK_EDGE_SIZE_Z;
     }
 
     public boolean isEmpty() {
@@ -67,7 +96,7 @@ public class Chunk implements Releasable, Copiable<Chunk> {
     }
 
     private static int toIndex(int x, int y, int z) {
-        return (z * CHUNK_EDGE_SIZE + y) * CHUNK_EDGE_SIZE + x;
+        return (z * CHUNK_EDGE_SIZE_Y + y) * CHUNK_EDGE_SIZE_X + x;
     }
 
     public int get(int x, int y, int z) {
@@ -84,7 +113,12 @@ public class Chunk implements Releasable, Copiable<Chunk> {
         storage[i] = value;
         int c;
         populatedCells += c = (old == defaultValue && value != defaultValue ? 1 : old != defaultValue && value == defaultValue ? -1 : 0);
-        return c != 0;
+        if (c != 0) {
+            bounds.set(-1, -1, -1, -1, -1, -1);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public boolean set(Vector3ic v, int value) {
@@ -92,42 +126,42 @@ public class Chunk implements Releasable, Copiable<Chunk> {
     }
 
     public int minX() {
-        return min(Getter.gX);
+        return bounds.xMin == -1 ? bounds.xMin = min(Getter.gX) : bounds.xMin;
     }
 
     public int maxX() {
-        return max(Getter.gX);
+        return bounds.xMax == -1 ? bounds.xMax = max(Getter.gX) : bounds.xMax;
     }
 
     public int minY() {
-        return min(Getter.gY);
+        return bounds.yMin == -1 ? bounds.yMin = min(Getter.gY) : bounds.yMin;
     }
 
     public int maxY() {
-        return max(Getter.gY);
+        return bounds.yMax == -1 ? bounds.yMax = max(Getter.gY) : bounds.yMax;
     }
 
     public int minZ() {
-        return min(Getter.gZ);
+        return bounds.zMin == -1 ? bounds.zMin = min(Getter.gZ) : bounds.zMin;
     }
 
     public int maxZ() {
-        return max(Getter.gZ);
+        return bounds.zMax == -1 ? bounds.zMax = max(Getter.gZ) : bounds.zMax;
     }
 
     private int min(Getter g) {
-        for (var a = 0; a < CHUNK_EDGE_SIZE; a++)
-            for (var b = 0; b < CHUNK_EDGE_SIZE; b++)
-                for (var c = 0; c < CHUNK_EDGE_SIZE; c++)
+        for (var a = 0; a < g.sa(); a++)
+            for (var b = 0; b < g.sb(); b++)
+                for (var c = 0; c < g.sc(); c++)
                     if (storage[g.toIndex(a, b, c)] != defaultValue)
                         return a;
         throw new IllegalStateException();
     }
 
     private int max(Getter g) {
-        for (var a = CHUNK_EDGE_SIZE - 1; a >= 0; a--)
-            for (var b = 0; b < CHUNK_EDGE_SIZE; b++)
-                for (var c = 0; c < CHUNK_EDGE_SIZE; c++)
+        for (var a = g.sa() - 1; a >= 0; a--)
+            for (var b = 0; b < g.sb(); b++)
+                for (var c = 0; c < g.sc(); c++)
                     if (storage[g.toIndex(a, b, c)] != defaultValue)
                         return a;
         throw new IllegalStateException();
@@ -141,19 +175,68 @@ public class Chunk implements Releasable, Copiable<Chunk> {
     private interface Getter {
         int toIndex(int a, int b, int c);
 
+        int sa();
+        int sb();
+        int sc();
+
         Getter gX = new Getter() {
             public int toIndex(int a, int b, int c) {
                 return Chunk.toIndex(a, b, c);
+            }
+
+            @Override
+            public int sa() {
+                return CHUNK_EDGE_SIZE_X;
+            }
+
+            @Override
+            public int sb() {
+                return CHUNK_EDGE_SIZE_Y;
+            }
+
+            @Override
+            public int sc() {
+                return CHUNK_EDGE_SIZE_Z;
             }
         };
         Getter gY = new Getter() {
             public int toIndex(int a, int b, int c) {
                 return Chunk.toIndex(b, a, c);
             }
+
+            @Override
+            public int sa() {
+                return CHUNK_EDGE_SIZE_Y;
+            }
+
+            @Override
+            public int sb() {
+                return CHUNK_EDGE_SIZE_X;
+            }
+
+            @Override
+            public int sc() {
+                return CHUNK_EDGE_SIZE_Z;
+            }
         };
         Getter gZ = new Getter() {
             public int toIndex(int a, int b, int c) {
                 return Chunk.toIndex(b, c, a);
+            }
+
+            @Override
+            public int sa() {
+                return CHUNK_EDGE_SIZE_Z;
+            }
+
+            @Override
+            public int sb() {
+                return CHUNK_EDGE_SIZE_X;
+            }
+
+            @Override
+            public int sc() {
+                return CHUNK_EDGE_SIZE_Y;
             }
         };
     }

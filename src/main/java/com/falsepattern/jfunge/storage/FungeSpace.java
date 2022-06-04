@@ -1,14 +1,11 @@
 package com.falsepattern.jfunge.storage;
 
 import com.falsepattern.jfunge.Copiable;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.*;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
-
-import java.util.ArrayList;
 
 import static com.falsepattern.jfunge.storage.Chunk.*;
 
@@ -48,11 +45,11 @@ public class FungeSpace implements Copiable<FungeSpace> {
     }
 
     public int get(int x, int y, int z) {
-        val cX = toChunk(x);
-        val cY = toChunk(y);
-        val cZ = toChunk(z);
+        val cX = toChunkX(x);
+        val cY = toChunkY(y);
+        val cZ = toChunkZ(z);
         if (cacheChunk != null && cachePos.equals(cX, cY, cZ)) {
-            return cacheChunk.get(inChunk(x), inChunk(y), inChunk(z));
+            return cacheChunk.get(inChunkX(x), inChunkY(y), inChunkZ(z));
         }
         val plane = storage.get(cZ);
         if (plane != null) {
@@ -62,7 +59,7 @@ public class FungeSpace implements Copiable<FungeSpace> {
                 if (chunk != null) {
                     cacheChunk = chunk;
                     cachePos.set(cX, cY, cZ);
-                    return chunk.get(inChunk(x), inChunk(y), inChunk(z));
+                    return chunk.get(inChunkX(x), inChunkY(y), inChunkZ(z));
                 }
             }
         }
@@ -74,11 +71,11 @@ public class FungeSpace implements Copiable<FungeSpace> {
     }
 
     public void set(int x, int y, int z, int value) {
-        val cX = toChunk(x);
-        val cY = toChunk(y);
-        val cZ = toChunk(z);
+        val cX = toChunkX(x);
+        val cY = toChunkY(y);
+        val cZ = toChunkZ(z);
         if (cacheChunk != null && cachePos.equals(cX, cY, cZ)) {
-            cacheChunk.set(inChunk(x), inChunk(y), inChunk(z), value);
+            cacheChunk.set(inChunkX(x), inChunkY(y), inChunkZ(z), value);
         }
         var plane = storage.get(cZ);
         if (plane == null) {
@@ -96,7 +93,7 @@ public class FungeSpace implements Copiable<FungeSpace> {
             chunk = Chunk.allocate(defaultValue);
             row.put(cX, chunk);
         }
-        boundsRecheck |= chunk.set(inChunk(x), inChunk(y), inChunk(z), value);
+        boundsRecheck |= chunk.set(inChunkX(x), inChunkY(y), inChunkZ(z), value);
         cacheChunk = chunk;
         cachePos.set(cX, cY, cZ);
     }
@@ -186,30 +183,72 @@ public class FungeSpace implements Copiable<FungeSpace> {
         minMax(cZArr, mm);
         int cZMin = mm[0];
         int cZMax = mm[1];
-        zMinFinal = cZMin * CHUNK_EDGE_SIZE + storage.get(cZMin).valueCollection().stream().flatMap((row) -> row.valueCollection().stream()).mapToInt(Chunk::minZ).min().getAsInt();
-        zMaxFinal = cZMax * CHUNK_EDGE_SIZE + storage.get(cZMax).valueCollection().stream().flatMap((row) -> row.valueCollection().stream()).mapToInt(Chunk::maxZ).max().getAsInt();
+        int best = Integer.MAX_VALUE;
+        var plane = storage.get(cZMin);
+        for (val iRow : plane.keys()) {
+            val row = plane.get(iRow);
+            for (val iChunk : row.keys()) {
+                val chunk = row.get(iChunk);
+                int minZ = chunk.minZ();
+                if (minZ < best) {
+                    best = minZ;
+                }
+            }
+        }
+        zMinFinal = fromChunkZ(cZMin) + best;
+        best = Integer.MIN_VALUE;
+        plane = storage.get(cZMax);
+        for (val iRow : plane.keys()) {
+            val row = plane.get(iRow);
+            for (val iChunk : row.keys()) {
+                val chunk = row.get(iChunk);
+                int maxZ = chunk.maxZ();
+                if (maxZ > best) {
+                    best = maxZ;
+                }
+            }
+        }
+        zMaxFinal = fromChunkZ(cZMax) + best;
         for (var cZ: cZArr) {
-            val plane = storage.get(cZ);
+            plane = storage.get(cZ);
             int yMin;
             int yMax;
             int[] cYArr = plane.keys();
             minMax(cYArr, mm);
             int cYMin = mm[0];
             int cYMax = mm[1];
-            yMin = cYMin * CHUNK_EDGE_SIZE + plane.get(cYMin).valueCollection().stream().mapToInt(Chunk::minY).min().getAsInt();
-            yMax = cYMax * CHUNK_EDGE_SIZE + plane.get(cYMax).valueCollection().stream().mapToInt(Chunk::maxY).max().getAsInt();
+            best = Integer.MAX_VALUE;
+            var row = plane.get(cYMin);
+            for (val iChunk : row.keys()) {
+                val chunk = row.get(iChunk);
+                int minY = chunk.minY();
+                if (minY < best) {
+                    best = minY;
+                }
+            }
+            yMin = fromChunkY(cYMin) + best;
+            best = Integer.MIN_VALUE;
+            row = plane.get(cYMax);
+            for (val iChunk : row.keys()) {
+                val chunk = row.get(iChunk);
+                int maxY = chunk.maxY();
+                if (maxY > best) {
+                    best = maxY;
+                }
+            }
+            yMax = fromChunkY(cYMax) + best;
             yMinFinal = Math.min(yMinFinal, yMin);
             yMaxFinal = Math.max(yMaxFinal, yMax);
             for (val cY: cYArr) {
-                val row = plane.get(cY);
+                row = plane.get(cY);
                 int xMin;
                 int xMax;
                 int[] cXArr = row.keys();
                 minMax(cXArr, mm);
                 int cXMin = mm[0];
                 int cXMax = mm[1];
-                xMin = cXMin * CHUNK_EDGE_SIZE + row.get(cXMin).minX();
-                xMax = cXMax * CHUNK_EDGE_SIZE + row.get(cXMax).maxX();
+                xMin = fromChunkX(cXMin) + row.get(cXMin).minX();
+                xMax = fromChunkX(cXMax) + row.get(cXMax).maxX();
                 xMinFinal = Math.min(xMinFinal, xMin);
                 xMaxFinal = Math.max(xMaxFinal, xMax);
             }

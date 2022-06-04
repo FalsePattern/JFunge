@@ -3,6 +3,8 @@ package com.falsepattern.jfunge.interpreter.instructions;
 import com.falsepattern.jfunge.Globals;
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
 import com.falsepattern.jfunge.ip.Stack;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.val;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
@@ -14,7 +16,9 @@ import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.ObjIntConsumer;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Funge98 implements InstructionSet {
+    public static final Funge98 INSTANCE = new Funge98();
     @Override
     public void load(ObjIntConsumer<Instruction> instructionSet) {
         for (int i = 0; i <= 9; i++) {

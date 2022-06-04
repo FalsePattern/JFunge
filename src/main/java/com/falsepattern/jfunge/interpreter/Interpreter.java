@@ -2,6 +2,7 @@ package com.falsepattern.jfunge.interpreter;
 
 import com.falsepattern.jfunge.interpreter.instructions.Funge98;
 import com.falsepattern.jfunge.interpreter.instructions.Instruction;
+import com.falsepattern.jfunge.interpreter.instructions.InstructionManager;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.Fingerprint;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODU;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.NULL;
@@ -19,15 +20,14 @@ import java.util.*;
 
 @Accessors(fluent = true)
 public class Interpreter implements ExecutionContext {
+    private static final TIntObjectMap<Fingerprint> fingerprints = new TIntObjectHashMap<>();
 
     @Getter
     private final FungeSpace fungeSpace = new FungeSpace(' ');
 
     private final InstructionPointer IP = new InstructionPointer();
 
-    private final TIntObjectMap<Deque<Instruction>> instructionMap = new TIntObjectHashMap<>();
-
-    private final TIntObjectMap<Fingerprint> fingerprints = new TIntObjectHashMap<>();
+    private final InstructionManager baseInstructionManager = new InstructionManager();
 
     @Getter
     private final List<String> args;
@@ -35,35 +35,20 @@ public class Interpreter implements ExecutionContext {
     @Getter
     private final int dimensions;
 
-    private void addFingerprint(Fingerprint print) {
+    static {
+        addFingerprint(MODU.INSTANCE);
+        addFingerprint(NULL.INSTANCE);
+        addFingerprint(ROMA.INSTANCE);
+    }
+
+    private static void addFingerprint(Fingerprint print) {
         fingerprints.put(print.code(), print);
-    }
-
-    private void loadInstruction(Instruction instr, int c) {
-        var q = instructionMap.get(c);
-        if (q == null) {
-            instructionMap.put(c, q = new ArrayDeque<>());
-        }
-        q.push(instr);
-    }
-
-    private void unloadInstruction(int c) {
-        var q = instructionMap.get(c);
-        if (q != null) {
-            q.pop();
-            if (q.isEmpty()) {
-                instructionMap.remove(c);
-            }
-        }
     }
 
     public Interpreter(boolean trefunge, String[] args) {
         this.args = Arrays.asList(args);
         dimensions = trefunge ? 3 : 2;
-        new Funge98().load(this::loadInstruction);
-        addFingerprint(new ROMA());
-        addFingerprint(new MODU());
-        addFingerprint(new NULL());
+        baseInstructionManager.loadInstructionSet(Funge98.INSTANCE);
     }
 
     @Override
@@ -100,18 +85,22 @@ public class Interpreter implements ExecutionContext {
                     if (opcode == '(') {
                         IP().stackStack.TOSS().push(sum);
                         IP().stackStack.TOSS().push(1);
-                        p.load(this::loadInstruction);
+                        IP().instructionManager.loadInstructionSet(p);
                     } else {
-                        p.unload(this::unloadInstruction);
+                        IP().instructionManager.unloadInstructionSet(p);
                     }
                 } else {
                     interpret('r');
                 }
             } else {
-                if (!instructionMap.containsKey(opcode)) {
-                    opcode = 'r';
+                Instruction instr;
+                if ((instr = IP().instructionManager.fetch(opcode)) != null) {
+                    instr.process(this);
+                } else if ((instr = baseInstructionManager.fetch(opcode)) != null) {
+                    instr.process(this);
+                } else {
+                   baseInstructionManager.fetch('r').process(this);
                 }
-                instructionMap.get(opcode).peek().process(this);
             }
         }
     }

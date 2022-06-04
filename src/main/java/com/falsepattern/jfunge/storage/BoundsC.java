@@ -1,8 +1,9 @@
 package com.falsepattern.jfunge.storage;
 
+import com.falsepattern.jfunge.Copiable;
 import org.joml.Vector3ic;
 
-public interface BoundsC {
+public interface BoundsC<T extends BoundsC<T>> extends Copiable<T> {
     int xMin();
     int yMin();
     int zMin();

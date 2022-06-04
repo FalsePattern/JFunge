@@ -1,19 +1,28 @@
 package com.falsepattern.jfunge.storage;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.joml.Vector3i;
-import org.joml.Vector3ic;
 
 @Accessors(fluent = true, chain = true)
 @Data
-public class Bounds implements BoundsC {
+@NoArgsConstructor
+public class Bounds implements BoundsC<Bounds> {
     private int xMin;
     private int yMin;
     private int zMin;
     private int xMax;
     private int yMax;
     private int zMax;
+
+    private Bounds(Bounds original) {
+        xMin = original.xMin;
+        yMin = original.yMin;
+        zMin = original.zMin;
+        xMax = original.xMax;
+        yMax = original.yMax;
+        zMax = original.zMax;
+    }
 
     public Bounds zero() {
         xMin = yMin = zMin = xMax = yMax = zMax = 0;
@@ -28,5 +37,15 @@ public class Bounds implements BoundsC {
         this.yMax = yMax;
         this.zMax = zMax;
         return this;
+    }
+
+    public Bounds set(Bounds other) {
+        set(other.xMin, other.yMin, other.zMin, other.xMax, other.yMax, other.zMax);
+        return this;
+    }
+
+    @Override
+    public Bounds deepCopy() {
+        return new Bounds(this);
     }
 }

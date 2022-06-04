@@ -1,21 +1,40 @@
 package com.falsepattern.jfunge.ip;
 
-import lombok.Data;
+import com.falsepattern.jfunge.Copiable;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.joml.Vector3i;
 
-@NoArgsConstructor
-public class InstructionPointer {
-    public final Vector3i position = new Vector3i();
-    public final Vector3i delta = new Vector3i(1, 0, 0);
-    public final Vector3i storageOffset = new Vector3i();
-    public final StackStack stackStack = new StackStack();
+public class InstructionPointer implements Copiable<InstructionPointer> {
+    public final Vector3i position;
+    public final Vector3i delta;
+    public final Vector3i storageOffset;
+    public final StackStack stackStack;
     @Getter
     private boolean dead = false;
     public boolean stringMode = false;
 
+    public InstructionPointer() {
+        position = new Vector3i();
+        delta = new Vector3i(1, 0, 0);
+        storageOffset = new Vector3i();
+        stackStack = new StackStack();
+    }
+
+    private InstructionPointer(InstructionPointer original) {
+        position = new Vector3i(original.position);
+        delta = new Vector3i(original.delta);
+        storageOffset = new Vector3i(original.storageOffset);
+        stackStack = original.stackStack.deepCopy();
+        dead = original.dead;
+        stringMode = original.stringMode;
+    }
+
     public void die() {
         dead = true;
+    }
+
+    @Override
+    public InstructionPointer deepCopy() {
+        return new InstructionPointer(this);
     }
 }

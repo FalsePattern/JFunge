@@ -1,5 +1,6 @@
 package com.falsepattern.jfunge.storage;
 
+import com.falsepattern.jfunge.Copiable;
 import com.falsepattern.jfunge.Releasable;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -12,16 +13,22 @@ import java.util.List;
 
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class Chunk implements Releasable {
+public class Chunk implements Releasable, Copiable<Chunk> {
     public static final int CHUNK_EDGE_SIZE = 32;
     public static final int CHUNK_CAPACITY = CHUNK_EDGE_SIZE * CHUNK_EDGE_SIZE * CHUNK_EDGE_SIZE;
 
     private static final int BUFFER_CAPACITY = 64;
     private static final List<Chunk> buffer = new LinkedList<>();
 
-    private int[] storage = new int[CHUNK_CAPACITY];
+    private final int[] storage = new int[CHUNK_CAPACITY];
     private int defaultValue;
     private int populatedCells;
+
+    private Chunk(Chunk original) {
+        System.arraycopy(original.storage, 0, storage, 0, CHUNK_CAPACITY);
+        defaultValue = original.defaultValue;
+        populatedCells = original.populatedCells;
+    }
 
     public static Chunk allocate(int defaultValue) {
         Chunk instance;
@@ -124,6 +131,11 @@ public class Chunk implements Releasable {
                     if (storage[g.toIndex(a, b, c)] != defaultValue)
                         return a;
         throw new IllegalStateException();
+    }
+
+    @Override
+    public Chunk deepCopy() {
+        return new Chunk(this);
     }
 
     private interface Getter {

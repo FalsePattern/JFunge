@@ -1,12 +1,21 @@
 package com.falsepattern.jfunge.ip;
 
+import com.falsepattern.jfunge.Copiable;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import lombok.val;
 import org.joml.*;
 
-public class Stack {
-    private final TIntList storage = new TIntArrayList();
+public class Stack implements Copiable<Stack> {
+    private final TIntList storage;
+
+    public Stack() {
+        storage = new TIntArrayList();
+    }
+
+    private Stack(Stack original) {
+        storage = new TIntArrayList(original.storage);
+    }
 
     public void push(int x) {
         storage.add(x);
@@ -100,5 +109,10 @@ public class Stack {
 
     public int size() {
         return storage.size();
+    }
+
+    @Override
+    public Stack deepCopy() {
+        return new Stack(this);
     }
 }

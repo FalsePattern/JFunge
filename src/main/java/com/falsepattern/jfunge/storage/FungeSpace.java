@@ -1,5 +1,6 @@
 package com.falsepattern.jfunge.storage;
 
+import com.falsepattern.jfunge.Copiable;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import static com.falsepattern.jfunge.storage.Chunk.*;
 
 @RequiredArgsConstructor
-public class FungeSpace {
+public class FungeSpace implements Copiable<FungeSpace> {
     private final TIntObjectMap<TIntObjectMap<TIntObjectMap<Chunk>>> storage = new TIntObjectHashMap<>();
 
     private final Vector3i cachePos = new Vector3i();
@@ -22,6 +23,29 @@ public class FungeSpace {
     private final Bounds bounds = new Bounds();
 
     private final int defaultValue;
+
+    private FungeSpace(FungeSpace original) {
+        original.storage.forEachEntry((z, oPlane) -> {
+            val nPlane = new TIntObjectHashMap<TIntObjectMap<Chunk>>();
+            storage.put(z, nPlane);
+            oPlane.forEachEntry((y, oRow) -> {
+                val nRow = new TIntObjectHashMap<Chunk>();
+                nPlane.put(y, nRow);
+                oRow.forEachEntry((x, oChunk) -> {
+                    val nChunk = oChunk.deepCopy();
+                    nRow.put(x, nChunk);
+                    return true;
+                });
+                return true;
+            });
+            return true;
+        });
+        boundsRecheck = original.boundsRecheck;
+        bounds.set(original.bounds);
+        defaultValue = original.defaultValue;
+        cachePos.set(0);
+        cacheChunk = null;
+    }
 
     public int get(int x, int y, int z) {
         val cX = toChunk(x);
@@ -202,5 +226,10 @@ public class FungeSpace {
         }
         buf[0] = min;
         buf[1] = max;
+    }
+
+    @Override
+    public FungeSpace deepCopy() {
+        return new FungeSpace(this);
     }
 }

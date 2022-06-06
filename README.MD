@@ -25,4 +25,4 @@ A standard-conforming Funge-98 interpreter.
 
 ### Additional goals
 - [ ] File IO
-- [ ] Concurrency
+- [x] Concurrency

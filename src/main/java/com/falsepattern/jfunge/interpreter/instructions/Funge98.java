@@ -402,7 +402,7 @@ public class Funge98 implements InstructionSet {
         //9 teamnumber
         s.push(0);
         //8 uuid
-        s.push(0);
+        s.push(ctx.IP().UUID);
         //7 dimensions
         s.push(ctx.dimensions());
         //6 separator
@@ -416,7 +416,7 @@ public class Funge98 implements InstructionSet {
         //2 bpc
         s.push(4);
         //1 flags
-        s.push(0);
+        s.push(0b00000001);
         if (n > 0) {
             int curr = s.pick(n - 1);
             for (int i = s.size(); i >= tossSize; i--) {
@@ -430,6 +430,12 @@ public class Funge98 implements InstructionSet {
     public static void quit(ExecutionContext ctx) {
         int q = ctx.IP().stackStack.TOSS().pop();
         ctx.stop(q);
+    }
+
+    @Instr('t')
+    public static void split(ExecutionContext ctx) {
+        val clone = ctx.cloneIP();
+        clone.delta.mul(-1);
     }
 
     @Override

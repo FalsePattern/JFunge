@@ -18,7 +18,7 @@ public class Interpreter implements ExecutionContext {
     @Getter
     private final FungeSpace fungeSpace = new FungeSpace(' ');
 
-    private final InstructionPointer IP = new InstructionPointer();
+    private final List<InstructionPointer> IPs = new ArrayList<>();
 
     private final InstructionManager baseInstructionManager = new InstructionManager();
 
@@ -35,6 +35,12 @@ public class Interpreter implements ExecutionContext {
     private final int dimensions;
 
     private Integer exitCode = null;
+
+    private InstructionPointer currentIP = null;
+
+    private InstructionPointer clone = null;
+
+    private int nextUUID = 0;
 
     public static int executeProgram(boolean trefunge, String[] args, byte[] program, long iterLimit, InputStream input, OutputStream output) {
         val interpreter = new Interpreter(trefunge, args, input, output);
@@ -60,21 +66,31 @@ public class Interpreter implements ExecutionContext {
         baseInstructionManager.loadInstructionSet(Funge98.INSTANCE);
         this.input = input;
         this.output = output;
+        val ip = new InstructionPointer();
+        ip.UUID = nextUUID++;
+        IPs.add(ip);
     }
 
     @Override
     public InstructionPointer[] allIPs() {
-        return new InstructionPointer[]{IP};
+        return IPs.toArray(new InstructionPointer[0]);
     }
 
     @Override
     public InstructionPointer IP() {
-        return IP;
+        return currentIP;
+    }
+
+    @Override
+    public InstructionPointer cloneIP() {
+        clone = currentIP.deepCopy();
+        clone.UUID = nextUUID++;
+        return clone;
     }
 
     @Override
     public boolean stopped() {
-        if (dead()) {
+        if (IPs.size() == 0) {
             exitCode = 0;
         }
         return exitCode != null;
@@ -88,10 +104,6 @@ public class Interpreter implements ExecutionContext {
     @Override
     public int exitCode() {
         return exitCode == null ? 0 : exitCode;
-    }
-
-    public boolean dead() {
-        return IP.isDead();
     }
 
     @Override
@@ -165,8 +177,21 @@ public class Interpreter implements ExecutionContext {
     }
 
     public void tick() {
-        for (InstructionPointer ip : allIPs()) {
-            interpret(fungeSpace().get(ip.position));
+        currentIP = null;
+        for (int i = 0; i < IPs.size(); i++) {
+            currentIP = IPs.get(i);
+            if (IP().isDead()) {
+                IPs.remove(i);
+                i--;
+                continue;
+            }
+            interpret(fungeSpace().get(IP().position));
+            if (clone != null) {
+                IPs.add(i++, clone);
+                clone = null;
+            }
+        }
+        for (val ip: IPs) {
             step(ip);
         }
     }

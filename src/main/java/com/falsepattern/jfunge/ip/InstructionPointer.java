@@ -17,6 +17,7 @@ public class InstructionPointer implements Copiable<InstructionPointer> {
     @Getter
     private boolean dead = false;
     public boolean stringMode = false;
+    public int UUID;
 
     public InstructionPointer() {
         position = new Vector3i();
@@ -36,6 +37,7 @@ public class InstructionPointer implements Copiable<InstructionPointer> {
         stringMode = original.stringMode;
         instructionManager = original.instructionManager.deepCopy();
         customStorage = new TObjectIntHashMap<>(original.customStorage);
+        UUID = 0;
     }
 
     public void die() {

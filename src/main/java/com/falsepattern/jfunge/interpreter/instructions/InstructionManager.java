@@ -60,6 +60,6 @@ public class InstructionManager implements Copiable<InstructionManager> {
 
     @Override
     public InstructionManager deepCopy() {
-        return null;
+        return new InstructionManager(this);
     }
 }

@@ -11,6 +11,7 @@ import java.util.Map;
 public interface ExecutionContext {
     InstructionPointer[] allIPs();
     InstructionPointer IP();
+    InstructionPointer cloneIP();
     FungeSpace fungeSpace();
     int dimensions();
     boolean stopped();

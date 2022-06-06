@@ -73,6 +73,44 @@ public class Funge98 implements InstructionSet {
     @Instr('v')
     public static void south(ExecutionContext ctx) {ctx.IP().delta.set(0, 1, 0);}
 
+    @Instr('h')
+    public static void high(ExecutionContext ctx) {
+        if (ctx.dimensions() == 3)
+            ctx.IP().delta.set(0, 0, 1);
+        else
+            ctx.interpret('r');
+    }
+
+    @Instr('l')
+    public static void low(ExecutionContext ctx) {
+        if (ctx.dimensions() == 3)
+            ctx.IP().delta.set(0, 0, -1);
+        else
+            ctx.interpret('r');
+    }
+
+    @Instr('?')
+    public static void away(ExecutionContext ctx) {
+        var random = Math.abs(ctx.IP().nextRandom());
+        if (ctx.dimensions() == 3) {
+            switch (random % 6) {
+                case 0: east(ctx); break;
+                case 1: south(ctx); break;
+                case 2: west(ctx); break;
+                case 3: north(ctx); break;
+                case 4: high(ctx); break;
+                case 5: low(ctx); break;
+            }
+        } else {
+            switch (random % 4) {
+                case 0: east(ctx); break;
+                case 1: south(ctx); break;
+                case 2: west(ctx); break;
+                case 3: north(ctx); break;
+            }
+        }
+    }
+
     @Instr('<')
     public static void west(ExecutionContext ctx) {ctx.IP().delta.set(-1, 0, 0);}
 

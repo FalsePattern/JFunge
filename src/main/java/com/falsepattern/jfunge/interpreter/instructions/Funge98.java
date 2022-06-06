@@ -28,6 +28,7 @@ public class Funge98 implements InstructionSet {
         addFingerprint(MODU.INSTANCE);
         addFingerprint(NULL.INSTANCE);
         addFingerprint(ROMA.INSTANCE);
+        addFingerprint(JAVA.INSTANCE);
     }
 
     private static void addFingerprint(Fingerprint print) {

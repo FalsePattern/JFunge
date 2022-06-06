@@ -1,8 +1,8 @@
 package com.falsepattern.jfunge;
 
 public class Globals {
-    public static final String VERSION = "0.2.0";
-    public static final int FUNGE_VERSION = 0 * 256 * 256 + 2 * 256 + 0;
+    public static final String VERSION = "0.3.0";
+    public static final int FUNGE_VERSION = 0 * 256 * 256 + 3 * 256 + 0;
     public static final int HANDPRINT = 0xfa15e9a7;
     public static final String LICENSE = "JFunge - A standard-conforming Befunge-98 and Trefunge-98 interpreter\n" +
                                          "Copyright (C) 2022 FalsePattern\n" +

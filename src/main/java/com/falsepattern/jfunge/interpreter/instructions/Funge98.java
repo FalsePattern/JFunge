@@ -2,10 +2,14 @@ package com.falsepattern.jfunge.interpreter.instructions;
 
 import com.falsepattern.jfunge.Globals;
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.*;
 import com.falsepattern.jfunge.ip.Stack;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.val;
+import lombok.var;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
@@ -19,6 +23,55 @@ import java.util.function.ObjIntConsumer;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Funge98 implements InstructionSet {
     public static final Funge98 INSTANCE = new Funge98();
+    private static final TIntObjectMap<Fingerprint> fingerprints = new TIntObjectHashMap<>();
+
+    static {
+        addFingerprint(MODU.INSTANCE);
+        addFingerprint(NULL.INSTANCE);
+        addFingerprint(ROMA.INSTANCE);
+    }
+
+    private static void addFingerprint(Fingerprint print) {
+        fingerprints.put(print.code(), print);
+    }
+
+    private static int getFingerCode(Stack s) {
+        val n = s.pop();
+        var sum = 0;
+        for (var i = 0; i < n; i++) {
+            sum *= 256;
+            sum += s.pop();
+        }
+        return sum;
+    }
+
+    @Instr('(')
+    public static void loadFinger(ExecutionContext ctx) {
+        val s = ctx.IP().stackStack.TOSS();
+        val code = getFingerCode(s);
+        if (fingerprints.containsKey(code)) {
+            s.push(code);
+            s.push(1);
+            ctx.IP().instructionManager.loadInstructionSet(fingerprints.get(code));
+        } else {
+            ctx.interpret('r');
+        }
+    }
+
+    @Instr(')')
+    public static void unloadFinger(ExecutionContext ctx) {
+        val code = getFingerCode(ctx.IP().stackStack.TOSS());
+        if (fingerprints.containsKey(code)) {
+            ctx.IP().instructionManager.unloadInstructionSet(fingerprints.get(code));
+        } else {
+            ctx.interpret('r');
+        }
+    }
+
+    @Instr('"')
+    public static void stringMod(ExecutionContext ctx) {
+        ctx.IP().stringMode = !ctx.IP().stringMode;
+    }
 
     @Instr('>')
     public static void east(ExecutionContext ctx) {ctx.IP().delta.set(1, 0, 0);}

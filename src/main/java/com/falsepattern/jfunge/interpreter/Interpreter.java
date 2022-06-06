@@ -3,25 +3,15 @@ package com.falsepattern.jfunge.interpreter;
 import com.falsepattern.jfunge.interpreter.instructions.Funge98;
 import com.falsepattern.jfunge.interpreter.instructions.Instruction;
 import com.falsepattern.jfunge.interpreter.instructions.InstructionManager;
-import com.falsepattern.jfunge.interpreter.instructions.fingerprints.Fingerprint;
-import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODU;
-import com.falsepattern.jfunge.interpreter.instructions.fingerprints.NULL;
-import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ROMA;
 import com.falsepattern.jfunge.ip.InstructionPointer;
 import com.falsepattern.jfunge.storage.FungeSpace;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import lombok.val;
-import lombok.var;
 
 import java.util.*;
 
 @Accessors(fluent = true)
 public class Interpreter implements ExecutionContext {
-    private static final TIntObjectMap<Fingerprint> fingerprints = new TIntObjectHashMap<>();
-
     @Getter
     private final FungeSpace fungeSpace = new FungeSpace(' ');
 
@@ -34,16 +24,6 @@ public class Interpreter implements ExecutionContext {
 
     @Getter
     private final int dimensions;
-
-    static {
-        addFingerprint(MODU.INSTANCE);
-        addFingerprint(NULL.INSTANCE);
-        addFingerprint(ROMA.INSTANCE);
-    }
-
-    private static void addFingerprint(Fingerprint print) {
-        fingerprints.put(print.code(), print);
-    }
 
     public Interpreter(boolean trefunge, String[] args) {
         this.args = Arrays.asList(args);
@@ -68,39 +48,15 @@ public class Interpreter implements ExecutionContext {
 
     @Override
     public void interpret(int opcode) {
-        if (opcode == '"') {
-            IP().stringMode = !IP().stringMode;
-        } else if (IP().stringMode) {
+        if (IP().stringMode) {
             IP().stackStack.TOSS().push(opcode);
         } else {
-            if (opcode == '(' || opcode == ')') {
-                int n = IP().stackStack.TOSS().pop();
-                int sum = 0;
-                for (int i = 0; i < n; i++) {
-                    sum *= 256;
-                    sum += IP().stackStack.TOSS().pop();
-                }
-                if (fingerprints.containsKey(sum)) {
-                    val p = fingerprints.get(sum);
-                    if (opcode == '(') {
-                        IP().stackStack.TOSS().push(sum);
-                        IP().stackStack.TOSS().push(1);
-                        IP().instructionManager.loadInstructionSet(p);
-                    } else {
-                        IP().instructionManager.unloadInstructionSet(p);
-                    }
-                } else {
-                    interpret('r');
-                }
+            Instruction instr;
+            if ((instr = IP().instructionManager.fetch(opcode)) != null || (instr = baseInstructionManager.fetch(opcode)) != null) {
+                instr.process(this);
             } else {
-                Instruction instr;
-                if ((instr = IP().instructionManager.fetch(opcode)) != null) {
-                    instr.process(this);
-                } else if ((instr = baseInstructionManager.fetch(opcode)) != null) {
-                    instr.process(this);
-                } else {
-                   baseInstructionManager.fetch('r').process(this);
-                }
+                if (opcode == 'r') throw new IllegalArgumentException("Language does not implement 'r' reflect instruction.");
+                interpret('r');
             }
         }
     }

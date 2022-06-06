@@ -12,6 +12,7 @@ A standard-conforming Befunge-98 and Trefunge-98 interpreter.
 | `--license` | Prints the license of the program.                                                                        |
 
 ### Currently implemented fingerprints
+- MODE
 - MODU
 - NULL
 - ROMA

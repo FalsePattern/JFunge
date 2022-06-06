@@ -17,11 +17,18 @@ public class StackStack implements Copiable<StackStack> {
     @NonNull
     private Stack TOSS = new Stack();
 
+    @Getter
+    private boolean invertMode;
+    @Getter
+    private boolean queueMode;
+
     private StackStack(StackStack original) {
         TOSS(original.TOSS().deepCopy());
         original.stackStack.forEach((stack) -> {
             stackStack.add(stack.deepCopy());
         });
+        invertMode = original.invertMode;
+        queueMode = original.queueMode;
     }
 
     public Optional<Stack> SOSS() {
@@ -32,9 +39,27 @@ public class StackStack implements Copiable<StackStack> {
         try {
             stackStack.push(TOSS);
             TOSS(new Stack());
+            TOSS().invertMode = invertMode;
+            TOSS().queueMode = queueMode;
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    public void invertMode(boolean state) {
+        invertMode = state;
+        TOSS().invertMode = state;
+        for (Stack stack : stackStack) {
+            stack.invertMode = state;
+        }
+    }
+
+    public void queueMode(boolean state) {
+        queueMode = state;
+        TOSS().queueMode = state;
+        for (Stack stack : stackStack) {
+            stack.queueMode = state;
         }
     }
 

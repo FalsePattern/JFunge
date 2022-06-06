@@ -26,6 +26,7 @@ public class Funge98 implements InstructionSet {
     private static final TIntObjectMap<Fingerprint> fingerprints = new TIntObjectHashMap<>();
 
     static {
+        addFingerprint(MODE.INSTANCE);
         addFingerprint(MODU.INSTANCE);
         addFingerprint(NULL.INSTANCE);
         addFingerprint(ROMA.INSTANCE);

@@ -8,27 +8,34 @@ import org.joml.*;
 
 public class Stack implements Copiable<Stack> {
     private final TIntList storage;
-
+    public boolean invertMode;
+    public boolean queueMode;
     public Stack() {
         storage = new TIntArrayList();
     }
 
     private Stack(Stack original) {
         storage = new TIntArrayList(original.storage);
+        invertMode = original.invertMode;
+        queueMode = original.queueMode;
     }
 
     public void push(int x) {
-        storage.add(x);
+        if (invertMode) {
+            storage.insert(0, x);
+        } else {
+            storage.add(x);
+        }
     }
 
     public int peek() {
         int s = storage.size();
-        return s == 0 ? 0 : storage.get(s - 1);
+        return s == 0 ? 0 : storage.get(queueMode ? 0 : s - 1);
     }
 
     public int pop() {
         int s = storage.size();
-        return s == 0 ? 0 : storage.removeAt(s - 1);
+        return s == 0 ? 0 : storage.removeAt(queueMode ? 0 : s - 1);
     }
 
     public void push2(Vector2ic v) {

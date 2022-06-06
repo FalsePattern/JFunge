@@ -115,6 +115,7 @@ public class FungeSpace implements Copiable<FungeSpace> {
                     val chunk = row.get(iChunk);
                     if (chunk.isEmpty()) {
                         row.remove(iChunk);
+                        chunk.release();
                     }
                 }
                 if (row.isEmpty()) {

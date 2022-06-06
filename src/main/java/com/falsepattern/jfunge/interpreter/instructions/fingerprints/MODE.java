@@ -75,6 +75,24 @@ public class MODE implements Fingerprint {
         public static void north(ExecutionContext ctx) {
             ctx.IP().delta.add(0, -1, 0);
         }
+
+        @Instr('h')
+        public static void high(ExecutionContext ctx) {
+            if (ctx.dimensions() == 3) {
+                ctx.IP().delta.add(0, 0, 1);
+            } else {
+                ctx.interpret('r');
+            }
+        }
+
+        @Instr('l')
+        public static void low(ExecutionContext ctx) {
+            if (ctx.dimensions() == 3) {
+                ctx.IP().delta.add(0, 0, -1);
+            } else {
+                ctx.interpret('r');
+            }
+        }
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)

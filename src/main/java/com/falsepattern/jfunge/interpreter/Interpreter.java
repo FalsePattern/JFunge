@@ -192,11 +192,6 @@ public class Interpreter implements ExecutionContext {
     }
 
     @Override
-    public int paradigm() {
-        return 0;
-    }
-
-    @Override
     public int input(boolean stagger) {
         var value = -1;
         if (inputStagger > 0) {

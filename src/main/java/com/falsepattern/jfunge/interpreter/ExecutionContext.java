@@ -21,7 +21,6 @@ public interface ExecutionContext {
     void step(InstructionPointer ip);
     List<String> args();
     Map<String, String> env();
-    int paradigm();
     int input(boolean stagger);
     OutputStream output();
     byte[] readFile(String file);

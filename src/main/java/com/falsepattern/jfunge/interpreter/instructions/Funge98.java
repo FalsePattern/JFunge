@@ -455,7 +455,7 @@ public class Funge98 implements InstructionSet {
         //6 separator
         s.push(File.separatorChar);
         //5 operating paradigm
-        s.push(ctx.paradigm());
+        s.push(1);
         //4 version
         s.push(Globals.FUNGE_VERSION);
         //3 handprint
@@ -463,7 +463,7 @@ public class Funge98 implements InstructionSet {
         //2 bpc
         s.push(4);
         //1 flags
-        s.push(0b00000111);
+        s.push(0b00001111);
         if (n > 0) {
             int curr = s.pick(n - 1);
             for (int i = s.size(); i >= tossSize; i--) {
@@ -570,6 +570,17 @@ public class Funge98 implements InstructionSet {
     public static void readChar(ExecutionContext ctx) {
         ctx.output().flush();
         ctx.IP().stackStack.TOSS().push(ctx.input(false));
+    }
+
+    @Instr('=')
+    public static void sysCall(ExecutionContext ctx) {
+        val command = ctx.IP().stackStack.TOSS().popString();
+        try {
+            val proc = Runtime.getRuntime().exec(command);
+            ctx.IP().stackStack.TOSS().push(proc.waitFor());
+        } catch (Exception e) {
+            ctx.IP().stackStack.TOSS().push(-1);
+        }
     }
 
     @Override

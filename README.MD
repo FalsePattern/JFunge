@@ -1,5 +1,5 @@
 # JFunge
-A standard-conforming Befunge-98 and Trefunge-98 interpreter.
+A standard-conforming Funge-98 interpreter.
 
 ### Usage
 `jfunge [file] [--3d] [--version] [--license]`
@@ -7,15 +7,21 @@ A standard-conforming Befunge-98 and Trefunge-98 interpreter.
 | argument    | usage                                                                                                     |
 |-------------|-----------------------------------------------------------------------------------------------------------|
 | `file`      | The file to load into the interpreter                                                                     |
-| `--3d`      | Enable 3D (Trefunge) mode. By default, the interpreter acts as if it was 2D for compatibility reasons.    |
+| `--3d`      | Enable 3D (Trefunge) mode. By default, the interpreter emulates 2D Befunge for compatibility.             |
 | `--version` | Prints the current program version, along with the handprint and version given by befunge's y instruction |
 | `--license` | Prints the license of the program.                                                                        |
 
+### References
+- [Esolang wiki article of Funge-98](https://esolangs.org/wiki/Funge-98)
+- [Official funge98 language specification](https://github.com/catseye/Funge-98/blob/master/doc/funge98.markdown)
+- [Mycology Befunge-98 test suite](https://github.com/Deewiant/Mycology)
+- 
+
 ### Currently implemented fingerprints
-- MODE
-- MODU
-- NULL
-- ROMA
+- [MODE](https://catseye.tc/view/funge-98/library/MODE.markdown)
+- [MODU](https://catseye.tc/view/funge-98/library/MODU.markdown)
+- [NULL](https://catseye.tc/view/funge-98/library/NULL.markdown)
+- [ROMA](https://catseye.tc/view/funge-98/library/ROMA.markdown)
 
 ### Additional goals
 - [ ] File IO

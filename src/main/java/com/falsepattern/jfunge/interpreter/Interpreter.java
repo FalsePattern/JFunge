@@ -8,13 +8,27 @@ import com.falsepattern.jfunge.storage.FungeSpace;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.val;
+import lombok.var;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 @Accessors(fluent = true)
 public class Interpreter implements ExecutionContext {
+    public static final FileIOSupplier DEFAULT_FILE_IO_SUPPLIER = new FileIOSupplier() {
+        @Override
+        public byte[] readFile(String file) throws IOException {
+            return Files.readAllBytes(Paths.get(file));
+        }
+
+        @Override
+        public boolean writeFile(String file, byte[] data) throws IOException {
+            Files.write(Paths.get(file), data);
+            return true;
+        }
+    };
     @Getter
     private final FungeSpace fungeSpace = new FungeSpace(' ');
 
@@ -22,11 +36,13 @@ public class Interpreter implements ExecutionContext {
 
     private final InstructionManager baseInstructionManager = new InstructionManager();
 
-    @Getter
     private final InputStream input;
+
 
     @Getter
     private final OutputStream output;
+
+    private final FileIOSupplier fileIOSupplier;
 
     @Getter
     private final List<String> args;
@@ -42,8 +58,11 @@ public class Interpreter implements ExecutionContext {
 
     private int nextUUID = 0;
 
-    public static int executeProgram(boolean trefunge, String[] args, byte[] program, long iterLimit, InputStream input, OutputStream output) {
-        val interpreter = new Interpreter(trefunge, args, input, output);
+    private int inputStagger;
+
+
+    public static int executeProgram(boolean trefunge, String[] args, byte[] program, long iterLimit, InputStream input, OutputStream output, FileIOSupplier fileIOSupplier) {
+        val interpreter = new Interpreter(trefunge, args, input, output, fileIOSupplier);
         interpreter.fungeSpace().loadFileAt(0, 0, 0, program, trefunge);
         if (iterLimit > 0) {
             long step = 0;
@@ -60,12 +79,13 @@ public class Interpreter implements ExecutionContext {
         return interpreter.exitCode();
     }
 
-    public Interpreter(boolean trefunge, String[] args, InputStream input, OutputStream output) {
+    public Interpreter(boolean trefunge, String[] args, InputStream input, OutputStream output, FileIOSupplier fileIOSupplier) {
         this.args = Arrays.asList(args);
         dimensions = trefunge ? 3 : 2;
         baseInstructionManager.loadInstructionSet(Funge98.INSTANCE);
         this.input = input;
         this.output = output;
+        this.fileIOSupplier = fileIOSupplier;
         val ip = new InstructionPointer();
         ip.UUID = nextUUID++;
         IPs.add(ip);
@@ -174,6 +194,48 @@ public class Interpreter implements ExecutionContext {
     @Override
     public int paradigm() {
         return 0;
+    }
+
+    @Override
+    public int input(boolean stagger) {
+        var value = -1;
+        if (inputStagger > 0) {
+            value = inputStagger;
+            inputStagger = -1;
+        } else {
+            try {
+                value = input.read();
+            } catch (IOException e) {
+                value = -1;
+            }
+        }
+        if (stagger) {
+            inputStagger = value;
+        }
+        return value;
+    }
+
+    @Override
+    public byte[] readFile(String file) {
+        try {
+            return fileIOSupplier.readFile(file);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean writeFile(String file, byte[] data) {
+        try {
+            return fileIOSupplier.writeFile(file, data);
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    public interface FileIOSupplier {
+        byte[] readFile(String file) throws IOException;
+        boolean writeFile(String file, byte[] data) throws IOException;
     }
 
     public void tick() {

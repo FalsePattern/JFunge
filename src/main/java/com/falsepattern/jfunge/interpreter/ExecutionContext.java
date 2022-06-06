@@ -3,10 +3,10 @@ package com.falsepattern.jfunge.interpreter;
 import com.falsepattern.jfunge.ip.InstructionPointer;
 import com.falsepattern.jfunge.storage.FungeSpace;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 public interface ExecutionContext {
     InstructionPointer[] allIPs();
@@ -22,6 +22,8 @@ public interface ExecutionContext {
     List<String> args();
     Map<String, String> env();
     int paradigm();
-    InputStream input();
+    int input(boolean stagger);
     OutputStream output();
+    byte[] readFile(String file);
+    boolean writeFile(String file, byte[] data);
 }

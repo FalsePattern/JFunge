@@ -6,9 +6,10 @@ import lombok.var;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestMycology {
     @Test
@@ -25,7 +26,7 @@ public class TestMycology {
                 program.write(b, 0, read);
             }
         });
-        val returnCode = Assertions.assertDoesNotThrow(() -> Interpreter.executeProgram(false, new String[]{"mycology.b98"}, program.toByteArray(), 100000, input, output));
+        val returnCode = Assertions.assertDoesNotThrow(() -> Interpreter.executeProgram(false, new String[]{"mycology.b98"}, program.toByteArray(), 300000, input, output, fakeSupplier));
         val txt = output.toString();
         Assertions.assertTrue(Arrays.stream(txt.split("\n")).noneMatch((line) -> {
             if (line.startsWith("BAD")) {
@@ -37,4 +38,36 @@ public class TestMycology {
         }));
         Assertions.assertEquals(15, returnCode);
     }
+
+    private static final Interpreter.FileIOSupplier fakeSupplier = new Interpreter.FileIOSupplier() {
+
+        private final Map<String, byte[]> files = new HashMap<>();
+        @Override
+        public byte[] readFile(String file) throws IOException {
+            if (files.containsKey(file)) {
+                val b = files.get(file);
+                return Arrays.copyOf(b, b.length);
+            } else {
+                val s = TestMycology.class.getResourceAsStream("/" + file);
+                if (s == null) {
+                    throw new FileNotFoundException("Could not find resource " + file);
+                }
+                val ret = new ByteArrayOutputStream();
+                val b = new byte[4096];
+                var r = 0;
+                while ((r = s.read(b)) > 0) {
+                    ret.write(b, 0, r);
+                }
+                val bytes = ret.toByteArray();
+                files.put(file, bytes);
+                return Arrays.copyOf(bytes, bytes.length);
+            }
+        }
+
+        @Override
+        public boolean writeFile(String file, byte[] data) throws IOException {
+            files.put(file, Arrays.copyOf(data, data.length));
+            return true;
+        }
+    };
 }

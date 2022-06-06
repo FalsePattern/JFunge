@@ -24,5 +24,5 @@ A standard-conforming Funge-98 interpreter.
 - [ROMA](https://catseye.tc/view/funge-98/library/ROMA.markdown)
 
 ### Additional goals
-- [ ] File IO
+- [x] File IO
 - [x] Concurrency

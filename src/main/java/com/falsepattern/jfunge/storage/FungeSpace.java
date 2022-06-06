@@ -7,6 +7,8 @@ import lombok.*;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
+import java.io.ByteArrayOutputStream;
+
 import static com.falsepattern.jfunge.storage.Chunk.*;
 
 @RequiredArgsConstructor
@@ -128,10 +130,18 @@ public class FungeSpace implements Copiable<FungeSpace> {
         }
     }
 
-    public void loadFileAt(int x, int y, int z, byte[] data, boolean trefunge) {
+    public Vector3i loadBinaryFileAt(int x, int y, int z, byte[] data) {
+        for (int i = 0; i < data.length; i++) {
+            set(x + i, y, z, Byte.toUnsignedInt(data[i]));
+        }
+        return new Vector3i(x + data.length - 1, y, z);
+    }
+
+    public Vector3i loadFileAt(int x, int y, int z, byte[] data, boolean trefunge) {
         int X = x;
         int Y = y;
         int Z = z;
+        val ret = new Vector3i(x, y, z);
         for (int i = 0; i < data.length; i++) {
             int c = Byte.toUnsignedInt(data[i]);
             switch (c) {
@@ -149,9 +159,48 @@ public class FungeSpace implements Copiable<FungeSpace> {
                     }
                     continue;
             }
-            set(X, Y, Z, c);
+            ret.x = Math.max(ret.x, X);
+            ret.y = Math.max(ret.y, Y);
+            ret.z = Math.max(ret.z, Z);
+            if (c != defaultValue) {
+                set(X, Y, Z, c);
+            }
             X++;
         }
+        return ret.sub(x - 1, y - 1, z - 1);
+    }
+
+    public byte[] readDataAt(int x, int y, int z, int dX, int dY, int dZ, boolean textFile) {
+        val out = new ByteArrayOutputStream();
+        for (int accumulatedFormFeeds = 0, Z = z; Z < z + dZ; Z++, accumulatedFormFeeds++) {
+            if (!textFile && accumulatedFormFeeds > 0) {
+                out.write('\t');
+            }
+            for (int accumulatedLineFeeds = 0, Y = y; Y < y + dY; Y++, accumulatedLineFeeds++) {
+                if (!textFile && accumulatedLineFeeds > 0) {
+                    out.write('\n');
+                }
+                for (int accumulatedSpaces = 0, X = x; X < x + dX; X++) {
+                    val c = get(X, Y, Z);
+                    if (textFile) {
+                        if (c == defaultValue) {
+                            accumulatedSpaces++;
+                        } else {
+                            for (; accumulatedFormFeeds > 0; accumulatedFormFeeds--)
+                                out.write('\f');
+                            for (; accumulatedLineFeeds > 0; accumulatedLineFeeds--)
+                                out.write('\n');
+                            for (; accumulatedSpaces > 0; accumulatedSpaces--)
+                                out.write(defaultValue);
+                            out.write(c);
+                        }
+                    } else {
+                        out.write(c);
+                    }
+                }
+            }
+        }
+        return out.toByteArray();
     }
 
     public void wipe() {

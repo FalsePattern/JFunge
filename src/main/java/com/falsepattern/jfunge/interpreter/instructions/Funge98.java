@@ -463,7 +463,7 @@ public class Funge98 implements InstructionSet {
         //2 bpc
         s.push(4);
         //1 flags
-        s.push(0b00000001);
+        s.push(0b00000111);
         if (n > 0) {
             int curr = s.pick(n - 1);
             for (int i = s.size(); i >= tossSize; i--) {
@@ -483,6 +483,93 @@ public class Funge98 implements InstructionSet {
     public static void split(ExecutionContext ctx) {
         val clone = ctx.cloneIP();
         clone.delta.mul(-1);
+    }
+
+    @Instr('i')
+    public static void input(ExecutionContext ctx) {
+        val s = ctx.IP().stackStack.TOSS();
+        val filename = s.popString();
+        val flags = s.pop();
+        val pos = new Vector3i();
+        if (ctx.dimensions() == 3) {
+            s.pop3(pos);
+        } else {
+            pos.set(s.pop2(), 0);
+        }
+        pos.add(ctx.IP().storageOffset);
+        val file = ctx.readFile(filename);
+        if (file == null) {
+            ctx.interpret('r');
+            return;
+        }
+        val delta = ((flags & 1) == 1) ? ctx.fungeSpace().loadBinaryFileAt(pos.x, pos.y, pos.z, file) : ctx.fungeSpace().loadFileAt(pos.x, pos.y, pos.z, file, ctx.dimensions() == 3);
+        pos.sub(ctx.IP().storageOffset);
+        if (ctx.dimensions() == 3) {
+            s.push3(delta);
+            s.push3(pos);
+        } else {
+            s.push2(new Vector2i(delta.x, delta.y));
+            s.push2(new Vector2i(pos.x, pos.y));
+        }
+    }
+
+    @Instr('o')
+    public static void output(ExecutionContext ctx) {
+        val s = ctx.IP().stackStack.TOSS();
+        val filename = s.popString();
+        val flags = s.pop();
+        val pos = new Vector3i();
+        val delta = new Vector3i();
+        if (ctx.dimensions() == 3) {
+            s.pop3(pos);
+            s.pop3(delta);
+        } else {
+            pos.set(s.pop2(), 0);
+            delta.set(s.pop2(), 1);
+        }
+        pos.add(ctx.IP().storageOffset);
+        val data = ctx.fungeSpace().readDataAt(pos.x, pos.y, pos.z, delta.x, delta.y, delta.z, (flags & 1) == 1);
+        if (!ctx.writeFile(filename, data)) {
+            ctx.interpret('r');
+        }
+    }
+
+    @Instr('&')
+    @SneakyThrows
+    public static void readInt(ExecutionContext ctx) {
+        ctx.output().flush();
+        var counter = 0;
+        var found = false;
+        var next = 0;
+        while ((next = ctx.input(true)) < '0' || next > '9') {
+            ctx.input(false);
+        }
+        while (true) {
+            next = ctx.input(true);
+            if (next >= '0' && next <= '9' && (counter * 10 >= counter)) {
+                found = true;
+                counter *= 10;
+                counter += next - '0';
+                ctx.input(false);
+            } else {
+                if (next == '\n') {
+                    ctx.input(false);
+                }
+                break;
+            }
+        }
+        if (found) {
+            ctx.IP().stackStack.TOSS().push(counter);
+        } else {
+            ctx.interpret('r');
+        }
+    }
+
+    @Instr('~')
+    @SneakyThrows
+    public static void readChar(ExecutionContext ctx) {
+        ctx.output().flush();
+        ctx.IP().stackStack.TOSS().push(ctx.input(false));
     }
 
     @Override

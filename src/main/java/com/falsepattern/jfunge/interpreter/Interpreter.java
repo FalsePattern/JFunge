@@ -48,7 +48,9 @@ public class Interpreter implements ExecutionContext {
 
     @Override
     public void interpret(int opcode) {
-        if (IP().stringMode) {
+        if (opcode == '"') {
+            IP().stringMode = !IP().stringMode;
+        } else if (IP().stringMode) {
             IP().stackStack.TOSS().push(opcode);
         } else {
             Instruction instr;

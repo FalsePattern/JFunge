@@ -68,11 +68,6 @@ public class Funge98 implements InstructionSet {
         }
     }
 
-    @Instr('"')
-    public static void stringMod(ExecutionContext ctx) {
-        ctx.IP().stringMode = !ctx.IP().stringMode;
-    }
-
     @Instr('>')
     public static void east(ExecutionContext ctx) {ctx.IP().delta.set(1, 0, 0);}
 

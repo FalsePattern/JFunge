@@ -26,7 +26,15 @@ public class TestMycology {
             }
         });
         val returnCode = Assertions.assertDoesNotThrow(() -> Interpreter.executeProgram(false, new String[]{"mycology.b98"}, program.toByteArray(), 100000, input, output));
-        Assertions.assertTrue(Arrays.stream(output.toString().split("\n")).noneMatch((line) -> line.startsWith("BAD")));
+        val txt = output.toString();
+        Assertions.assertTrue(Arrays.stream(txt.split("\n")).noneMatch((line) -> {
+            if (line.startsWith("BAD")) {
+                System.out.println(line);
+                return true;
+            } else {
+                return false;
+            }
+        }));
         Assertions.assertEquals(15, returnCode);
     }
 }

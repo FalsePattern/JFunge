@@ -10,6 +10,7 @@ import java.util.function.ObjIntConsumer;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class NULL implements Fingerprint {
     public static final NULL INSTANCE = new NULL();
+
     @Override
     public void load(ObjIntConsumer<Instruction> instructionSet) {
         for (int i = 'A'; i <= 'Z'; i++) {

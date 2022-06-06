@@ -13,7 +13,8 @@ public class TestChunk {
     @Test
     public void testSetGet() {
         val rngSeed = System.nanoTime();
-        @Cleanup val chunk = Chunk.allocate(0);
+        @Cleanup
+        val chunk = Chunk.allocate(0);
 
         var rng = new Random(rngSeed);
         for (int z = 0; z < Chunk.CHUNK_EDGE_SIZE_Z; z++)
@@ -31,7 +32,8 @@ public class TestChunk {
     @Test
     public void testDefaultValue() {
         for (int i = -10; i < 10; i++) {
-            @Cleanup val chunk = Chunk.allocate(i);
+            @Cleanup
+            val chunk = Chunk.allocate(i);
             for (int z = 0; z < Chunk.CHUNK_EDGE_SIZE_Z; z++)
                 for (int y = 0; y < Chunk.CHUNK_EDGE_SIZE_Y; y++)
                     for (int x = 0; x < Chunk.CHUNK_EDGE_SIZE_X; x++)
@@ -41,7 +43,8 @@ public class TestChunk {
 
     @Test
     public void testEmpty() {
-        @Cleanup val chunk = Chunk.allocate(0);
+        @Cleanup
+        val chunk = Chunk.allocate(0);
         Assertions.assertTrue(chunk.isEmpty());
         chunk.set(1, 1, 0, 3);
         Assertions.assertFalse(chunk.isEmpty());

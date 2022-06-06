@@ -20,14 +20,7 @@ public interface InstructionSet {
             val lookup = MethodHandles.lookup();
             val methodType = MethodType.methodType(void.class, ExecutionContext.class);
             try {
-                val lambda = (Instruction) LambdaMetafactory.metafactory(lookup,
-                                                                    "process",
-                                                                    MethodType.methodType(Instruction.class),
-                                                                    methodType,
-                                                                    lookup.findStatic(clazz, method.getName(), methodType),
-                                                                    methodType)
-                        .getTarget()
-                        .invokeExact();
+                val lambda = (Instruction) LambdaMetafactory.metafactory(lookup, "process", MethodType.methodType(Instruction.class), methodType, lookup.findStatic(clazz, method.getName(), methodType), methodType).getTarget().invokeExact();
                 val ann = method.getAnnotation(Instr.class);
                 instructionSet.accept(lambda, ann.value());
             } catch (Throwable e) {

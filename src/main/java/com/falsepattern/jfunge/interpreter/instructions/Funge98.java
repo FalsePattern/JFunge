@@ -68,10 +68,14 @@ public class Funge98 implements InstructionSet {
     }
 
     @Instr('>')
-    public static void east(ExecutionContext ctx) {ctx.IP().delta.set(1, 0, 0);}
+    public static void east(ExecutionContext ctx) {
+        ctx.IP().delta.set(1, 0, 0);
+    }
 
     @Instr('v')
-    public static void south(ExecutionContext ctx) {ctx.IP().delta.set(0, 1, 0);}
+    public static void south(ExecutionContext ctx) {
+        ctx.IP().delta.set(0, 1, 0);
+    }
 
     @Instr('h')
     public static void high(ExecutionContext ctx) {
@@ -94,28 +98,52 @@ public class Funge98 implements InstructionSet {
         var random = Math.abs(ctx.IP().nextRandom());
         if (ctx.dimensions() == 3) {
             switch (random % 6) {
-                case 0: east(ctx); break;
-                case 1: south(ctx); break;
-                case 2: west(ctx); break;
-                case 3: north(ctx); break;
-                case 4: high(ctx); break;
-                case 5: low(ctx); break;
+                case 0:
+                    east(ctx);
+                    break;
+                case 1:
+                    south(ctx);
+                    break;
+                case 2:
+                    west(ctx);
+                    break;
+                case 3:
+                    north(ctx);
+                    break;
+                case 4:
+                    high(ctx);
+                    break;
+                case 5:
+                    low(ctx);
+                    break;
             }
         } else {
             switch (random % 4) {
-                case 0: east(ctx); break;
-                case 1: south(ctx); break;
-                case 2: west(ctx); break;
-                case 3: north(ctx); break;
+                case 0:
+                    east(ctx);
+                    break;
+                case 1:
+                    south(ctx);
+                    break;
+                case 2:
+                    west(ctx);
+                    break;
+                case 3:
+                    north(ctx);
+                    break;
             }
         }
     }
 
     @Instr('<')
-    public static void west(ExecutionContext ctx) {ctx.IP().delta.set(-1, 0, 0);}
+    public static void west(ExecutionContext ctx) {
+        ctx.IP().delta.set(-1, 0, 0);
+    }
 
     @Instr('^')
-    public static void north(ExecutionContext ctx) {ctx.IP().delta.set(0, -1, 0);}
+    public static void north(ExecutionContext ctx) {
+        ctx.IP().delta.set(0, -1, 0);
+    }
 
     @Instr('[')
     public static void turnLeft(ExecutionContext ctx) {
@@ -130,7 +158,9 @@ public class Funge98 implements InstructionSet {
     }
 
     @Instr('#')
-    public static void trampoline(ExecutionContext ctx) {ctx.IP().position.add(ctx.IP().delta);}
+    public static void trampoline(ExecutionContext ctx) {
+        ctx.IP().position.add(ctx.IP().delta);
+    }
 
     @Instr('j')
     public static void jumpNTimes(ExecutionContext ctx) {
@@ -180,22 +210,34 @@ public class Funge98 implements InstructionSet {
     }
 
     @Instr('r')
-    public static void reflect(ExecutionContext ctx) {ctx.IP().delta.mul(-1);}
+    public static void reflect(ExecutionContext ctx) {
+        ctx.IP().delta.mul(-1);
+    }
 
     @Instr('@')
-    public static void die(ExecutionContext ctx) {ctx.IP().die();}
+    public static void die(ExecutionContext ctx) {
+        ctx.IP().die();
+    }
 
     @Instr('$')
-    public static void pop(ExecutionContext ctx) {ctx.IP().stackStack.TOSS().pop();}
+    public static void pop(ExecutionContext ctx) {
+        ctx.IP().stackStack.TOSS().pop();
+    }
 
     @Instr('n')
-    public static void clearStack(ExecutionContext ctx) {ctx.IP().stackStack.TOSS().clear();}
+    public static void clearStack(ExecutionContext ctx) {
+        ctx.IP().stackStack.TOSS().clear();
+    }
 
     @Instr('_')
-    public static void branchEastWest(ExecutionContext ctx) {ctx.interpret(ctx.IP().stackStack.TOSS().pop() == 0 ? '>' : '<');}
+    public static void branchEastWest(ExecutionContext ctx) {
+        ctx.interpret(ctx.IP().stackStack.TOSS().pop() == 0 ? '>' : '<');
+    }
 
     @Instr('|')
-    public static void branchNorthSouth(ExecutionContext ctx) {ctx.interpret(ctx.IP().stackStack.TOSS().pop() == 0 ? 'v' : '^');}
+    public static void branchNorthSouth(ExecutionContext ctx) {
+        ctx.interpret(ctx.IP().stackStack.TOSS().pop() == 0 ? 'v' : '^');
+    }
 
     @Instr('m')
     public static void branchHighLow(ExecutionContext ctx) {
@@ -234,25 +276,38 @@ public class Funge98 implements InstructionSet {
     }
 
     @Instr('z')
-    public static void noop(ExecutionContext ctx) {}
+    public static void noop(ExecutionContext ctx) {
+    }
 
     @Instr('+')
-    public static void add(ExecutionContext ctx) {binop(ctx, Integer::sum);}
+    public static void add(ExecutionContext ctx) {
+        binop(ctx, Integer::sum);
+    }
 
     @Instr('-')
-    public static void sub(ExecutionContext ctx) {binop(ctx, (a, b) -> a - b);}
+    public static void sub(ExecutionContext ctx) {
+        binop(ctx, (a, b) -> a - b);
+    }
 
     @Instr('*')
-    public static void mul(ExecutionContext ctx) {binop(ctx, (a, b) -> a * b);}
+    public static void mul(ExecutionContext ctx) {
+        binop(ctx, (a, b) -> a * b);
+    }
 
     @Instr('`')
-    public static void greater(ExecutionContext ctx) {binop(ctx, (a, b) -> a > b ? 1 : 0);}
+    public static void greater(ExecutionContext ctx) {
+        binop(ctx, (a, b) -> a > b ? 1 : 0);
+    }
 
     @Instr('/')
-    public static void div(ExecutionContext ctx) {binop(ctx, (a, b) -> b == 0 ? 0 : a / b);}
+    public static void div(ExecutionContext ctx) {
+        binop(ctx, (a, b) -> b == 0 ? 0 : a / b);
+    }
 
     @Instr('%')
-    public static void mod(ExecutionContext ctx) {binop(ctx, (a, b) -> b == 0 ? 0 : a % b);}
+    public static void mod(ExecutionContext ctx) {
+        binop(ctx, (a, b) -> b == 0 ? 0 : a % b);
+    }
 
     @Instr('\\')
     public static void swap(ExecutionContext ctx) {
@@ -293,7 +348,9 @@ public class Funge98 implements InstructionSet {
     }
 
     @Instr('!')
-    public static void logicalNot(ExecutionContext ctx) {stack(ctx, (toss) -> toss.push(toss.pop() == 0 ? 1 : 0));}
+    public static void logicalNot(ExecutionContext ctx) {
+        stack(ctx, (toss) -> toss.push(toss.pop() == 0 ? 1 : 0));
+    }
 
     @Instr(':')
     public static void duplicate(ExecutionContext ctx) {
@@ -583,6 +640,17 @@ public class Funge98 implements InstructionSet {
         }
     }
 
+    public static void stack(ExecutionContext ctx, Consumer<Stack> runner) {
+        runner.accept(ctx.IP().stackStack.TOSS());
+    }
+
+    public static void binop(ExecutionContext ctx, BinaryOperator op) {
+        val TOSS = ctx.IP().stackStack.TOSS();
+        int b = TOSS.pop();
+        int a = TOSS.pop();
+        TOSS.push(op.op(a, b));
+    }
+
     @Override
     public void load(ObjIntConsumer<Instruction> instructionSet) {
         InstructionSet.super.load(instructionSet);
@@ -596,23 +664,12 @@ public class Funge98 implements InstructionSet {
         }
     }
 
-    public static void stack(ExecutionContext ctx, Consumer<Stack> runner) {
-        runner.accept(ctx.IP().stackStack.TOSS());
-    }
-
-    public static void binop(ExecutionContext ctx, BinaryOperator op) {
-        val TOSS = ctx.IP().stackStack.TOSS();
-        int b = TOSS.pop();
-        int a = TOSS.pop();
-        TOSS.push(op.op(a, b));
+    @Override
+    public void unload(IntConsumer instructionSet) {
+        throw new UnsupportedOperationException("Cannot unload the base syntax");
     }
 
     public interface BinaryOperator {
         int op(int a, int b);
-    }
-
-    @Override
-    public void unload(IntConsumer instructionSet) {
-        throw new UnsupportedOperationException("Cannot unload the base syntax");
     }
 }

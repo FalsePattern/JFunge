@@ -36,11 +36,6 @@ public class MODE implements Fingerprint {
         ctx.IP().stackStack.queueMode(!ctx.IP().stackStack.queueMode());
     }
 
-    @Override
-    public int code() {
-        return 0x4d4f4445;
-    }
-
     private static void toggleMode(ExecutionContext ctx, InstructionSet set, int bit) {
         val ip = ctx.IP();
         val state = ip.customStorage.get("mode");
@@ -52,6 +47,11 @@ public class MODE implements Fingerprint {
             ip.instructionManager.unloadInstructionSet(set);
         }
         ip.customStorage.put("mode", state ^ bit);
+    }
+
+    @Override
+    public int code() {
+        return 0x4d4f4445;
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -100,6 +100,7 @@ public class MODE implements Fingerprint {
         private static void set(ExecutionContext ctx, int ch) {
             ctx.fungeSpace().set(ctx.IP().position, ch);
         }
+
         @Instr('(')
         public static void loadFinger(ExecutionContext ctx) {
             Funge98.loadFinger(ctx);

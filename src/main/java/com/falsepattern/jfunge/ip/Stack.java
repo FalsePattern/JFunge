@@ -10,6 +10,7 @@ public class Stack implements Copiable<Stack> {
     private final TIntList storage;
     public boolean invertMode;
     public boolean queueMode;
+
     public Stack() {
         storage = new TIntArrayList();
     }
@@ -108,7 +109,7 @@ public class Stack implements Copiable<Stack> {
     public String popString() {
         val sb = new StringBuilder();
         char c;
-        while ((c = (char)pop()) != 0) {
+        while ((c = (char) pop()) != 0) {
             sb.append(c);
         }
         return sb.toString();

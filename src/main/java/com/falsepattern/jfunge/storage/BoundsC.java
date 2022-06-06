@@ -5,10 +5,15 @@ import org.joml.Vector3ic;
 
 public interface BoundsC<T extends BoundsC<T>> extends Copiable<T> {
     int xMin();
+
     int yMin();
+
     int zMin();
+
     int xMax();
+
     int yMax();
+
     int zMax();
 
 

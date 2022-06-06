@@ -1,7 +1,6 @@
 package com.falsepattern.jfunge.interpreter.instructions;
 
 import com.falsepattern.jfunge.Copiable;
-import com.falsepattern.jfunge.interpreter.instructions.fingerprints.Fingerprint;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.NoArgsConstructor;

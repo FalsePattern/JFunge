@@ -84,6 +84,10 @@ public class Chunk implements Releasable, Copiable<Chunk> {
         return cPos * CHUNK_EDGE_SIZE_Z;
     }
 
+    private static int toIndex(int x, int y, int z) {
+        return (z * CHUNK_EDGE_SIZE_Y + y) * CHUNK_EDGE_SIZE_X + x;
+    }
+
     public boolean isEmpty() {
         return populatedCells == 0;
     }
@@ -93,10 +97,6 @@ public class Chunk implements Releasable, Copiable<Chunk> {
         if (buffer.size() <= BUFFER_CAPACITY) {
             buffer.add(this);
         }
-    }
-
-    private static int toIndex(int x, int y, int z) {
-        return (z * CHUNK_EDGE_SIZE_Y + y) * CHUNK_EDGE_SIZE_X + x;
     }
 
     public int get(int x, int y, int z) {
@@ -173,12 +173,6 @@ public class Chunk implements Releasable, Copiable<Chunk> {
     }
 
     private interface Getter {
-        int toIndex(int a, int b, int c);
-
-        int sa();
-        int sb();
-        int sc();
-
         Getter gX = new Getter() {
             public int toIndex(int a, int b, int c) {
                 return Chunk.toIndex(a, b, c);
@@ -239,5 +233,13 @@ public class Chunk implements Releasable, Copiable<Chunk> {
                 return CHUNK_EDGE_SIZE_Y;
             }
         };
+
+        int toIndex(int a, int b, int c);
+
+        int sa();
+
+        int sb();
+
+        int sc();
     }
 }

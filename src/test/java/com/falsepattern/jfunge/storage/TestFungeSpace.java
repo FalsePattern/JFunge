@@ -1,11 +1,9 @@
 package com.falsepattern.jfunge.storage;
 
 import lombok.val;
-import org.joml.Vector4i;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.awt.*;
 import java.nio.charset.StandardCharsets;
 
 import static com.falsepattern.jfunge.storage.Chunk.*;
@@ -15,6 +13,7 @@ public class TestFungeSpace {
         int sign = -((fragment >>> 1) & 1);
         return sign + (1 + 2 * sign) * ((fragment & 1) * es);
     }
+
     @Test
     public void testSetGet() {
         val fungeSpace = new FungeSpace(0);

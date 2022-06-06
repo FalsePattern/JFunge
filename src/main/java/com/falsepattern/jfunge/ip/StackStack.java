@@ -71,14 +71,15 @@ public class StackStack implements Copiable<StackStack> {
         val sizes = new int[stackStack.size() + 1];
         sizes[0] = TOSS().size();
         int i = 1;
-        for (val s: stackStack) {
+        for (val s : stackStack) {
             sizes[i++] = s.size();
         }
         return sizes;
     }
 
     public boolean popStackStack() {
-        if (stackStack.size() == 0) return false;
+        if (stackStack.size() == 0)
+            return false;
         TOSS(stackStack.pop());
         return true;
     }

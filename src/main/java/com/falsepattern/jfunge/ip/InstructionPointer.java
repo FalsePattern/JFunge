@@ -17,12 +17,9 @@ public class InstructionPointer implements Copiable<InstructionPointer> {
     public final StackStack stackStack;
     public final InstructionManager instructionManager;
     public final TObjectIntMap<String> customStorage;
-
+    private final SecureRandom rng;
     public boolean stringMode = false;
     public int UUID;
-
-    private final SecureRandom rng;
-
     @Getter
     private boolean dead = false;
 

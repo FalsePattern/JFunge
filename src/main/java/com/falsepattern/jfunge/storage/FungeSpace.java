@@ -3,7 +3,9 @@ package com.falsepattern.jfunge.storage;
 import com.falsepattern.jfunge.Copiable;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import lombok.*;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.var;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
@@ -16,12 +18,10 @@ public class FungeSpace implements Copiable<FungeSpace> {
     private final TIntObjectMap<TIntObjectMap<TIntObjectMap<Chunk>>> storage = new TIntObjectHashMap<>();
 
     private final Vector3i cachePos = new Vector3i();
-    private Chunk cacheChunk;
-
-    private boolean boundsRecheck = false;
     private final Bounds bounds = new Bounds();
-
     private final int defaultValue;
+    private Chunk cacheChunk;
+    private boolean boundsRecheck = false;
 
     private FungeSpace(FungeSpace original) {
         original.storage.forEachEntry((z, oPlane) -> {
@@ -44,6 +44,17 @@ public class FungeSpace implements Copiable<FungeSpace> {
         defaultValue = original.defaultValue;
         cachePos.set(0);
         cacheChunk = null;
+    }
+
+    private static void minMax(int[] arr, int[] buf) {
+        int max = Integer.MIN_VALUE;
+        int min = Integer.MAX_VALUE;
+        for (int i = 0; i < arr.length; i++) {
+            max = Math.max(arr[i], max);
+            min = Math.min(arr[i], min);
+        }
+        buf[0] = min;
+        buf[1] = max;
     }
 
     public int get(int x, int y, int z) {
@@ -91,7 +102,8 @@ public class FungeSpace implements Copiable<FungeSpace> {
         }
         var chunk = row.get(cX);
         if (chunk == null) {
-            if (value == defaultValue) return;
+            if (value == defaultValue)
+                return;
             chunk = Chunk.allocate(defaultValue);
             row.put(cX, chunk);
         }
@@ -107,13 +119,13 @@ public class FungeSpace implements Copiable<FungeSpace> {
     public void gc() {
         cacheChunk = null;
         val planes = storage.keys();
-        for (val iPlane: planes) {
+        for (val iPlane : planes) {
             val plane = storage.get(iPlane);
             val rows = plane.keys();
-            for (val iRow: rows) {
+            for (val iRow : rows) {
                 val row = plane.get(iRow);
                 val chunks = row.keys();
-                for (val iChunk: chunks) {
+                for (val iChunk : chunks) {
                     val chunk = row.get(iChunk);
                     if (chunk.isEmpty()) {
                         row.remove(iChunk);
@@ -146,7 +158,8 @@ public class FungeSpace implements Copiable<FungeSpace> {
             int c = Byte.toUnsignedInt(data[i]);
             switch (c) {
                 case '\r':
-                    if (i < data.length - 1 && data[i + 1] == '\n') continue;
+                    if (i < data.length - 1 && data[i + 1] == '\n')
+                        continue;
                 case '\n':
                     X = x;
                     Y++;
@@ -215,7 +228,8 @@ public class FungeSpace implements Copiable<FungeSpace> {
     }
 
     public void recheckBounds() {
-        if (!boundsRecheck) return;
+        if (!boundsRecheck)
+            return;
         gc();
         boundsRecheck = false;
         if (storage.size() == 0) {
@@ -259,7 +273,7 @@ public class FungeSpace implements Copiable<FungeSpace> {
             }
         }
         zMaxFinal = fromChunkZ(cZMax) + best;
-        for (var cZ: cZArr) {
+        for (var cZ : cZArr) {
             plane = storage.get(cZ);
             int yMin;
             int yMax;
@@ -289,7 +303,7 @@ public class FungeSpace implements Copiable<FungeSpace> {
             yMax = fromChunkY(cYMax) + best;
             yMinFinal = Math.min(yMinFinal, yMin);
             yMaxFinal = Math.max(yMaxFinal, yMax);
-            for (val cY: cYArr) {
+            for (val cY : cYArr) {
                 row = plane.get(cY);
                 int xMin;
                 int xMax;
@@ -304,17 +318,6 @@ public class FungeSpace implements Copiable<FungeSpace> {
             }
         }
         bounds.set(xMinFinal, yMinFinal, zMinFinal, xMaxFinal, yMaxFinal, zMaxFinal);
-    }
-
-    private static void minMax(int[] arr, int[] buf) {
-        int max = Integer.MIN_VALUE;
-        int min = Integer.MAX_VALUE;
-        for (int i = 0; i < arr.length; i++) {
-            max = Math.max(arr[i], max);
-            min = Math.min(arr[i], min);
-        }
-        buf[0] = min;
-        buf[1] = max;
     }
 
     @Override

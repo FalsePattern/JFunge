@@ -10,7 +10,9 @@ import lombok.experimental.Accessors;
 import lombok.val;
 import lombok.var;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -61,24 +63,6 @@ public class Interpreter implements ExecutionContext {
     private int inputStagger;
 
 
-    public static int executeProgram(boolean trefunge, String[] args, byte[] program, long iterLimit, InputStream input, OutputStream output, FileIOSupplier fileIOSupplier) {
-        val interpreter = new Interpreter(trefunge, args, input, output, fileIOSupplier);
-        interpreter.fungeSpace().loadFileAt(0, 0, 0, program, trefunge);
-        if (iterLimit > 0) {
-            long step = 0;
-            while (!interpreter.stopped() && step < iterLimit) {
-                interpreter.tick();
-                step++;
-            }
-            if (!interpreter.stopped()) throw new IllegalStateException("Program exceeded max iteration count!");
-        } else {
-            while (!interpreter.stopped()) {
-                interpreter.tick();
-            }
-        }
-        return interpreter.exitCode();
-    }
-
     public Interpreter(boolean trefunge, String[] args, InputStream input, OutputStream output, FileIOSupplier fileIOSupplier) {
         this.args = Arrays.asList(args);
         dimensions = trefunge ? 3 : 2;
@@ -89,6 +73,25 @@ public class Interpreter implements ExecutionContext {
         val ip = new InstructionPointer();
         ip.UUID = nextUUID++;
         IPs.add(ip);
+    }
+
+    public static int executeProgram(boolean trefunge, String[] args, byte[] program, long iterLimit, InputStream input, OutputStream output, FileIOSupplier fileIOSupplier) {
+        val interpreter = new Interpreter(trefunge, args, input, output, fileIOSupplier);
+        interpreter.fungeSpace().loadFileAt(0, 0, 0, program, trefunge);
+        if (iterLimit > 0) {
+            long step = 0;
+            while (!interpreter.stopped() && step < iterLimit) {
+                interpreter.tick();
+                step++;
+            }
+            if (!interpreter.stopped())
+                throw new IllegalStateException("Program exceeded max iteration count!");
+        } else {
+            while (!interpreter.stopped()) {
+                interpreter.tick();
+            }
+        }
+        return interpreter.exitCode();
     }
 
     @Override
@@ -137,7 +140,8 @@ public class Interpreter implements ExecutionContext {
             if ((instr = IP().instructionManager.fetch(opcode)) != null || (instr = baseInstructionManager.fetch(opcode)) != null) {
                 instr.process(this);
             } else {
-                if (opcode == 'r') throw new IllegalArgumentException("Language does not implement 'r' reflect instruction.");
+                if (opcode == 'r')
+                    throw new IllegalArgumentException("Language does not implement 'r' reflect instruction.");
                 interpret('r');
             }
         }
@@ -228,11 +232,6 @@ public class Interpreter implements ExecutionContext {
         }
     }
 
-    public interface FileIOSupplier {
-        byte[] readFile(String file) throws IOException;
-        boolean writeFile(String file, byte[] data) throws IOException;
-    }
-
     public void tick() {
         currentIP = null;
         for (int i = 0; i < IPs.size(); i++) {
@@ -248,8 +247,14 @@ public class Interpreter implements ExecutionContext {
                 clone = null;
             }
         }
-        for (val ip: IPs) {
+        for (val ip : IPs) {
             step(ip);
         }
+    }
+
+    public interface FileIOSupplier {
+        byte[] readFile(String file) throws IOException;
+
+        boolean writeFile(String file, byte[] data) throws IOException;
     }
 }

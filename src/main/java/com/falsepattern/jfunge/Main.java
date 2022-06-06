@@ -4,7 +4,6 @@ import com.falsepattern.jfunge.interpreter.Interpreter;
 import lombok.val;
 import lombok.var;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,7 +11,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -61,7 +59,7 @@ public class Main {
             var read = 0;
             val buf = new byte[4096];
             while ((read = in.read(buf)) > 0) {
-               programBytes.write(buf, 0, read);
+                programBytes.write(buf, 0, read);
             }
             program = programBytes.toByteArray();
         } else {

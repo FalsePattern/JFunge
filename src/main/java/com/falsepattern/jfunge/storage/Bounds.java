@@ -4,7 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-@Accessors(fluent = true, chain = true)
+@Accessors(fluent = true,
+           chain = true)
 @Data
 @NoArgsConstructor
 public class Bounds implements BoundsC<Bounds> {

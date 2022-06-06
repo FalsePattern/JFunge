@@ -197,6 +197,15 @@ public class Funge98 implements InstructionSet {
     @Instr('|')
     public static void branchNorthSouth(ExecutionContext ctx) {ctx.interpret(ctx.IP().stackStack.TOSS().pop() == 0 ? 'v' : '^');}
 
+    @Instr('m')
+    public static void branchHighLow(ExecutionContext ctx) {
+        if (ctx.dimensions() == 3) {
+            ctx.interpret(ctx.IP().stackStack.TOSS().pop() == 0 ? 'h' : 'l');
+        } else {
+            ctx.interpret('r');
+        }
+    }
+
     @Instr('\'')
     public static void getNext(ExecutionContext ctx) {
         int i = ctx.fungeSpace().get(new Vector3i(ctx.IP().position).add(ctx.IP().delta));

@@ -7,7 +7,10 @@ import com.falsepattern.jfunge.ip.InstructionPointer;
 import com.falsepattern.jfunge.storage.FungeSpace;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import lombok.val;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 
 @Accessors(fluent = true)
@@ -20,15 +23,43 @@ public class Interpreter implements ExecutionContext {
     private final InstructionManager baseInstructionManager = new InstructionManager();
 
     @Getter
+    private final InputStream input;
+
+    @Getter
+    private final OutputStream output;
+
+    @Getter
     private final List<String> args;
 
     @Getter
     private final int dimensions;
 
-    public Interpreter(boolean trefunge, String[] args) {
+    private Integer exitCode = null;
+
+    public static int executeProgram(boolean trefunge, String[] args, byte[] program, long iterLimit, InputStream input, OutputStream output) {
+        val interpreter = new Interpreter(trefunge, args, input, output);
+        interpreter.fungeSpace().loadFileAt(0, 0, 0, program, trefunge);
+        if (iterLimit > 0) {
+            long step = 0;
+            while (!interpreter.stopped() && step < iterLimit) {
+                interpreter.tick();
+                step++;
+            }
+            if (!interpreter.stopped()) throw new IllegalStateException("Program exceeded max iteration count!");
+        } else {
+            while (!interpreter.stopped()) {
+                interpreter.tick();
+            }
+        }
+        return interpreter.exitCode();
+    }
+
+    public Interpreter(boolean trefunge, String[] args, InputStream input, OutputStream output) {
         this.args = Arrays.asList(args);
         dimensions = trefunge ? 3 : 2;
         baseInstructionManager.loadInstructionSet(Funge98.INSTANCE);
+        this.input = input;
+        this.output = output;
     }
 
     @Override
@@ -42,6 +73,23 @@ public class Interpreter implements ExecutionContext {
     }
 
     @Override
+    public boolean stopped() {
+        if (dead()) {
+            exitCode = 0;
+        }
+        return exitCode != null;
+    }
+
+    @Override
+    public void stop(int exitCode) {
+        this.exitCode = exitCode;
+    }
+
+    @Override
+    public int exitCode() {
+        return exitCode == null ? 0 : exitCode;
+    }
+
     public boolean dead() {
         return IP.isDead();
     }

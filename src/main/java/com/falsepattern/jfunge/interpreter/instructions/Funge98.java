@@ -6,14 +6,12 @@ import com.falsepattern.jfunge.interpreter.instructions.fingerprints.*;
 import com.falsepattern.jfunge.ip.Stack;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.val;
-import lombok.var;
+import lombok.*;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -130,11 +128,18 @@ public class Funge98 implements InstructionSet {
         }
     }
 
+    @SneakyThrows
     @Instr('.')
-    public static void printNumber(ExecutionContext ctx) {System.out.printf("%d ", ctx.IP().stackStack.TOSS().pop());}
+    public static void printNumber(ExecutionContext ctx) {
+        ctx.output().write(Integer.toString(ctx.IP().stackStack.TOSS().pop()).getBytes(StandardCharsets.UTF_8));
+        ctx.output().write(' ');
+    }
 
+    @SneakyThrows
     @Instr(',')
-    public static void printChar(ExecutionContext ctx) {System.out.print((char) ctx.IP().stackStack.TOSS().pop());}
+    public static void printChar(ExecutionContext ctx) {
+        ctx.output().write(ctx.IP().stackStack.TOSS().pop());
+    }
 
     @Instr('r')
     public static void reflect(ExecutionContext ctx) {ctx.IP().delta.mul(-1);}
@@ -424,7 +429,7 @@ public class Funge98 implements InstructionSet {
     @Instr('q')
     public static void quit(ExecutionContext ctx) {
         int q = ctx.IP().stackStack.TOSS().pop();
-        System.exit(q);
+        ctx.stop(q);
     }
 
     @Override

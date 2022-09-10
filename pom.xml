@@ -6,7 +6,7 @@
 
     <groupId>com.falsepattern</groupId>
     <artifactId>jfunge</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <properties>
         <java.version>8</java.version>
@@ -16,7 +16,7 @@
         <joml.version>1.10.2</joml.version>
         <project.encoding>UTF-8</project.encoding>
         <project.distribution.name>mavenpattern</project.distribution.name>
-        <project.distribution.url>https://maven.falsepattern.com/</project.distribution.url>
+        <project.distribution.url>https://mvn.falsepattern.com/releases/</project.distribution.url>
         <project.mainclass>com.falsepattern.jfunge.Main</project.mainclass>
     </properties>
 

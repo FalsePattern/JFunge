@@ -78,6 +78,12 @@ public class Interpreter implements ExecutionContext {
     public static int executeProgram(boolean trefunge, String[] args, byte[] program, long iterLimit, InputStream input, OutputStream output, FileIOSupplier fileIOSupplier) {
         val interpreter = new Interpreter(trefunge, args, input, output, fileIOSupplier);
         interpreter.fungeSpace().loadFileAt(0, 0, 0, program, trefunge);
+        //Init step
+        {
+            val ip = interpreter.IPs.get(0);
+            ip.position.sub(ip.delta);
+            interpreter.step(ip);
+        }
         if (iterLimit > 0) {
             long step = 0;
             while (!interpreter.stopped() && step < iterLimit) {
@@ -148,7 +154,7 @@ public class Interpreter implements ExecutionContext {
     }
 
 
-    private void wrappingStep(InstructionPointer ip) {
+    private boolean wrappingStep(InstructionPointer ip) {
         ip.position.add(ip.delta);
         if (!fungeSpace().bounds().inBounds(ip.position)) {
             ip.delta.mul(-1);
@@ -162,7 +168,9 @@ public class Interpreter implements ExecutionContext {
             do {
                 ip.position.add(ip.delta);
             } while (!fungeSpace().bounds().inBounds(ip.position));
+            return true;
         }
+        return false;
     }
 
     public void step(InstructionPointer ip) {
@@ -174,18 +182,22 @@ public class Interpreter implements ExecutionContext {
                 return;
             }
         }
+        int flipCount = 0;
         do {
-            wrappingStep(ip);
+            flipCount += wrappingStep(ip) ? 1 : 0;
             p = fungeSpace.get(ip.position);
             if (!ip.stringMode) {
                 while (p == ';') {
                     do {
-                        wrappingStep(ip);
+                        flipCount += wrappingStep(ip) ? 1 : 0;
                         p = fungeSpace.get(ip.position);
                     } while (p != ';');
-                    wrappingStep(ip);
+                    flipCount += wrappingStep(ip) ? 1 : 0;
                     p = fungeSpace.get(ip.position);
                 }
+            }
+            if (flipCount == 1000) {
+                throw new IllegalStateException("IP " + ip.UUID + " is stuck on a blank strip!\nPos: " + ip.position + ", Delta: " + ip.delta + (ip.position.equals(0, 0, 0) && ip.UUID == 0 ? "\nIs the file empty?" : ""));
             }
         } while (p == ' ');
     }

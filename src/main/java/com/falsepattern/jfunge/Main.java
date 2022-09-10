@@ -65,6 +65,8 @@ public class Main {
         } else {
             program = Files.readAllBytes(Paths.get(file));
         }
-        System.exit(Interpreter.executeProgram(trefunge, args, program, maxIter, System.in, System.out, Interpreter.DEFAULT_FILE_IO_SUPPLIER));
+        int returnCode = Interpreter.executeProgram(trefunge, args, program, maxIter, System.in, System.out, Interpreter.DEFAULT_FILE_IO_SUPPLIER);
+        System.out.flush();
+        System.exit(returnCode);
     }
 }

@@ -1,8 +1,13 @@
 package com.falsepattern.jfunge.ip;
 
 import com.falsepattern.jfunge.Copiable;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.val;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

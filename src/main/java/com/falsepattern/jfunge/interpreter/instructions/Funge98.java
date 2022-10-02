@@ -2,11 +2,19 @@ package com.falsepattern.jfunge.interpreter.instructions;
 
 import com.falsepattern.jfunge.Globals;
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
-import com.falsepattern.jfunge.interpreter.instructions.fingerprints.*;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.Fingerprint;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODE;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODU;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.NULL;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ROMA;
 import com.falsepattern.jfunge.ip.Stack;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.var;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 

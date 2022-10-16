@@ -11,7 +11,15 @@ import org.joml.Vector3ic;
 
 import java.io.ByteArrayOutputStream;
 
-import static com.falsepattern.jfunge.storage.Chunk.*;
+import static com.falsepattern.jfunge.storage.Chunk.fromChunkX;
+import static com.falsepattern.jfunge.storage.Chunk.fromChunkY;
+import static com.falsepattern.jfunge.storage.Chunk.fromChunkZ;
+import static com.falsepattern.jfunge.storage.Chunk.inChunkX;
+import static com.falsepattern.jfunge.storage.Chunk.inChunkY;
+import static com.falsepattern.jfunge.storage.Chunk.inChunkZ;
+import static com.falsepattern.jfunge.storage.Chunk.toChunkX;
+import static com.falsepattern.jfunge.storage.Chunk.toChunkY;
+import static com.falsepattern.jfunge.storage.Chunk.toChunkZ;
 
 @RequiredArgsConstructor
 public class FungeSpace implements Copiable<FungeSpace> {

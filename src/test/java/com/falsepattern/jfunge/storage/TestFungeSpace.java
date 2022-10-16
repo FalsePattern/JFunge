@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
-import static com.falsepattern.jfunge.storage.Chunk.*;
+import static com.falsepattern.jfunge.storage.Chunk.CHUNK_EDGE_SIZE_X;
+import static com.falsepattern.jfunge.storage.Chunk.CHUNK_EDGE_SIZE_Y;
+import static com.falsepattern.jfunge.storage.Chunk.CHUNK_EDGE_SIZE_Z;
 
 public class TestFungeSpace {
     private static int toPos(int fragment, int es) {

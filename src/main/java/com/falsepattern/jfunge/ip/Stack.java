@@ -4,7 +4,12 @@ import com.falsepattern.jfunge.Copiable;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import lombok.val;
-import org.joml.*;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
+import org.joml.Vector4i;
+import org.joml.Vector4ic;
 
 public class Stack implements Copiable<Stack> {
     private final TIntList storage;

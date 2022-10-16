@@ -29,29 +29,31 @@ public class TestInterpreter {
                 val b = files.get(file);
                 return Arrays.copyOf(b, b.length);
             } else {
-                val s = TestInterpreter.class.getResourceAsStream("/" + file);
-                if (s == null) {
-                    throw new FileNotFoundException("Could not find resource " + file);
+                try (val s = TestInterpreter.class.getResourceAsStream("/" + file)) {
+                    if (s == null) {
+                        throw new FileNotFoundException("Could not find resource " + file);
+                    }
+                    val ret = new ByteArrayOutputStream();
+                    val b = new byte[4096];
+                    var r = 0;
+                    while ((r = s.read(b)) > 0) {
+                        ret.write(b, 0, r);
+                    }
+                    val bytes = ret.toByteArray();
+                    files.put(file, bytes);
+                    return Arrays.copyOf(bytes, bytes.length);
                 }
-                val ret = new ByteArrayOutputStream();
-                val b = new byte[4096];
-                var r = 0;
-                while ((r = s.read(b)) > 0) {
-                    ret.write(b, 0, r);
-                }
-                val bytes = ret.toByteArray();
-                files.put(file, bytes);
-                return Arrays.copyOf(bytes, bytes.length);
             }
         }
 
         @Override
-        public boolean writeFile(String file, byte[] data) throws IOException {
+        public boolean writeFile(String file, byte[] data) {
             files.put(file, Arrays.copyOf(data, data.length));
             return true;
         }
     };
 
+    @SuppressWarnings("SameParameterValue")
     private static byte[] readProgram(String path) {
         val program = new ByteArrayOutputStream();
         Assertions.assertDoesNotThrow(() -> {

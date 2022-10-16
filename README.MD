@@ -35,6 +35,13 @@ Additionally, the following fingerprints are currently supported (more to come):
 - [NULL](https://catseye.tc/view/funge-98/library/NULL.markdown)
 - [ROMA](https://catseye.tc/view/funge-98/library/ROMA.markdown)
 
+
+### Version Release Checklist
+- Update the version number inside the [pom](./pom.xml)
+- Update the version string and FUNGE_VERSION inside [Globals](./src/main/java/com/falsepattern/jfunge/Globals.java)
+- Create a new git tag with the same version number, and push it to master
+- Never push tags outside master!
+
 ### References
 
 - [Esolang wiki article of Funge-98](https://esolangs.org/wiki/Funge-98)

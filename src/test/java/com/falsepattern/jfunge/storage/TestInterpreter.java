@@ -83,14 +83,37 @@ public class TestInterpreter {
         val program = readProgram("/mycology.b98");
         val returnCode = interpret(new String[]{"mycology.b98"}, program, 300000, nullStream(), output);
         val txt = checkingOutput.toString();
-        Assertions.assertTrue(Arrays.stream(txt.split("\n")).noneMatch((line) -> {
-            if (line.startsWith("BAD")) {
-                System.err.println("Found BAD check in Mycology! Interpreter is NOT standard-compliant");
-                return true;
-            } else {
-                return false;
+        String currentlyActiveFingerprint = null;
+        boolean fingerprintHadError = false;
+        boolean good = true;
+        for (val line: txt.split("\n")) {
+            if (line.startsWith("Testing fingerprint ")) {
+                int start = "Testing fingerprint ".length();
+                currentlyActiveFingerprint = line.substring(start, start + 4);
+                fingerprintHadError = false;
+            } else if (line.equals("About to test detailed () behaviour with two fingerprints.")) {
+                //Fingerprint core checks are over, stop tracking.
+                currentlyActiveFingerprint = null;
+                fingerprintHadError = false;
             }
-        }));
+            if (line.startsWith("BAD")) {
+                if (good) {
+                    System.err.println("Found BAD check(s) in Mycology! Interpreter is NOT standard-compliant.");
+                    good = false;
+                }
+                if (currentlyActiveFingerprint != null) {
+                    if (!fingerprintHadError) {
+                        System.err.println("Broken fingerprint: " + currentlyActiveFingerprint);
+                        fingerprintHadError = true;
+                    }
+                } else {
+                    System.err.println("Not inside a fingerprint test, base language spec is broken. Fix urgently!");
+                }
+                System.err.print("    ");
+                System.err.println(line);
+            }
+        }
+        Assertions.assertTrue(good);
         Assertions.assertEquals(15, returnCode);
     }
 

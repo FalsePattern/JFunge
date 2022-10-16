@@ -5,6 +5,8 @@ import com.falsepattern.jfunge.interpreter.instructions.Instruction;
 import com.falsepattern.jfunge.interpreter.instructions.InstructionManager;
 import com.falsepattern.jfunge.ip.InstructionPointer;
 import com.falsepattern.jfunge.storage.FungeSpace;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
@@ -20,6 +22,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,6 +69,8 @@ public class Interpreter implements ExecutionContext {
 
     private final boolean unrestrictedOutput;
     private final Path[] allowedOutputPaths;
+
+    private final TIntObjectMap<Map<String, Object>> globals = new TIntObjectHashMap<>();
 
     private Integer exitCode = null;
 
@@ -172,6 +177,31 @@ public class Interpreter implements ExecutionContext {
         clone = currentIP.deepCopy();
         clone.UUID = nextUUID++;
         return clone;
+    }
+
+    private Map<String, Object> getMap(int key) {
+        if (globals.containsKey(key)) {
+            return globals.get(key);
+        } else {
+            val map = new HashMap<String, Object>();
+            globals.put(key, map);
+            return map;
+        }
+    }
+
+    @Override
+    public <T> T getGlobal(int finger, String key) {
+        return (T) getMap(finger).getOrDefault(key, null);
+    }
+
+    @Override
+    public <T> void putGlobal(int finger, String key, T value) {
+        getMap(finger).put(key, value);
+    }
+
+    @Override
+    public boolean hasGlobal(int finger, String key) {
+        return getMap(finger).containsKey(key);
     }
 
     @Override

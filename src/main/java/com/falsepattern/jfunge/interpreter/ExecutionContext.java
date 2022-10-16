@@ -17,6 +17,12 @@ public interface ExecutionContext {
 
     FungeSpace fungeSpace();
 
+    <T> T getGlobal(int finger, String key);
+
+    <T> void putGlobal(int finger, String key, T value);
+
+    boolean hasGlobal(int finger, String key);
+
     int dimensions();
 
     boolean stopped();

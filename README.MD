@@ -33,6 +33,7 @@ Additionally, the following fingerprints are currently supported (more to come):
 - [MODE](https://catseye.tc/view/funge-98/library/MODE.markdown)
 - [MODU](https://catseye.tc/view/funge-98/library/MODU.markdown)
 - [NULL](https://catseye.tc/view/funge-98/library/NULL.markdown)
+- [ORTH](https://catseye.tc/view/funge-98/library/ORTH.markdown)
 - [ROMA](https://catseye.tc/view/funge-98/library/ROMA.markdown)
 
 

@@ -11,11 +11,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestMycology {
+public class TestInterpreter {
     private static final Interpreter.FileIOSupplier fakeSupplier = new Interpreter.FileIOSupplier() {
 
         private final Map<String, byte[]> files = new HashMap<>();
@@ -26,7 +29,7 @@ public class TestMycology {
                 val b = files.get(file);
                 return Arrays.copyOf(b, b.length);
             } else {
-                val s = TestMycology.class.getResourceAsStream("/" + file);
+                val s = TestInterpreter.class.getResourceAsStream("/" + file);
                 if (s == null) {
                     throw new FileNotFoundException("Could not find resource " + file);
                 }
@@ -49,14 +52,10 @@ public class TestMycology {
         }
     };
 
-    @Test
-    public void testMycology() {
-        val input = new ByteArrayInputStream(new byte[0]);
-        val checkingOutput = new ByteArrayOutputStream();
-        val output = new TeeOutputStream(checkingOutput, System.out);
+    private static byte[] readProgram(String path) {
         val program = new ByteArrayOutputStream();
         Assertions.assertDoesNotThrow(() -> {
-            val reader = TestMycology.class.getResourceAsStream("/mycology.b98");
+            val reader = TestInterpreter.class.getResourceAsStream(path);
             Assertions.assertNotNull(reader);
             var read = 0;
             val b = new byte[4096];
@@ -64,16 +63,52 @@ public class TestMycology {
                 program.write(b, 0, read);
             }
         });
-        val returnCode = Assertions.assertDoesNotThrow(() -> Interpreter.executeProgram(false, new String[]{"mycology.b98"}, program.toByteArray(), 300000, input, output, fakeSupplier));
-        val txt = output.toString();
+        return program.toByteArray();
+    }
+
+    private static int interpret(String[] args, byte[] code, int iterLimit, InputStream input, OutputStream output) {
+        return Assertions.assertDoesNotThrow(() -> Interpreter.executeProgram(false, args, code, iterLimit, input, output, fakeSupplier));
+    }
+
+    private static InputStream nullStream() {
+        return new ByteArrayInputStream(new byte[0]);
+    }
+
+    @Test
+    public void testMycology() {
+        val checkingOutput = new ByteArrayOutputStream();
+        val output = new TeeOutputStream(checkingOutput, System.out);
+        val program = readProgram("/mycology.b98");
+        val returnCode = interpret(new String[]{"mycology.b98"}, program, 300000, nullStream(), output);
+        val txt = checkingOutput.toString();
         Assertions.assertTrue(Arrays.stream(txt.split("\n")).noneMatch((line) -> {
             if (line.startsWith("BAD")) {
-                System.out.println(line);
+                System.err.println("Found BAD check in Mycology! Interpreter is NOT standard-compliant");
                 return true;
             } else {
                 return false;
             }
         }));
         Assertions.assertEquals(15, returnCode);
+    }
+
+    @Test
+    public void testSemicolonAtStart() {
+        System.out.println("Testing edge case ;;.@");
+        val output = new ByteArrayOutputStream();
+        val returnCode = interpret(new String[0], ";;.@".getBytes(StandardCharsets.UTF_8), 50, nullStream(), output);
+        val txt = output.toString();
+        Assertions.assertEquals("0 ", txt);
+        Assertions.assertEquals(0, returnCode);
+    }
+
+    @Test
+    public void testPutCharAtStart() {
+        System.out.println("Testing edge case 'a,@");
+        val output = new ByteArrayOutputStream();
+        val returnCode = interpret(new String[0], "'a,@".getBytes(StandardCharsets.UTF_8), 50, nullStream(), output);
+        val txt = output.toString();
+        Assertions.assertEquals("a", txt);
+        Assertions.assertEquals(0, returnCode);
     }
 }

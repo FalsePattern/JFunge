@@ -7,6 +7,7 @@ import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODE;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODU;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.NULL;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ORTH;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.REFC;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ROMA;
 import com.falsepattern.jfunge.ip.Stack;
 import gnu.trove.map.TIntObjectMap;
@@ -38,6 +39,7 @@ public class Funge98 implements InstructionSet {
         addFingerprint(MODU.INSTANCE);
         addFingerprint(NULL.INSTANCE);
         addFingerprint(ORTH.INSTANCE);
+        addFingerprint(REFC.INSTANCE);
         addFingerprint(ROMA.INSTANCE);
     }
 

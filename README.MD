@@ -55,6 +55,7 @@ Additionally, the following fingerprints are currently supported (more to come):
 - [MODU](./docs/catseye/library/MODU.markdown)
 - [NULL](./docs/catseye/library/NULL.markdown)
 - [ORTH](./docs/catseye/library/ORTH.markdown)
+- [REFC](./docs/catseye/library/REFC.markdown)
 - [ROMA](./docs/catseye/library/ROMA.markdown)
 
 Fingerprints that are NOT planned to be ever implemented:

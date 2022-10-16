@@ -51,6 +51,7 @@ The interpreter supports the following Funge-98 specification extensions:
 - Optional Trefunge mode (experimental)
 
 Additionally, the following fingerprints are currently supported (more to come):
+- [HRTI](./docs/catseye/library/HRTI.markdown)
 - [MODE](./docs/catseye/library/MODE.markdown)
 - [MODU](./docs/catseye/library/MODU.markdown)
 - [NULL](./docs/catseye/library/NULL.markdown)

@@ -3,6 +3,7 @@ package com.falsepattern.jfunge.interpreter.instructions;
 import com.falsepattern.jfunge.Globals;
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.Fingerprint;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.HRTI;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODE;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODU;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.NULL;
@@ -35,6 +36,7 @@ public class Funge98 implements InstructionSet {
     private static final TIntObjectMap<Fingerprint> fingerprints = new TIntObjectHashMap<>();
 
     static {
+        addFingerprint(HRTI.INSTANCE);
         addFingerprint(MODE.INSTANCE);
         addFingerprint(MODU.INSTANCE);
         addFingerprint(NULL.INSTANCE);

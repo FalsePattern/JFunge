@@ -3,6 +3,7 @@ package com.falsepattern.jfunge.storage;
 import com.falsepattern.jfunge.interpreter.Interpreter;
 import lombok.val;
 import lombok.var;
+import org.apache.commons.io.output.TeeOutputStream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +52,8 @@ public class TestMycology {
     @Test
     public void testMycology() {
         val input = new ByteArrayInputStream(new byte[0]);
-        val output = new ByteArrayOutputStream();
+        val checkingOutput = new ByteArrayOutputStream();
+        val output = new TeeOutputStream(checkingOutput, System.out);
         val program = new ByteArrayOutputStream();
         Assertions.assertDoesNotThrow(() -> {
             val reader = TestMycology.class.getResourceAsStream("/mycology.b98");

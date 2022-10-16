@@ -11,13 +11,16 @@
     <properties>
         <java.version>8</java.version>
         <lombok.version>1.18.22</lombok.version>
-        <junit.version>5.8.2</junit.version>
         <trove.version>3.0.3</trove.version>
         <joml.version>1.10.2</joml.version>
         <project.encoding>UTF-8</project.encoding>
         <project.distribution.name>mavenpattern</project.distribution.name>
         <project.distribution.url>https://mvn.falsepattern.com/releases/</project.distribution.url>
         <project.mainclass>com.falsepattern.jfunge.Main</project.mainclass>
+
+        <!--Test deps -->
+        <commons-io.version>2.11.0</commons-io.version>
+        <junit.version>5.8.2</junit.version>
     </properties>
 
     <dependencies>
@@ -28,12 +31,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>net.sf.trove4j</groupId>
             <artifactId>trove4j</artifactId>
             <version>${trove.version}</version>
@@ -42,6 +39,18 @@
             <groupId>org.joml</groupId>
             <artifactId>joml</artifactId>
             <version>${joml.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

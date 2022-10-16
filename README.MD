@@ -36,6 +36,9 @@ Additionally, the following fingerprints are currently supported (more to come):
 - [ORTH](./docs/catseye/library/ORTH.markdown)
 - [ROMA](./docs/catseye/library/ROMA.markdown)
 
+Fingerprints that are NOT planned to be ever implemented:
+- [PERL](./docs/catseye/library/PERL.markdown) -- Would need to hook into the system-installed perl, highly unsafe
+
 
 ### Version Release Checklist
 - Update the version number inside the [pom](./pom.xml)

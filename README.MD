@@ -30,11 +30,11 @@ The interpreter supports the following Funge-98 specification extensions:
 - Optional Trefunge mode (experimental)
 
 Additionally, the following fingerprints are currently supported (more to come):
-- [MODE](https://catseye.tc/view/funge-98/library/MODE.markdown)
-- [MODU](https://catseye.tc/view/funge-98/library/MODU.markdown)
-- [NULL](https://catseye.tc/view/funge-98/library/NULL.markdown)
-- [ORTH](https://catseye.tc/view/funge-98/library/ORTH.markdown)
-- [ROMA](https://catseye.tc/view/funge-98/library/ROMA.markdown)
+- [MODE](./docs/catseye/library/MODE.markdown)
+- [MODU](./docs/catseye/library/MODU.markdown)
+- [NULL](./docs/catseye/library/NULL.markdown)
+- [ORTH](./docs/catseye/library/ORTH.markdown)
+- [ROMA](./docs/catseye/library/ROMA.markdown)
 
 
 ### Version Release Checklist
@@ -46,5 +46,5 @@ Additionally, the following fingerprints are currently supported (more to come):
 ### References
 
 - [Esolang wiki article of Funge-98](https://esolangs.org/wiki/Funge-98)
-- [Official funge98 language specification](https://github.com/catseye/Funge-98/blob/master/doc/funge98.markdown)
+- [Official funge98 language specification](./docs/catseye/doc/funge98.markdown)
 - [Mycology Befunge-98 test suite](https://github.com/Deewiant/Mycology)

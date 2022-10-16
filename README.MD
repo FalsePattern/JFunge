@@ -3,16 +3,37 @@
 A standard-conforming Funge-98 interpreter.
 
 ### Usage
-
-`jfunge [file] [--3d] [--version] [--license]`
-
-| argument             | usage                                                                                                                           |
-|----------------------|---------------------------------------------------------------------------------------------------------------------------------|
-| `file`               | The file to load into the interpreter                                                                                           |
-| `--3d`               | Enable 3D (Trefunge) mode. By default, the interpreter emulates 2D Befunge for compatibility.                                   |
-| `--version`          | Prints the current program version, along with the handprint and version given by befunge's y instruction                       |
-| `--license`          | Prints the license of the program.                                                                                              |
-| `--maxiter <number>` | The maximum number of iterations the program can run for. Anything less than 1 will run until the program terminates naturally. |
+```
+usage: jfunge [-f <file> | --help | --license | --version]  [-i <file>]
+       [--maxiter <iterations>] [-o <file>] [--syscall] [-t] [--trefunge]
+JFunge, a Funge98 interpeter for java.
+ -f,--file <file>            The file to load into the interpreter at the origin
+                             on startup.
+    --help                   Displays this help page
+ -i,--readperm <file>        Enables read access to the specified file or
+                             directory (i instruction). Specify / to allow read
+                             access to every file on the system (dangerous). Can
+                             specify multiple files/folders.
+    --license                Prints the license of the program.
+    --maxiter <iterations>   The maximum number of iterations the program can
+                             run for. Anything less than 1 will run until the
+                             program terminates by itself. Default is unlimited.
+ -o,--writeperm <file>       Enables write access to the specified file or
+                             directory (o instruction). Specify / to allow write
+                             access to every file on the system (dangerous). Can
+                             specify multiple files/folders.
+    --syscall                Enables the syscall feature (= instruction). This
+                             is a very dangerous permission to grant, it can
+                             call any arbitrary program on your system.
+ -t,--concurrent             Enables the Concurrent Funge extension (t
+                             instruction). Buggy programs can potentially
+                             forkbomb the interpreter.
+    --trefunge               Enable 3D (Trefunge) mode. By default, the
+                             interpreter emulates 2D Befunge for compatibility.
+    --version                Prints the current program version, along with the
+                             handprint and version given by befunge's y
+                             instruction.
+```
 
 ### Compatibility
 

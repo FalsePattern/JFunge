@@ -20,6 +20,7 @@ import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -522,7 +523,7 @@ public class Funge98 implements InstructionSet {
         //6 separator
         s.push(File.separatorChar);
         //5 operating paradigm
-        s.push(1);
+        s.push((ctx.envFlags() & 0x08) != 0 ? 1 : 0);
         //4 version
         s.push(Globals.FUNGE_VERSION);
         //3 handprint
@@ -530,7 +531,7 @@ public class Funge98 implements InstructionSet {
         //2 bpc
         s.push(4);
         //1 flags
-        s.push(0b00001111);
+        s.push(ctx.envFlags());
         if (n > 0) {
             int curr = s.pick(n - 1);
             for (int i = s.size(); i >= tossSize; i--) {
@@ -548,12 +549,21 @@ public class Funge98 implements InstructionSet {
 
     @Instr('t')
     public static void split(ExecutionContext ctx) {
+        if (!ctx.concurrentAllowed()) {
+            System.err.println("Program tried to execute concurrent funge when it was disabled!");
+            reflect(ctx);
+            return;
+        }
         val clone = ctx.cloneIP();
         clone.delta.mul(-1);
     }
 
     @Instr('i')
     public static void input(ExecutionContext ctx) {
+        if ((ctx.envFlags() & 0x02) == 0) {
+            reflect(ctx);
+            return;
+        }
         val s = ctx.IP().stackStack.TOSS();
         val filename = s.popString();
         val flags = s.pop();
@@ -564,6 +574,16 @@ public class Funge98 implements InstructionSet {
             pos.set(s.pop2(), 0);
         }
         pos.add(ctx.IP().storageOffset);
+        try {
+            if (!ctx.fileInputAllowed(filename)) {
+                System.err.println("Code tried to read file not on whitelist: " + filename);
+                reflect(ctx);
+                return;
+            }
+        } catch (IOException e) {
+            reflect(ctx);
+            return;
+        }
         val file = ctx.readFile(filename);
         if (file == null) {
             ctx.interpret('r');
@@ -582,6 +602,10 @@ public class Funge98 implements InstructionSet {
 
     @Instr('o')
     public static void output(ExecutionContext ctx) {
+        if ((ctx.envFlags() & 0x04) == 0) {
+            reflect(ctx);
+            return;
+        }
         val s = ctx.IP().stackStack.TOSS();
         val filename = s.popString();
         val flags = s.pop();
@@ -595,6 +619,16 @@ public class Funge98 implements InstructionSet {
             delta.set(s.pop2(), 1);
         }
         pos.add(ctx.IP().storageOffset);
+        try {
+            if (!ctx.fileOutputAllowed(filename)) {
+                System.err.println("Code tried to write file not on whitelist: " + filename);
+                reflect(ctx);
+                return;
+            }
+        } catch (IOException e) {
+            reflect(ctx);
+            return;
+        }
         val data = ctx.fungeSpace().readDataAt(pos.x, pos.y, pos.z, delta.x, delta.y, delta.z, (flags & 1) == 1);
         if (!ctx.writeFile(filename, data)) {
             ctx.interpret('r');
@@ -641,6 +675,11 @@ public class Funge98 implements InstructionSet {
 
     @Instr('=')
     public static void sysCall(ExecutionContext ctx) {
+        if (!ctx.syscallAllowed()) {
+            System.err.println("Program tried to syscall while it was disabled!");
+            reflect(ctx);
+            return;
+        }
         val command = ctx.IP().stackStack.TOSS().popString();
         try {
             val proc = Runtime.getRuntime().exec(command);

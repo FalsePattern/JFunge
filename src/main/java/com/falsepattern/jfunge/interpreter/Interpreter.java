@@ -6,6 +6,7 @@ import com.falsepattern.jfunge.interpreter.instructions.InstructionManager;
 import com.falsepattern.jfunge.ip.InstructionPointer;
 import com.falsepattern.jfunge.storage.FungeSpace;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import lombok.val;
 import lombok.var;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +58,15 @@ public class Interpreter implements ExecutionContext {
     @Getter
     private final int dimensions;
 
+    @Getter
+    private final int envFlags;
+
+    private final boolean unrestrictedInput;
+    private final Path[] allowedInputPaths;
+
+    private final boolean unrestrictedOutput;
+    private final Path[] allowedOutputPaths;
+
     private Integer exitCode = null;
 
     private InstructionPointer currentIP = null;
@@ -66,10 +77,9 @@ public class Interpreter implements ExecutionContext {
 
     private int inputStagger;
 
-
-    public Interpreter(boolean trefunge, String[] args, InputStream input, OutputStream output, FileIOSupplier fileIOSupplier) {
+    public Interpreter(String[] args, InputStream input, OutputStream output, FileIOSupplier fileIOSupplier, FeatureSet featureSet) {
         this.args = Arrays.asList(args);
-        dimensions = trefunge ? 3 : 2;
+        dimensions = featureSet.trefunge ? 3 : 2;
         baseInstructionManager.loadInstructionSet(Funge98.INSTANCE);
         this.input = input;
         this.output = output;
@@ -77,20 +87,63 @@ public class Interpreter implements ExecutionContext {
         val ip = new InstructionPointer();
         ip.UUID = nextUUID++;
         IPs.add(ip);
+        int env = 0;
+        if (featureSet.concurrent) {
+            env |= 1;
+        }
+        if (featureSet.allowedInputFiles != null && featureSet.allowedInputFiles.length != 0) {
+            if (Arrays.asList(featureSet.allowedInputFiles).contains("/")) {
+                unrestrictedInput = true;
+                allowedInputPaths = null;
+            } else {
+                unrestrictedInput = false;
+                allowedInputPaths = toPaths(featureSet.allowedInputFiles);
+            }
+            env |= 2;
+        } else {
+            unrestrictedInput = false;
+            allowedInputPaths = null;
+        }
+        if (featureSet.allowedOutputFiles != null && featureSet.allowedOutputFiles.length != 0) {
+            if (Arrays.asList(featureSet.allowedOutputFiles).contains("/")) {
+                unrestrictedOutput = true;
+                allowedOutputPaths = null;
+            } else {
+                unrestrictedOutput = false;
+                allowedOutputPaths = toPaths(featureSet.allowedOutputFiles);
+            }
+            env |= 4;
+        } else {
+            unrestrictedOutput = false;
+            allowedOutputPaths = null;
+        }
+        if (featureSet.sysCall) {
+            env |= 8;
+        }
+        envFlags = env;
     }
 
-    public static int executeProgram(boolean trefunge, String[] args, byte[] program, long iterLimit, InputStream input, OutputStream output, FileIOSupplier fileIOSupplier) {
-        val interpreter = new Interpreter(trefunge, args, input, output, fileIOSupplier);
-        interpreter.fungeSpace().loadFileAt(0, 0, 0, program, trefunge);
+    @SneakyThrows
+    private static Path[] toPaths(String[] files) {
+        List<Path> list = new ArrayList<>();
+        for (String file : files) {
+            list.add(Paths.get(file).toRealPath());
+        }
+        return list.toArray(new Path[0]);
+    }
+
+    public static int executeProgram(String[] args, byte[] program, InputStream input, OutputStream output, FileIOSupplier fileIOSupplier, FeatureSet featureSet) {
+        val interpreter = new Interpreter(args, input, output, fileIOSupplier, featureSet);
+        interpreter.fungeSpace().loadFileAt(0, 0, 0, program, featureSet.trefunge);
         //Init step
         {
             val ip = interpreter.IPs.get(0);
             ip.position.sub(ip.delta);
             interpreter.step(ip);
         }
-        if (iterLimit > 0) {
+        if (featureSet.maxIter > 0) {
             long step = 0;
-            while (!interpreter.stopped() && step < iterLimit) {
+            while (!interpreter.stopped() && step < featureSet.maxIter) {
                 interpreter.tick();
                 step++;
             }
@@ -244,6 +297,31 @@ public class Interpreter implements ExecutionContext {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    @Override
+    public boolean fileInputAllowed(String file) throws IOException {
+        if ((envFlags & 0x02) == 0) {
+            return false;
+        }
+        if (unrestrictedInput) return true;
+        val path = Paths.get(file).toRealPath();
+        return Arrays.stream(allowedInputPaths).anyMatch(path::startsWith);
+    }
+
+    @Override
+    public boolean fileOutputAllowed(String file) throws IOException {
+        if ((envFlags & 0x04) == 0) {
+            return false;
+        }
+        if (unrestrictedOutput) return true;
+        val path = Paths.get(file).toRealPath();
+        return Arrays.stream(allowedOutputPaths).anyMatch(path::startsWith);
+    }
+
+    @Override
+    public boolean syscallAllowed() {
+        return (envFlags & 0x08) != 0;
     }
 
     public void tick() {

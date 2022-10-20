@@ -1,7 +1,9 @@
 package com.falsepattern.jfunge.interpreter;
 
-import com.falsepattern.jfunge.ip.InstructionPointer;
+import com.falsepattern.jfunge.ip.IP;
+import com.falsepattern.jfunge.ip.IStack;
 import com.falsepattern.jfunge.storage.FungeSpace;
+import org.joml.Vector3i;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,11 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface ExecutionContext {
-    InstructionPointer[] allIPs();
+    IP[] allIPs();
 
-    InstructionPointer IP();
+    IP IP();
 
-    InstructionPointer cloneIP();
+    IP cloneIP();
 
     FungeSpace fungeSpace();
 
@@ -33,7 +35,7 @@ public interface ExecutionContext {
 
     void interpret(int code);
 
-    void step(InstructionPointer ip);
+    void step(IP ip);
 
     List<String> args();
 
@@ -66,4 +68,10 @@ public interface ExecutionContext {
     }
 
     boolean fingerprintAllowed(int code);
+
+    //Common shorthands
+
+    default IStack stack() {
+        return IP().stackStack().TOSS();
+    }
 }

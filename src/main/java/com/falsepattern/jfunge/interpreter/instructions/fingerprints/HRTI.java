@@ -25,24 +25,24 @@ public class HRTI implements Fingerprint {
 
     @Instr('G')
     public static void granularity(ExecutionContext ctx) {
-        ctx.IP().stackStack.TOSS().push(1);
+        ctx.stack().push(1);
     }
 
     @Instr('M')
     public static void mark(ExecutionContext ctx) {
         val marks = getMarkMap(ctx);
-        marks.put(ctx.IP().UUID, System.nanoTime());
+        marks.put(ctx.IP().UUID(), System.nanoTime());
     }
 
     @Instr('T')
     public static void timer(ExecutionContext ctx) {
         val marks = getMarkMap(ctx);
         val ip = ctx.IP();
-        if (!marks.containsKey(ip.UUID)) {
+        if (!marks.containsKey(ip.UUID())) {
             ctx.interpret('r');
             return;
         }
-        ip.stackStack.TOSS().push((int)((System.nanoTime() - marks.get(ip.UUID)) / 1000L));
+        ctx.stack().push((int)((System.nanoTime() - marks.get(ip.UUID())) / 1000L));
     }
 
     /*
@@ -59,11 +59,11 @@ public class HRTI implements Fingerprint {
 //            ctx.interpret('r');
 //            return;
 //        }
-        marks.remove(ip.UUID);
+        marks.remove(ip.UUID());
     }
 
     @Instr('S')
     public static void second(ExecutionContext ctx) {
-        ctx.IP().stackStack.TOSS().push((int)((System.nanoTime() % 1000000000L) / 1000L));
+        ctx.stack().push((int)((System.nanoTime() % 1000000000L) / 1000L));
     }
 }

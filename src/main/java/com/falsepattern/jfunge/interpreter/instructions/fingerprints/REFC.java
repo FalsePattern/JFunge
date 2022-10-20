@@ -26,26 +26,26 @@ public class REFC implements Fingerprint {
     public static void reference(ExecutionContext ctx) {
         val vecs = getGlobal(ctx);
         val vec = new Vector3i();
-        val toss = ctx.IP().stackStack.TOSS();
+        val stack = ctx.stack();
         if (ctx.dimensions() == 3) {
-            toss.pop3(vec);
+            stack.pop3(vec);
         } else {
-            val vec2 = toss.pop2();
+            val vec2 = stack.pop2();
             vec.x = vec2.x;
             vec.y = vec2.y;
         }
-        toss.push(vecs.reference(vec));
+        stack.push(vecs.reference(vec));
     }
 
     @Instr('D')
     public static void dereference(ExecutionContext ctx) {
         val vecs = getGlobal(ctx);
-        val toss = ctx.IP().stackStack.TOSS();
-        Vector3i vec = vecs.dereference(toss.pop());
+        val stack = ctx.stack();
+        Vector3i vec = vecs.dereference(stack.pop());
         if (ctx.dimensions() == 3) {
-            toss.push3(vec);
+            stack.push3(vec);
         } else {
-            toss.push2(new Vector2i(vec.x, vec.y));
+            stack.push2(new Vector2i(vec.x, vec.y));
         }
     }
 

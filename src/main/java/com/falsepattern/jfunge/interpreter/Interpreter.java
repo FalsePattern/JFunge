@@ -4,7 +4,8 @@ import com.falsepattern.jfunge.interpreter.instructions.Funge98;
 import com.falsepattern.jfunge.interpreter.instructions.Instruction;
 import com.falsepattern.jfunge.interpreter.instructions.InstructionManager;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.PERL;
-import com.falsepattern.jfunge.ip.InstructionPointer;
+import com.falsepattern.jfunge.ip.IP;
+import com.falsepattern.jfunge.ip.impl.InstructionPointer;
 import com.falsepattern.jfunge.storage.FungeSpace;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -46,7 +47,7 @@ public class Interpreter implements ExecutionContext {
     @Getter
     private final FungeSpace fungeSpace = new FungeSpace(' ');
 
-    private final List<InstructionPointer> IPs = new ArrayList<>();
+    private final List<IP> IPs = new ArrayList<>();
 
     private final InstructionManager baseInstructionManager = new InstructionManager();
 
@@ -78,9 +79,9 @@ public class Interpreter implements ExecutionContext {
 
     private Integer exitCode = null;
 
-    private InstructionPointer currentIP = null;
+    private IP currentIP = null;
 
-    private InstructionPointer clone = null;
+    private IP clone = null;
 
     private int nextUUID = 0;
 
@@ -93,8 +94,8 @@ public class Interpreter implements ExecutionContext {
         this.input = input;
         this.output = output;
         this.fileIOSupplier = fileIOSupplier;
-        val ip = new InstructionPointer();
-        ip.UUID = nextUUID++;
+        val ip = (IP) new InstructionPointer();
+        ip.UUID(nextUUID++);
         IPs.add(ip);
         int env = 0;
         if (featureSet.concurrent) {
@@ -151,7 +152,7 @@ public class Interpreter implements ExecutionContext {
         //Init step
         {
             val ip = interpreter.IPs.get(0);
-            ip.position.sub(ip.delta);
+            ip.position().sub(ip.delta());
             interpreter.step(ip);
         }
         if (featureSet.maxIter > 0) {
@@ -171,19 +172,19 @@ public class Interpreter implements ExecutionContext {
     }
 
     @Override
-    public InstructionPointer[] allIPs() {
-        return IPs.toArray(new InstructionPointer[0]);
+    public IP[] allIPs() {
+        return IPs.toArray(new IP[0]);
     }
 
     @Override
-    public InstructionPointer IP() {
+    public IP IP() {
         return currentIP;
     }
 
     @Override
-    public InstructionPointer cloneIP() {
+    public IP cloneIP() {
         clone = currentIP.deepCopy();
-        clone.UUID = nextUUID++;
+        clone.UUID(nextUUID++);
         return clone;
     }
 
@@ -233,12 +234,12 @@ public class Interpreter implements ExecutionContext {
     @Override
     public void interpret(int opcode) {
         if (opcode == '"') {
-            IP().stringMode = !IP().stringMode;
-        } else if (IP().stringMode) {
-            IP().stackStack.TOSS().push(opcode);
+            IP().stringMode(!IP().stringMode());
+        } else if (IP().stringMode()) {
+            IP().stackStack().TOSS().push(opcode);
         } else {
             Instruction instr;
-            if ((instr = IP().instructionManager.fetch(opcode)) != null || (instr = baseInstructionManager.fetch(opcode)) != null) {
+            if ((instr = IP().instructionManager().fetch(opcode)) != null || (instr = baseInstructionManager.fetch(opcode)) != null) {
                 instr.process(this);
             } else {
                 if (opcode == 'r')
@@ -249,29 +250,29 @@ public class Interpreter implements ExecutionContext {
     }
 
 
-    private boolean wrappingStep(InstructionPointer ip) {
-        ip.position.add(ip.delta);
-        if (!fungeSpace().bounds().inBounds(ip.position)) {
-            ip.delta.mul(-1);
+    private boolean wrappingStep(IP ip) {
+        ip.step();
+        if (!fungeSpace().bounds().inBounds(ip.position())) {
+            ip.reflect();
             do {
-                ip.position.add(ip.delta);
-            } while (!fungeSpace().bounds().inBounds(ip.position));
+                ip.step();
+            } while (!fungeSpace().bounds().inBounds(ip.position()));
             do {
-                ip.position.add(ip.delta);
-            } while (fungeSpace().bounds().inBounds(ip.position));
-            ip.delta.mul(-1);
+                ip.step();
+            } while (fungeSpace().bounds().inBounds(ip.position()));
+            ip.reflect();
             do {
-                ip.position.add(ip.delta);
-            } while (!fungeSpace().bounds().inBounds(ip.position));
+                ip.step();
+            } while (!fungeSpace().bounds().inBounds(ip.position()));
             return true;
         }
         return false;
     }
 
-    public void step(InstructionPointer ip) {
+    public void step(IP ip) {
         int p;
-        if (ip.stringMode) {
-            p = fungeSpace.get(ip.position);
+        if (ip.stringMode()) {
+            p = fungeSpace.get(ip.position());
             if (p != ' ') {
                 wrappingStep(ip);
                 return;
@@ -280,19 +281,19 @@ public class Interpreter implements ExecutionContext {
         int flipCount = 0;
         do {
             flipCount += wrappingStep(ip) ? 1 : 0;
-            p = fungeSpace.get(ip.position);
-            if (!ip.stringMode) {
+            p = fungeSpace.get(ip.position());
+            if (!ip.stringMode()) {
                 while (p == ';') {
                     do {
                         flipCount += wrappingStep(ip) ? 1 : 0;
-                        p = fungeSpace.get(ip.position);
+                        p = fungeSpace.get(ip.position());
                     } while (p != ';');
                     flipCount += wrappingStep(ip) ? 1 : 0;
-                    p = fungeSpace.get(ip.position);
+                    p = fungeSpace.get(ip.position());
                 }
             }
             if (flipCount == 1000) {
-                throw new IllegalStateException("IP " + ip.UUID + " is stuck on a blank strip!\nPos: " + ip.position + ", Delta: " + ip.delta + (ip.position.equals(0, 0, 0) && ip.UUID == 0 ? "\nIs the file empty?" : ""));
+                throw new IllegalStateException("IP " + ip.UUID() + " is stuck on a blank strip!\nPos: " + ip.position() + ", Delta: " + ip.delta() + (ip.position().equals(0, 0, 0) && ip.UUID() == 0 ? "\nIs the file empty?" : ""));
             }
         } while (p == ' ');
     }
@@ -371,12 +372,12 @@ public class Interpreter implements ExecutionContext {
         currentIP = null;
         for (int i = 0; i < IPs.size(); i++) {
             currentIP = IPs.get(i);
-            if (IP().isDead()) {
+            if (IP().dead()) {
                 IPs.remove(i);
                 i--;
                 continue;
             }
-            interpret(fungeSpace().get(IP().position));
+            interpret(fungeSpace().get(IP().position()));
             if (clone != null) {
                 IPs.add(i++, clone);
                 clone = null;

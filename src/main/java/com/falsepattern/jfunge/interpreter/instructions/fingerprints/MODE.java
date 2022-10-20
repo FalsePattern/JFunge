@@ -28,25 +28,25 @@ public class MODE implements Fingerprint {
 
     @Instr('I')
     public static void invertMode(ExecutionContext ctx) {
-        ctx.IP().stackStack.invertMode(!ctx.IP().stackStack.invertMode());
+        ctx.IP().stackStack().invertMode(!ctx.IP().stackStack().invertMode());
     }
 
     @Instr('Q')
     public static void queueMode(ExecutionContext ctx) {
-        ctx.IP().stackStack.queueMode(!ctx.IP().stackStack.queueMode());
+        ctx.IP().stackStack().queueMode(!ctx.IP().stackStack().queueMode());
     }
 
     private static void toggleMode(ExecutionContext ctx, InstructionSet set, int bit) {
         val ip = ctx.IP();
-        val state = ip.customStorage.get("mode");
+        val state = ip.customStorage().get("mode");
         var mode = (state & bit) == bit;
         mode = !mode;
         if (mode) {
-            ip.instructionManager.loadInstructionSet(set);
+            ip.instructionManager().loadInstructionSet(set);
         } else {
-            ip.instructionManager.unloadInstructionSet(set);
+            ip.instructionManager().unloadInstructionSet(set);
         }
-        ip.customStorage.put("mode", state ^ bit);
+        ip.customStorage().put("mode", state ^ bit);
     }
 
     @Override
@@ -58,28 +58,28 @@ public class MODE implements Fingerprint {
     public static final class HoverMode implements InstructionSet {
         @Instr('>')
         public static void east(ExecutionContext ctx) {
-            ctx.IP().delta.add(1, 0, 0);
+            ctx.IP().delta().add(1, 0, 0);
         }
 
         @Instr('v')
         public static void south(ExecutionContext ctx) {
-            ctx.IP().delta.add(0, 1, 0);
+            ctx.IP().delta().add(0, 1, 0);
         }
 
         @Instr('<')
         public static void west(ExecutionContext ctx) {
-            ctx.IP().delta.add(-1, 0, 0);
+            ctx.IP().delta().add(-1, 0, 0);
         }
 
         @Instr('^')
         public static void north(ExecutionContext ctx) {
-            ctx.IP().delta.add(0, -1, 0);
+            ctx.IP().delta().add(0, -1, 0);
         }
 
         @Instr('h')
         public static void high(ExecutionContext ctx) {
             if (ctx.dimensions() == 3) {
-                ctx.IP().delta.add(0, 0, 1);
+                ctx.IP().delta().add(0, 0, 1);
             } else {
                 ctx.interpret('r');
             }
@@ -88,7 +88,7 @@ public class MODE implements Fingerprint {
         @Instr('l')
         public static void low(ExecutionContext ctx) {
             if (ctx.dimensions() == 3) {
-                ctx.IP().delta.add(0, 0, -1);
+                ctx.IP().delta().add(0, 0, -1);
             } else {
                 ctx.interpret('r');
             }
@@ -98,7 +98,7 @@ public class MODE implements Fingerprint {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static final class SwitchMode implements InstructionSet {
         private static void set(ExecutionContext ctx, int ch) {
-            ctx.fungeSpace().set(ctx.IP().position, ch);
+            ctx.fungeSpace().set(ctx.IP().position(), ch);
         }
 
         @Instr('(')

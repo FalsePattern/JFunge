@@ -26,7 +26,7 @@ public class PERL implements Fingerprint {
         try {
             try (val os = Files.newOutputStream(Paths.get(name), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
                 os.write("print eval(".getBytes(StandardCharsets.UTF_8));
-                os.write(ctx.IP().stackStack.TOSS().popString().getBytes(StandardCharsets.UTF_8));
+                os.write(ctx.stack().popString().getBytes(StandardCharsets.UTF_8));
                 os.write(");".getBytes(StandardCharsets.UTF_8));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -73,13 +73,13 @@ public class PERL implements Fingerprint {
     public static void exec(ExecutionContext ctx) {
         String res = executePerl(ctx);
         if (res != null) {
-            ctx.IP().stackStack.TOSS().pushString(res);
+            ctx.stack().pushString(res);
         }
     }
 
     @Instr('S')
     public static void getShelled(ExecutionContext ctx) {
-        ctx.IP().stackStack.TOSS().push(1);
+        ctx.stack().push(1);
     }
 
     @Instr('I')
@@ -93,7 +93,7 @@ public class PERL implements Fingerprint {
                 Funge98.reflect(ctx);
                 return;
             }
-            ctx.IP().stackStack.TOSS().push(intRes);
+            ctx.stack().push(intRes);
         }
     }
 

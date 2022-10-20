@@ -10,37 +10,37 @@ public class ROMA implements Fingerprint {
 
     @Instr('I')
     public static void I(ExecutionContext ctx) {
-        ctx.IP().stackStack.TOSS().push(1);
+        ctx.stack().push(1);
     }
 
     @Instr('V')
     public static void V(ExecutionContext ctx) {
-        ctx.IP().stackStack.TOSS().push(5);
+        ctx.stack().push(5);
     }
 
     @Instr('X')
     public static void X(ExecutionContext ctx) {
-        ctx.IP().stackStack.TOSS().push(10);
+        ctx.stack().push(10);
     }
 
     @Instr('L')
     public static void L(ExecutionContext ctx) {
-        ctx.IP().stackStack.TOSS().push(50);
+        ctx.stack().push(50);
     }
 
     @Instr('C')
     public static void C(ExecutionContext ctx) {
-        ctx.IP().stackStack.TOSS().push(100);
+        ctx.stack().push(100);
     }
 
     @Instr('D')
     public static void D(ExecutionContext ctx) {
-        ctx.IP().stackStack.TOSS().push(500);
+        ctx.stack().push(500);
     }
 
     @Instr('M')
     public static void M(ExecutionContext ctx) {
-        ctx.IP().stackStack.TOSS().push(1000);
+        ctx.stack().push(1000);
     }
 
     @Override

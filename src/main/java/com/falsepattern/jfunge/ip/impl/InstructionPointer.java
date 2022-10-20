@@ -1,27 +1,42 @@
-package com.falsepattern.jfunge.ip;
+package com.falsepattern.jfunge.ip.impl;
 
-import com.falsepattern.jfunge.Copiable;
 import com.falsepattern.jfunge.interpreter.instructions.InstructionManager;
+import com.falsepattern.jfunge.ip.IP;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.experimental.Accessors;
 import org.joml.Vector3i;
 
 import java.security.SecureRandom;
 
-public class InstructionPointer implements Copiable<InstructionPointer> {
-    public final Vector3i position;
-    public final Vector3i delta;
-    public final Vector3i storageOffset;
-    public final StackStack stackStack;
-    public final InstructionManager instructionManager;
-    public final TObjectIntMap<String> customStorage;
-    private final SecureRandom rng;
-    public boolean stringMode = false;
-    public int UUID;
+@Accessors(fluent = true,
+           chain = false)
+public class InstructionPointer implements IP {
+    @Getter
+    private final Vector3i position;
+    @Getter
+    private final Vector3i delta;
+    @Getter
+    private final Vector3i storageOffset;
+    @Getter
+    private final StackStack stackStack;
+    @Getter
+    private final InstructionManager instructionManager;
+    @Getter
+    private final TObjectIntMap<String> customStorage;
+    @Setter
+    @Getter
+    private boolean stringMode = false;
+    @Setter
+    @Getter
+    private int UUID;
     @Getter
     private boolean dead = false;
+
+    private final SecureRandom rng;
 
     @SneakyThrows
     public InstructionPointer() {
@@ -49,10 +64,12 @@ public class InstructionPointer implements Copiable<InstructionPointer> {
         UUID = 0;
     }
 
+    @Override
     public void die() {
         dead = true;
     }
 
+    @Override
     public int nextRandom() {
         return rng.nextInt();
     }

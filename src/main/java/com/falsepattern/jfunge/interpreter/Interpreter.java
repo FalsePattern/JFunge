@@ -3,8 +3,11 @@ package com.falsepattern.jfunge.interpreter;
 import com.falsepattern.jfunge.interpreter.instructions.Funge98;
 import com.falsepattern.jfunge.interpreter.instructions.Instruction;
 import com.falsepattern.jfunge.interpreter.instructions.InstructionManager;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.PERL;
 import com.falsepattern.jfunge.ip.InstructionPointer;
 import com.falsepattern.jfunge.storage.FungeSpace;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.Getter;
@@ -49,6 +52,7 @@ public class Interpreter implements ExecutionContext {
 
     private final InputStream input;
 
+    private final TIntList fingerprintBlackList = new TIntArrayList();
 
     @Getter
     private final OutputStream output;
@@ -126,6 +130,10 @@ public class Interpreter implements ExecutionContext {
             env |= 8;
         }
         envFlags = env;
+
+        if (!featureSet.perl) {
+            fingerprintBlackList.add(PERL.INSTANCE.code());
+        }
     }
 
     @SneakyThrows
@@ -352,6 +360,11 @@ public class Interpreter implements ExecutionContext {
     @Override
     public boolean syscallAllowed() {
         return (envFlags & 0x08) != 0;
+    }
+
+    @Override
+    public boolean fingerprintAllowed(int code) {
+        return !fingerprintBlackList.contains(code);
     }
 
     public void tick() {

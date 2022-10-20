@@ -12,4 +12,6 @@ public class FeatureSet {
     public final String[] allowedOutputFiles;
     public final boolean concurrent;
     public final long maxIter;
+
+    public final boolean perl;
 }

@@ -65,6 +65,10 @@ public class Main {
                                 .numberOfArgs(1)
                                 .desc("The maximum number of iterations the program can run for. Anything less than 1 will run until the program terminates by itself. Default is unlimited.")
                                 .build());
+        options.addOption(Option.builder()
+                                .longOpt("perl")
+                                .desc("Enable the PERL fingerprint. This requires the working directory of the interpreter to be writable, and is also an arbitrary code execution risk.")
+                                .build());
         val parser = new DefaultParser();
         val cmd = parser.parse(options, args);
         if (cmd.hasOption("help")) {
@@ -92,6 +96,7 @@ public class Main {
         featureSet.concurrent(cmd.hasOption("t"));
         featureSet.allowedInputFiles(cmd.getOptionValues("i"));
         featureSet.allowedOutputFiles(cmd.getOptionValues("o"));
+        featureSet.perl(cmd.hasOption("perl"));
         featureSet.maxIter(cmd.hasOption("maxiter") ? Integer.parseInt(cmd.getOptionValue("maxiter")) : 0);
         byte[] program;
         if (file.equals("-")) {

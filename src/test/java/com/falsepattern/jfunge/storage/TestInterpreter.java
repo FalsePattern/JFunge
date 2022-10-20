@@ -87,6 +87,7 @@ public class TestInterpreter {
                                    .allowedOutputFiles(new String[]{"/"})
                                    .sysCall(false)
                                    .concurrent(true)
+                                   .perl(true)
                                    .maxIter(300000L)
                                    .build();
         val returnCode = interpret(new String[]{"mycology.b98"}, program, nullStream(), output, featureSet);

@@ -64,4 +64,6 @@ public interface ExecutionContext {
     default boolean syscallAllowed() {
         return (envFlags() & 0x08) != 0;
     }
+
+    boolean fingerprintAllowed(int code);
 }

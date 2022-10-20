@@ -8,6 +8,7 @@ import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODE;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODU;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.NULL;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ORTH;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.PERL;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.REFC;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ROMA;
 import com.falsepattern.jfunge.ip.Stack;
@@ -41,6 +42,7 @@ public class Funge98 implements InstructionSet {
         addFingerprint(MODU.INSTANCE);
         addFingerprint(NULL.INSTANCE);
         addFingerprint(ORTH.INSTANCE);
+        addFingerprint(PERL.INSTANCE);
         addFingerprint(REFC.INSTANCE);
         addFingerprint(ROMA.INSTANCE);
     }
@@ -63,7 +65,7 @@ public class Funge98 implements InstructionSet {
     public static void loadFinger(ExecutionContext ctx) {
         val s = ctx.IP().stackStack.TOSS();
         val code = getFingerCode(s);
-        if (fingerprints.containsKey(code)) {
+        if (fingerprints.containsKey(code) && ctx.fingerprintAllowed(code)) {
             s.push(code);
             s.push(1);
             ctx.IP().instructionManager.loadInstructionSet(fingerprints.get(code));

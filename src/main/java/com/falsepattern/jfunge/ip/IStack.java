@@ -76,6 +76,43 @@ public interface IStack extends Copiable<IStack> {
         return pop4(new Vector4i());
     }
 
+    default void pushVecDimProof(int dimensions, Vector3i buf) {
+        switch (dimensions) {
+            default:
+                throw new IllegalStateException("pushVecDimProof only works with parameters 1-3");
+            case 1:
+                push(buf.x);
+                break;
+            case 2:
+                push(buf.x);
+                push(buf.y);
+                break;
+            case 3:
+                push(buf.x);
+                push(buf.y);
+                push(buf.z);
+                break;
+        }
+    }
+
+    default Vector3i popVecDimProof(int dimensions, Vector3i buf) {
+        switch (dimensions) {
+            default:
+                throw new IllegalStateException("popVecDimProof only works with parameters 1-3");
+            case 3:
+                buf.z = pop();
+            case 2:
+                buf.y = pop();
+            case 1:
+                buf.x = pop();
+        }
+        return buf;
+    }
+
+    default Vector3i popVecDimProof(int dimensions) {
+        return popVecDimProof(dimensions, new Vector3i());
+    }
+
     default void pushString(String text) {
         val chars = text.getBytes(StandardCharsets.UTF_8);
         push(0);

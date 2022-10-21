@@ -3,10 +3,16 @@ package com.falsepattern.jfunge.ip;
 import com.falsepattern.jfunge.Copiable;
 import lombok.SneakyThrows;
 import lombok.val;
+import org.joml.Vector2f;
+import org.joml.Vector2fc;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
+import org.joml.Vector4f;
+import org.joml.Vector4fc;
 import org.joml.Vector4i;
 import org.joml.Vector4ic;
 
@@ -129,5 +135,64 @@ public interface IStack extends Copiable<IStack> {
             data.write(b);
         }
         return data.toString("UTF-8");
+    }
+
+    default void pushF(float val) {
+        push(Float.floatToRawIntBits(val));
+    }
+
+    default float popF() {
+        return Float.intBitsToFloat(pop());
+    }
+
+    default void pushF2(Vector2fc v) {
+        pushF(v.x());
+        pushF(v.y());
+    }
+
+    default Vector2f popF2(Vector2f v) {
+        v.y = popF();
+        v.x = popF();
+        return v;
+    }
+
+    default Vector2f popF2() {
+        return popF2(new Vector2f());
+    }
+
+    default void pushF3(Vector3fc v) {
+        pushF(v.x());
+        pushF(v.y());
+        pushF(v.z());
+    }
+
+    default Vector3f popF3(Vector3f v) {
+        v.z = popF();
+        v.y = popF();
+        v.x = popF();
+        return v;
+    }
+
+    default Vector3f popF3() {
+        return popF3(new Vector3f());
+    }
+
+    default void pushF4(Vector4fc v) {
+        pushF(v.x());
+        pushF(v.y());
+        pushF(v.z());
+        pushF(v.w());
+    }
+
+    default Vector4f popF4(Vector4f v) {
+        v.w = popF();
+        v.z = popF();
+        v.y = popF();
+        v.x = popF();
+        return v;
+    }
+
+    default Vector4f popF4() {
+        return popF4(new Vector4f());
     }
 }

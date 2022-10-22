@@ -62,6 +62,7 @@ Additionally, the following fingerprints are currently supported (more to come):
 - [REFC](./docs/catseye/library/REFC.markdown)
 - [ROMA](./docs/catseye/library/ROMA.markdown)
 - [TOYS](./docs/catseye/library/TOYS.markdown)
+- [TURT](./docs/catseye/library/TURT.markdown)
 
 ### Version Release Checklist
 - Update the version number inside the [pom](./pom.xml)

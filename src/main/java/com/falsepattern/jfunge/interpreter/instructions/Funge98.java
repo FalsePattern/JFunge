@@ -2,6 +2,7 @@ package com.falsepattern.jfunge.interpreter.instructions;
 
 import com.falsepattern.jfunge.Globals;
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FPSP;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.Fingerprint;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.HRTI;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODE;
@@ -12,6 +13,7 @@ import com.falsepattern.jfunge.interpreter.instructions.fingerprints.PERL;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.REFC;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ROMA;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.TOYS;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints._3DSP;
 import com.falsepattern.jfunge.ip.IStack;
 import com.falsepattern.jfunge.ip.impl.Stack;
 import gnu.trove.map.TIntObjectMap;
@@ -39,6 +41,8 @@ public class Funge98 implements InstructionSet {
     private static final TIntObjectMap<Fingerprint> fingerprints = new TIntObjectHashMap<>();
 
     static {
+        addFingerprint(_3DSP.INSTANCE);
+        addFingerprint(FPSP.INSTANCE);
         addFingerprint(HRTI.INSTANCE);
         addFingerprint(MODE.INSTANCE);
         addFingerprint(MODU.INSTANCE);

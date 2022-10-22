@@ -77,8 +77,19 @@ public class Main {
             return;
         }
         if (cmd.hasOption("license")) {
-            System.out.println(Globals.LICENSE);
-            return;
+            try (val res = Main.class.getResourceAsStream("/LICENSE")) {
+                if (res == null) {
+                    System.out.println("Could not read embedded license file, however, this program (JFunge) is licensed under LGPLv3.");
+                    return;
+                }
+                val buf = new byte[256];
+                int read;
+                while ((read = res.read(buf)) > 0) {
+                    System.out.write(buf, 0, read);
+                }
+                System.out.println();
+                return;
+            }
         }
         if (cmd.hasOption("version")) {
             System.out.println("Version: " + Globals.VERSION);

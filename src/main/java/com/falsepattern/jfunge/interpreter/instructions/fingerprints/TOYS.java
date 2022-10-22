@@ -1,6 +1,7 @@
 package com.falsepattern.jfunge.interpreter.instructions.fingerprints;
 
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
+import com.falsepattern.jfunge.interpreter.instructions.Fingerprint;
 import com.falsepattern.jfunge.storage.FungeSpace;
 import com.falsepattern.jfunge.util.MemoryStack;
 import lombok.AccessLevel;

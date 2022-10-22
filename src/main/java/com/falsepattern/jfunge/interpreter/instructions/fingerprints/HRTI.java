@@ -1,6 +1,7 @@
 package com.falsepattern.jfunge.interpreter.instructions.fingerprints;
 
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
+import com.falsepattern.jfunge.interpreter.instructions.Fingerprint;
 import gnu.trove.map.TIntLongMap;
 import gnu.trove.map.hash.TIntLongHashMap;
 import lombok.AccessLevel;

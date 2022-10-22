@@ -3,7 +3,6 @@ package com.falsepattern.jfunge.interpreter.instructions;
 import com.falsepattern.jfunge.Globals;
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FPSP;
-import com.falsepattern.jfunge.interpreter.instructions.fingerprints.Fingerprint;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.HRTI;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODE;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODU;

@@ -1,6 +1,7 @@
 package com.falsepattern.jfunge.interpreter.instructions.fingerprints;
 
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
+import com.falsepattern.jfunge.interpreter.instructions.Fingerprint;
 import gnu.trove.function.TFloatFunction;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

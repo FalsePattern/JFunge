@@ -51,6 +51,8 @@ The interpreter supports the following Funge-98 specification extensions:
 - Optional Trefunge mode (experimental)
 
 Additionally, the following fingerprints are currently supported (more to come):
+- [3DSP](http://rcfunge98.com/rcsfingers.html#3DSP)
+- [FPSP](http://rcfunge98.com/rcsfingers.html#FPSP)
 - [HRTI](./docs/catseye/library/HRTI.markdown)
 - [MODE](./docs/catseye/library/MODE.markdown)
 - [MODU](./docs/catseye/library/MODU.markdown)

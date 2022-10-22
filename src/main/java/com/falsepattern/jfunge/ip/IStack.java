@@ -42,10 +42,6 @@ public interface IStack extends Copiable<IStack> {
         return v;
     }
 
-    default Vector2i pop2() {
-        return pop2(new Vector2i());
-    }
-
     default void push3(Vector3ic v) {
         push(v.x());
         push(v.y());
@@ -57,10 +53,6 @@ public interface IStack extends Copiable<IStack> {
         v.y = pop();
         v.x = pop();
         return v;
-    }
-
-    default Vector3i pop3() {
-        return pop3(new Vector3i());
     }
 
     default void push4(Vector4ic v) {
@@ -76,10 +68,6 @@ public interface IStack extends Copiable<IStack> {
         v.y = pop();
         v.x = pop();
         return v;
-    }
-
-    default Vector4i pop4() {
-        return pop4(new Vector4i());
     }
 
     default void pushVecDimProof(int dimensions, Vector3i buf) {
@@ -102,6 +90,7 @@ public interface IStack extends Copiable<IStack> {
     }
 
     default Vector3i popVecDimProof(int dimensions, Vector3i buf) {
+        buf.set(0, 0, 0);
         switch (dimensions) {
             default:
                 throw new IllegalStateException("popVecDimProof only works with parameters 1-3");
@@ -113,10 +102,6 @@ public interface IStack extends Copiable<IStack> {
                 buf.x = pop();
         }
         return buf;
-    }
-
-    default Vector3i popVecDimProof(int dimensions) {
-        return popVecDimProof(dimensions, new Vector3i());
     }
 
     default void pushString(String text) {
@@ -156,10 +141,6 @@ public interface IStack extends Copiable<IStack> {
         return v;
     }
 
-    default Vector2f popF2() {
-        return popF2(new Vector2f());
-    }
-
     default void pushF3(Vector3fc v) {
         pushF(v.x());
         pushF(v.y());
@@ -171,10 +152,6 @@ public interface IStack extends Copiable<IStack> {
         v.y = popF();
         v.x = popF();
         return v;
-    }
-
-    default Vector3f popF3() {
-        return popF3(new Vector3f());
     }
 
     default void pushF4(Vector4fc v) {
@@ -190,9 +167,5 @@ public interface IStack extends Copiable<IStack> {
         v.y = popF();
         v.x = popF();
         return v;
-    }
-
-    default Vector4f popF4() {
-        return popF4(new Vector4f());
     }
 }

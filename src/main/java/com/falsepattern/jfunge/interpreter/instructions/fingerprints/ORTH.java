@@ -2,12 +2,12 @@ package com.falsepattern.jfunge.interpreter.instructions.fingerprints;
 
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
 import com.falsepattern.jfunge.interpreter.instructions.Funge98;
+import com.falsepattern.jfunge.util.MemoryStack;
 import lombok.AccessLevel;
+import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
-import org.joml.Vector2i;
-import org.joml.Vector3i;
 
 import java.nio.charset.StandardCharsets;
 
@@ -52,17 +52,18 @@ public class ORTH implements Fingerprint {
 
     @Instr('G')
     public static void get(ExecutionContext ctx) {
+        @Cleanup val mem = MemoryStack.stackPush();
         val ip = ctx.IP();
         val stack = ctx.stack();
         if (ctx.dimensions() == 3) {
-            val vec = new Vector3i();
+            val vec = mem.vec3i();
             vec.x = stack.pop();
             vec.y = stack.pop();
             vec.z = stack.pop();
             vec.add(ip.storageOffset());
             stack.push(ctx.fungeSpace().get(vec));
         } else {
-            val vec = new Vector2i();
+            val vec = mem.vec2i();
             vec.x = stack.pop();
             vec.y = stack.pop();
             vec.add(ip.storageOffset().x, ip.storageOffset().y);
@@ -72,10 +73,11 @@ public class ORTH implements Fingerprint {
 
     @Instr('P')
     public static void put(ExecutionContext ctx) {
+        @Cleanup val mem = MemoryStack.stackPush();
         val ip = ctx.IP();
         val stack = ctx.stack();
         if (ctx.dimensions() == 3) {
-            val vec = new Vector3i();
+            val vec = mem.vec3i();
             vec.x = stack.pop();
             vec.y = stack.pop();
             vec.z = stack.pop();
@@ -83,7 +85,7 @@ public class ORTH implements Fingerprint {
             val i = stack.pop();
             ctx.fungeSpace().set(vec, i);
         } else {
-            val vec = new Vector2i();
+            val vec = mem.vec2i();
             vec.x = stack.pop();
             vec.y = stack.pop();
             vec.add(ip.storageOffset().x, ip.storageOffset().y);

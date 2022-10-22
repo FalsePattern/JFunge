@@ -173,7 +173,7 @@ public class _3DSP implements Fingerprint {
         @Cleanup val mem = MemoryStack.stackPush();
         val stack = ctx.stack();
         val matrix = getMatrix(ctx, stack.popVecDimProof(ctx.dimensions(), mem.vec3i()), mem.mat4f());
-        val vector = stack.popF3();
+        val vector = stack.popF3(mem.vec3f());
         matrix.transformPosition(vector);
         stack.pushF3(vector);
     }

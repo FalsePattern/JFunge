@@ -1,14 +1,15 @@
 package com.falsepattern.jfunge.interpreter.instructions.fingerprints;
 
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
+import com.falsepattern.jfunge.util.MemoryStack;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import lombok.AccessLevel;
+import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import lombok.val;
-import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -24,16 +25,10 @@ public class REFC implements Fingerprint {
 
     @Instr('R')
     public static void reference(ExecutionContext ctx) {
+        @Cleanup val mem = MemoryStack.stackPush();
         val vecs = getGlobal(ctx);
-        val vec = new Vector3i();
         val stack = ctx.stack();
-        if (ctx.dimensions() == 3) {
-            stack.pop3(vec);
-        } else {
-            val vec2 = stack.pop2();
-            vec.x = vec2.x;
-            vec.y = vec2.y;
-        }
+        val vec = stack.popVecDimProof(ctx.dimensions(), mem.vec3i());
         stack.push(vecs.reference(vec));
     }
 
@@ -41,12 +36,8 @@ public class REFC implements Fingerprint {
     public static void dereference(ExecutionContext ctx) {
         val vecs = getGlobal(ctx);
         val stack = ctx.stack();
-        Vector3i vec = vecs.dereference(stack.pop());
-        if (ctx.dimensions() == 3) {
-            stack.push3(vec);
-        } else {
-            stack.push2(new Vector2i(vec.x, vec.y));
-        }
+        val vec = vecs.dereference(stack.pop());
+        stack.pushVecDimProof(ctx.dimensions(), vec);
     }
 
     public static class Vectors {
@@ -55,6 +46,7 @@ public class REFC implements Fingerprint {
         private static int counter = 0;
 
         public int reference(Vector3i vec) {
+            vec = new Vector3i(vec);
             if (dereferences.containsKey(vec)) {
                 return dereferences.get(vec);
             } else {

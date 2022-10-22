@@ -1,6 +1,7 @@
 package com.falsepattern.jfunge.util;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -15,6 +16,8 @@ public class MemoryStack implements AutoCloseable{
                                                                                             Vector3i::zero);
     private final RewindableCachingStorage<Vector3f> vec3f = new RewindableCachingStorage<>(Vector3f::new,
                                                                                             Vector3f::zero);
+    private final RewindableCachingStorage<Vector2i> vec2i = new RewindableCachingStorage<>(Vector2i::new,
+                                                                                            Vector2i::zero);
 
     public static MemoryStack stackPush() {
         return THREAD_LOCAL.get().push();
@@ -32,10 +35,15 @@ public class MemoryStack implements AutoCloseable{
         return vec3f.alloc();
     }
 
+    public Vector2i vec2i() {
+        return vec2i.alloc();
+    }
+
     public MemoryStack push() {
         mat4f.mark();
         vec3i.mark();
         vec3f.mark();
+        vec2i.mark();
         depth++;
         return this;
     }
@@ -48,6 +56,7 @@ public class MemoryStack implements AutoCloseable{
         mat4f.unmark();
         vec3i.unmark();
         vec3f.unmark();
+        vec2i.unmark();
     }
 
     @Override

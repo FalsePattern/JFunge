@@ -2,10 +2,11 @@ package com.falsepattern.jfunge.interpreter.instructions.fingerprints;
 
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
 import com.falsepattern.jfunge.storage.FungeSpace;
+import com.falsepattern.jfunge.util.MemoryStack;
 import lombok.AccessLevel;
+import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import lombok.val;
-import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -44,19 +45,16 @@ public class TOYS implements Fingerprint {
     }
 
     private static void executeOperation(ExecutionContext ctx, IterationOperation iter, TransferOperation op) {
-        val dst = new Vector3i();
-        val delta = new Vector3i();
-        val src = new Vector3i();
+        @Cleanup val mem = MemoryStack.stackPush();
+        val dst = mem.vec3i();
+        val delta = mem.vec3i();
+        val src = mem.vec3i();
         val stack = ctx.stack();
-        if (ctx.dimensions() == 3) {
-            stack.pop3(dst);
-            stack.pop3(delta);
-            stack.pop3(src);
-        } else {
-            val buf = new Vector2i();
-            dst.set(stack.pop2(buf), 0);
-            delta.set(stack.pop2(buf), 1);
-            src.set(stack.pop2(buf), 0);
+        stack.popVecDimProof(ctx.dimensions(), dst);
+        stack.popVecDimProof(ctx.dimensions(), delta);
+        stack.popVecDimProof(ctx.dimensions(), src);
+        if (ctx.dimensions() != 3) {
+            delta.z = 1;
         }
         val space = ctx.fungeSpace();
         iter.operate(space, dst, delta, src, op);
@@ -84,16 +82,14 @@ public class TOYS implements Fingerprint {
 
     @Instr('S')
     public static void fill(ExecutionContext ctx) {
-        val dst = new Vector3i();
-        val delta = new Vector3i();
+        @Cleanup val mem = MemoryStack.stackPush();
+        val dst = mem.vec3i();
+        val delta = mem.vec3i();
         val stack = ctx.stack();
-        if (ctx.dimensions() == 3) {
-            stack.pop3(dst);
-            stack.pop3(delta);
-        } else {
-            val buf = new Vector2i();
-            dst.set(stack.pop2(buf), 0);
-            delta.set(stack.pop2(buf), 1);
+        stack.popVecDimProof(ctx.dimensions(), dst);
+        stack.popVecDimProof(ctx.dimensions(), delta);
+        if (ctx.dimensions() != 3) {
+            delta.z = 1;
         }
         val cellValue = stack.pop();
         val space = ctx.fungeSpace();
@@ -144,7 +140,8 @@ public class TOYS implements Fingerprint {
 
     @Instr('L')
     public static void getLeft(ExecutionContext ctx) {
-        val pos = new Vector3i(ctx.IP().position());
+        @Cleanup val mem = MemoryStack.stackPush();
+        val pos = mem.vec3i().set(ctx.IP().position());
         ctx.interpret('[');
         ctx.interpret('\'');
         ctx.interpret(']');
@@ -153,7 +150,8 @@ public class TOYS implements Fingerprint {
 
     @Instr('R')
     public static void getRight(ExecutionContext ctx) {
-        val pos = new Vector3i(ctx.IP().position());
+        @Cleanup val mem = MemoryStack.stackPush();
+        val pos = mem.vec3i().set(ctx.IP().position());
         ctx.interpret(']');
         ctx.interpret('\'');
         ctx.interpret('[');
@@ -233,15 +231,11 @@ public class TOYS implements Fingerprint {
     }
 
     private static void operateMatrix(ExecutionContext ctx, boolean get) {
+        @Cleanup val mem = MemoryStack.stackPush();
         val stack = ctx.stack();
-        val pos = new Vector3i();
-        if (ctx.dimensions() == 3) {
-            stack.pop3(pos);
-        } else {
-            pos.set(stack.pop2(), 0);
-        }
+        val pos = stack.popVecDimProof(ctx.dimensions(), mem.vec3i());
         //UNDEF F and G pop i and j in the style of a vector (first Y then X)
-        val scale = stack.pop2();
+        val scale = stack.pop2(mem.vec2i());
         val space = ctx.fungeSpace();
         if (get) {
             for (int i = scale.y - 1; i >= 0; i--) {
@@ -270,7 +264,8 @@ public class TOYS implements Fingerprint {
 
     @Instr('Q')
     public static void storeBehind(ExecutionContext ctx) {
-        val pos = new Vector3i(ctx.IP().position());
+        @Cleanup val mem = MemoryStack.stackPush();
+        val pos = mem.vec3i().set(ctx.IP().position());
         ctx.interpret('r');
         ctx.interpret('s');
         ctx.interpret('r');
@@ -311,11 +306,12 @@ public class TOYS implements Fingerprint {
 
     @Instr('W')
     public static void waitForValue(ExecutionContext ctx) {
+        @Cleanup val mem = MemoryStack.stackPush();
         val stack = ctx.stack();
-        val pos = stack.popVecDimProof(ctx.dimensions());
+        val pos = stack.popVecDimProof(ctx.dimensions(), mem.vec3i());
         int value = stack.pop();
         val space = ctx.fungeSpace();
-        int valueAtCell = space.get(new Vector3i(pos).add(ctx.IP().storageOffset()));
+        int valueAtCell = space.get(mem.vec3i().set(pos).add(ctx.IP().storageOffset()));
         if (valueAtCell < value) {
             stack.push(value);
             stack.pushVecDimProof(ctx.dimensions(), pos);

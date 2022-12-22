@@ -10,7 +10,7 @@
 
     <properties>
         <java.version>8</java.version>
-        <lombok.version>1.18.22</lombok.version>
+        <lombok.version>1.18.24</lombok.version>
         <trove.version>3.0.3</trove.version>
         <joml.version>1.10.2</joml.version>
         <commons-cli.version>1.5.0</commons-cli.version>

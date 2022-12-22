@@ -470,17 +470,18 @@ public class Funge98 implements InstructionSet {
         val n = s.pop();
         val sizes = ctx.IP().stackStack().stackSizes();
         //20 envs
+        s.push(0);
         for (Map.Entry<String, String> entry : ctx.env().entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
             s.pushString(key + "=" + value);
         }
         //19 args
+        s.push(0);
+        s.push(0);
         for (String s1 : ctx.args()) {
             s.pushString(s1);
         }
-        s.push(0);
-        s.push(0);
         //18 sizes of stack stack
         for (int size : sizes) {
             s.push(size);

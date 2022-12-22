@@ -43,6 +43,7 @@ public class Main {
         options.addOptionGroup(masterGroup);
         options.addOption(null, "trefunge", false, "Enable 3D (Trefunge) mode. By default, the interpreter emulates 2D Befunge for compatibility.");
         options.addOption("t", "concurrent", false, "Enables the Concurrent Funge extension (t instruction). Buggy programs can potentially forkbomb the interpreter.");
+        options.addOption(null, "env", false, "Allows the interpreter to access the environment variables of the host system.");
         options.addOption(null, "syscall", false, "Enables the syscall feature (= instruction). This is a very dangerous permission to grant, it can call any arbitrary program on your system.");
         options.addOption(Option.builder("i")
                                 .longOpt("readperm")
@@ -105,6 +106,7 @@ public class Main {
         val featureSet = FeatureSet.builder();
         featureSet.trefunge(cmd.hasOption("trefunge"));
         featureSet.concurrent(cmd.hasOption("t"));
+        featureSet.environment(cmd.hasOption("env"));
         featureSet.allowedInputFiles(cmd.getOptionValues("i"));
         featureSet.allowedOutputFiles(cmd.getOptionValues("o"));
         featureSet.perl(cmd.hasOption("perl"));

@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +73,9 @@ public class Interpreter implements ExecutionContext {
 
     private final boolean unrestrictedOutput;
     private final Path[] allowedOutputPaths;
+
+    @Getter
+    private final Map<String, String> env;
 
     private final TIntObjectMap<Map<String, Object>> globals = new TIntObjectHashMap<>();
 
@@ -131,6 +133,13 @@ public class Interpreter implements ExecutionContext {
             env |= 8;
         }
         envFlags = env;
+
+        if (featureSet.environment) {
+            this.env = new HashMap<>(System.getenv());
+        } else {
+            this.env = new HashMap<>();
+        }
+        this.env.put("JFUNGE_ENV", featureSet.environment ? "PASS" : "BLOCK");
 
         if (!featureSet.perl) {
             fingerprintBlackList.add(PERL.INSTANCE.code());
@@ -296,11 +305,6 @@ public class Interpreter implements ExecutionContext {
                 throw new IllegalStateException("IP " + ip.UUID() + " is stuck on a blank strip!\nPos: " + ip.position() + ", Delta: " + ip.delta() + (ip.position().equals(0, 0, 0) && ip.UUID() == 0 ? "\nIs the file empty?" : ""));
             }
         } while (p == ' ');
-    }
-
-    @Override
-    public Map<String, String> env() {
-        return Collections.unmodifiableMap(System.getenv());
     }
 
     @Override

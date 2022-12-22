@@ -108,7 +108,11 @@ public class FPSP implements Fingerprint {
     @SneakyThrows
     @Instr('P')
     public static void print(ExecutionContext ctx) {
-        ctx.output().write((PRINT_FORMAT.format(ctx.stack().popF())).getBytes(StandardCharsets.UTF_8));
+        ctx.output()
+           .write(PRINT_FORMAT.format(ctx.stack().popF())
+                              .replace("\uFFFD", "NaN ")
+                              .replace("\u221E", "infinity")
+                              .getBytes(StandardCharsets.UTF_8));
     }
 
     @Instr('Q')

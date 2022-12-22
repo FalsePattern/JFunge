@@ -3,6 +3,7 @@ package com.falsepattern.jfunge.interpreter.instructions;
 import com.falsepattern.jfunge.Globals;
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.BASE;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.CPLI;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FPDP;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FPSP;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.HRTI;
@@ -45,6 +46,7 @@ public class Funge98 implements InstructionSet {
     static {
         addFingerprint(_3DSP.INSTANCE);
         addFingerprint(BASE.INSTANCE);
+        addFingerprint(CPLI.INSTANCE);
         addFingerprint(FPSP.INSTANCE);
         addFingerprint(FPDP.INSTANCE);
         addFingerprint(HRTI.INSTANCE);

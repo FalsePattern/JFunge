@@ -122,12 +122,29 @@ public interface IStack extends Copiable<IStack> {
         return data.toString("UTF-8");
     }
 
+    default void pushL(long value) {
+        push((int) (value & 0xFFFFFFFFL));
+        push((int) ((value >> 32) & 0xFFFFFFFFL));
+    }
+
+    default long popL() {
+        return ((long) pop() << 32) | (pop() & 0xFFFFFFFFL);
+    }
+
     default void pushF(float val) {
         push(Float.floatToRawIntBits(val));
     }
 
     default float popF() {
         return Float.intBitsToFloat(pop());
+    }
+
+    default void pushD(double val) {
+        pushL(Double.doubleToRawLongBits(val));
+    }
+
+    default double popD() {
+        return Double.longBitsToDouble(popL());
     }
 
     default void pushF2(Vector2fc v) {

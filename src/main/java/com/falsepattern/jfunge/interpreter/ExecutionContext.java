@@ -41,6 +41,8 @@ public interface ExecutionContext {
 
     Map<String, String> env();
 
+    List<String> envKeys();
+
     int input(boolean stagger);
 
     OutputStream output();

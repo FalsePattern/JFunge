@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 @Accessors(fluent = true)
 public class Interpreter implements ExecutionContext {
@@ -76,6 +77,9 @@ public class Interpreter implements ExecutionContext {
 
     @Getter
     private final Map<String, String> env;
+
+    @Getter
+    private final List<String> envKeys;
 
     private final TIntObjectMap<Map<String, Object>> globals = new TIntObjectHashMap<>();
 
@@ -140,6 +144,8 @@ public class Interpreter implements ExecutionContext {
             this.env = new HashMap<>();
         }
         this.env.put("JFUNGE_ENV", featureSet.environment ? "PASS" : "BLOCK");
+        envKeys = new ArrayList<>();
+        envKeys.addAll(this.env.keySet());
 
         if (!featureSet.perl) {
             fingerprintBlackList.add(PERL.INSTANCE.code());

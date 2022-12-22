@@ -58,7 +58,8 @@ public class Funge98 implements InstructionSet {
         addFingerprint(REFC.INSTANCE);
         addFingerprint(ROMA.INSTANCE);
         addFingerprint(TOYS.INSTANCE);
-        addFingerprint(TURT.INSTANCE);
+        //TODO Fix TURT, it's broken
+//        addFingerprint(TURT.INSTANCE);
     }
 
     private static void addFingerprint(Fingerprint print) {

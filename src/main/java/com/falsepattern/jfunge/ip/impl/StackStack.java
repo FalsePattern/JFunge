@@ -1,6 +1,7 @@
-package com.falsepattern.jfunge.ip;
+package com.falsepattern.jfunge.ip.impl;
 
-import com.falsepattern.jfunge.Copiable;
+import com.falsepattern.jfunge.ip.IStack;
+import com.falsepattern.jfunge.ip.IStackStack;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,13 +15,14 @@ import java.util.Deque;
 import java.util.Optional;
 
 @NoArgsConstructor
-@Accessors(fluent = true)
-public class StackStack implements Copiable<StackStack> {
-    private final Deque<Stack> stackStack = new ArrayDeque<>();
+@Accessors(fluent = true,
+           chain = false)
+public class StackStack implements IStackStack {
+    private final Deque<IStack> stackStack = new ArrayDeque<>();
     @Getter
     @Setter(AccessLevel.PRIVATE)
     @NonNull
-    private Stack TOSS = new Stack();
+    private IStack TOSS = new Stack();
 
     @Getter
     private boolean invertMode;
@@ -29,42 +31,47 @@ public class StackStack implements Copiable<StackStack> {
 
     private StackStack(StackStack original) {
         TOSS(original.TOSS().deepCopy());
-        original.stackStack.forEach((stack) -> {
-            stackStack.add(stack.deepCopy());
-        });
+        original.stackStack.forEach((stack) -> stackStack.add(stack.deepCopy()));
         invertMode = original.invertMode;
         queueMode = original.queueMode;
     }
 
-    public Optional<Stack> SOSS() {
+    public Optional<IStack> SOSS() {
         return Optional.ofNullable(stackStack.peek());
     }
 
-    public boolean pushStackStack() {
+    public boolean push() {
         try {
             stackStack.push(TOSS);
             TOSS(new Stack());
-            TOSS().invertMode = invertMode;
-            TOSS().queueMode = queueMode;
+            TOSS().invertMode(invertMode);
+            TOSS().queueMode(queueMode);
             return true;
         } catch (Exception e) {
             return false;
         }
     }
 
+    public boolean pop() {
+        if (stackStack.size() == 0)
+            return false;
+        TOSS(stackStack.pop());
+        return true;
+    }
+
     public void invertMode(boolean state) {
         invertMode = state;
-        TOSS().invertMode = state;
-        for (Stack stack : stackStack) {
-            stack.invertMode = state;
+        TOSS().invertMode(state);
+        for (val stack : stackStack) {
+            stack.invertMode(state);
         }
     }
 
     public void queueMode(boolean state) {
         queueMode = state;
-        TOSS().queueMode = state;
-        for (Stack stack : stackStack) {
-            stack.queueMode = state;
+        TOSS().queueMode(state);
+        for (val stack : stackStack) {
+            stack.queueMode(state);
         }
     }
 
@@ -72,7 +79,7 @@ public class StackStack implements Copiable<StackStack> {
         return stackStack.size() + 1;
     }
 
-    public int[] sizes() {
+    public int[] stackSizes() {
         val sizes = new int[stackStack.size() + 1];
         sizes[0] = TOSS().size();
         int i = 1;
@@ -80,13 +87,6 @@ public class StackStack implements Copiable<StackStack> {
             sizes[i++] = s.size();
         }
         return sizes;
-    }
-
-    public boolean popStackStack() {
-        if (stackStack.size() == 0)
-            return false;
-        TOSS(stackStack.pop());
-        return true;
     }
 
     @Override

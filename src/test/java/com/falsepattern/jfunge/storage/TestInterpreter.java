@@ -1,5 +1,6 @@
 package com.falsepattern.jfunge.storage;
 
+import com.falsepattern.jfunge.interpreter.FeatureSet;
 import com.falsepattern.jfunge.interpreter.Interpreter;
 import lombok.val;
 import lombok.var;
@@ -68,8 +69,8 @@ public class TestInterpreter {
         return program.toByteArray();
     }
 
-    private static int interpret(String[] args, byte[] code, int iterLimit, InputStream input, OutputStream output) {
-        return Assertions.assertDoesNotThrow(() -> Interpreter.executeProgram(false, args, code, iterLimit, input, output, fakeSupplier));
+    private static int interpret(String[] args, byte[] code, InputStream input, OutputStream output, FeatureSet featureSet) {
+        return Assertions.assertDoesNotThrow(() -> Interpreter.executeProgram(args, code, input, output, fakeSupplier, featureSet));
     }
 
     private static InputStream nullStream() {
@@ -81,7 +82,15 @@ public class TestInterpreter {
         val checkingOutput = new ByteArrayOutputStream();
         val output = new TeeOutputStream(checkingOutput, System.out);
         val program = readProgram("/mycology.b98");
-        val returnCode = interpret(new String[]{"mycology.b98"}, program, 300000, nullStream(), output);
+        val featureSet = FeatureSet.builder()
+                                   .allowedInputFiles(new String[]{"/"})
+                                   .allowedOutputFiles(new String[]{"/"})
+                                   .sysCall(false)
+                                   .concurrent(true)
+                                   .perl(true)
+                                   .maxIter(300000L)
+                                   .build();
+        val returnCode = interpret(new String[]{"mycology.b98"}, program, nullStream(), output, featureSet);
         val txt = checkingOutput.toString();
         String currentlyActiveFingerprint = null;
         boolean fingerprintHadError = false;
@@ -121,7 +130,7 @@ public class TestInterpreter {
     public void testSemicolonAtStart() {
         System.out.println("Testing edge case ;;.@");
         val output = new ByteArrayOutputStream();
-        val returnCode = interpret(new String[0], ";;.@".getBytes(StandardCharsets.UTF_8), 50, nullStream(), output);
+        val returnCode = interpret(new String[0], ";;.@".getBytes(StandardCharsets.UTF_8), nullStream(), output, FeatureSet.builder().maxIter(50).build());
         val txt = output.toString();
         Assertions.assertEquals("0 ", txt);
         Assertions.assertEquals(0, returnCode);
@@ -131,7 +140,7 @@ public class TestInterpreter {
     public void testPutCharAtStart() {
         System.out.println("Testing edge case 'a,@");
         val output = new ByteArrayOutputStream();
-        val returnCode = interpret(new String[0], "'a,@".getBytes(StandardCharsets.UTF_8), 50, nullStream(), output);
+        val returnCode = interpret(new String[0], "'a,@".getBytes(StandardCharsets.UTF_8), nullStream(), output, FeatureSet.builder().maxIter(50).build());
         val txt = output.toString();
         Assertions.assertEquals("a", txt);
         Assertions.assertEquals(0, returnCode);

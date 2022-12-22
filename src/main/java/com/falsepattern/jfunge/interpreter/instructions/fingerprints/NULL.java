@@ -1,5 +1,6 @@
 package com.falsepattern.jfunge.interpreter.instructions.fingerprints;
 
+import com.falsepattern.jfunge.interpreter.instructions.Fingerprint;
 import com.falsepattern.jfunge.interpreter.instructions.Instruction;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

@@ -2,23 +2,38 @@ package com.falsepattern.jfunge.interpreter.instructions;
 
 import com.falsepattern.jfunge.Globals;
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
-import com.falsepattern.jfunge.interpreter.instructions.fingerprints.Fingerprint;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.BASE;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.CPLI;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.DATE;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.EVAR;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FIXP;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FPDP;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FPSP;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.HRTI;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODE;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODU;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.NULL;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ORTH;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.PERL;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.REFC;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ROMA;
-import com.falsepattern.jfunge.ip.Stack;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.TOYS;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.TURT;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints._3DSP;
+import com.falsepattern.jfunge.ip.IStack;
+import com.falsepattern.jfunge.ip.impl.Stack;
+import com.falsepattern.jfunge.util.MemoryStack;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.AccessLevel;
+import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 import lombok.var;
-import org.joml.Vector2i;
-import org.joml.Vector3i;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -32,17 +47,32 @@ public class Funge98 implements InstructionSet {
     private static final TIntObjectMap<Fingerprint> fingerprints = new TIntObjectHashMap<>();
 
     static {
+        addFingerprint(_3DSP.INSTANCE);
+        addFingerprint(BASE.INSTANCE);
+        addFingerprint(CPLI.INSTANCE);
+        addFingerprint(DATE.INSTANCE);
+        addFingerprint(EVAR.INSTANCE);
+        addFingerprint(FPSP.INSTANCE);
+        addFingerprint(FPDP.INSTANCE);
+        addFingerprint(FIXP.INSTANCE);
+        addFingerprint(HRTI.INSTANCE);
         addFingerprint(MODE.INSTANCE);
         addFingerprint(MODU.INSTANCE);
         addFingerprint(NULL.INSTANCE);
+        addFingerprint(ORTH.INSTANCE);
+        addFingerprint(PERL.INSTANCE);
+        addFingerprint(REFC.INSTANCE);
         addFingerprint(ROMA.INSTANCE);
+        addFingerprint(TOYS.INSTANCE);
+        //TODO Fix TURT, it's broken
+//        addFingerprint(TURT.INSTANCE);
     }
 
     private static void addFingerprint(Fingerprint print) {
         fingerprints.put(print.code(), print);
     }
 
-    private static int getFingerCode(Stack s) {
+    private static int getFingerCode(IStack s) {
         val n = s.pop();
         var sum = 0;
         for (var i = 0; i < n; i++) {
@@ -54,12 +84,12 @@ public class Funge98 implements InstructionSet {
 
     @Instr('(')
     public static void loadFinger(ExecutionContext ctx) {
-        val s = ctx.IP().stackStack.TOSS();
-        val code = getFingerCode(s);
-        if (fingerprints.containsKey(code)) {
-            s.push(code);
-            s.push(1);
-            ctx.IP().instructionManager.loadInstructionSet(fingerprints.get(code));
+        val stack = ctx.stack();
+        val code = getFingerCode(stack);
+        if (fingerprints.containsKey(code) && ctx.fingerprintAllowed(code)) {
+            stack.push(code);
+            stack.push(1);
+            ctx.IP().instructionManager().loadInstructionSet(fingerprints.get(code));
         } else {
             ctx.interpret('r');
         }
@@ -67,9 +97,9 @@ public class Funge98 implements InstructionSet {
 
     @Instr(')')
     public static void unloadFinger(ExecutionContext ctx) {
-        val code = getFingerCode(ctx.IP().stackStack.TOSS());
+        val code = getFingerCode(ctx.stack());
         if (fingerprints.containsKey(code)) {
-            ctx.IP().instructionManager.unloadInstructionSet(fingerprints.get(code));
+            ctx.IP().instructionManager().unloadInstructionSet(fingerprints.get(code));
         } else {
             ctx.interpret('r');
         }
@@ -77,18 +107,18 @@ public class Funge98 implements InstructionSet {
 
     @Instr('>')
     public static void east(ExecutionContext ctx) {
-        ctx.IP().delta.set(1, 0, 0);
+        ctx.IP().delta().set(1, 0, 0);
     }
 
     @Instr('v')
     public static void south(ExecutionContext ctx) {
-        ctx.IP().delta.set(0, 1, 0);
+        ctx.IP().delta().set(0, 1, 0);
     }
 
     @Instr('h')
     public static void high(ExecutionContext ctx) {
         if (ctx.dimensions() == 3)
-            ctx.IP().delta.set(0, 0, 1);
+            ctx.IP().delta().set(0, 0, 1);
         else
             ctx.interpret('r');
     }
@@ -96,7 +126,7 @@ public class Funge98 implements InstructionSet {
     @Instr('l')
     public static void low(ExecutionContext ctx) {
         if (ctx.dimensions() == 3)
-            ctx.IP().delta.set(0, 0, -1);
+            ctx.IP().delta().set(0, 0, -1);
         else
             ctx.interpret('r');
     }
@@ -145,57 +175,54 @@ public class Funge98 implements InstructionSet {
 
     @Instr('<')
     public static void west(ExecutionContext ctx) {
-        ctx.IP().delta.set(-1, 0, 0);
+        ctx.IP().delta().set(-1, 0, 0);
     }
 
     @Instr('^')
     public static void north(ExecutionContext ctx) {
-        ctx.IP().delta.set(0, -1, 0);
+        ctx.IP().delta().set(0, -1, 0);
     }
 
     @Instr('[')
     public static void turnLeft(ExecutionContext ctx) {
-        val d = ctx.IP().delta;
+        val d = ctx.IP().delta();
         d.set(d.y, -d.x, d.z);
     }
 
     @Instr(']')
     public static void turnRight(ExecutionContext ctx) {
-        val d = ctx.IP().delta;
+        val d = ctx.IP().delta();
         d.set(-d.y, d.x, d.z);
     }
 
     @Instr('#')
     public static void trampoline(ExecutionContext ctx) {
-        ctx.IP().position.add(ctx.IP().delta);
+        ctx.IP().step();
     }
 
     @Instr('j')
     public static void jumpNTimes(ExecutionContext ctx) {
-        int n = ctx.IP().stackStack.TOSS().pop();
-        ctx.IP().position.add(new Vector3i(ctx.IP().delta).mul(n));
+        @Cleanup val mem = MemoryStack.stackPush();
+        int n = ctx.stack().pop();
+        ctx.IP().position().add(mem.vec3i().set(ctx.IP().delta()).mul(n));
     }
 
     @Instr('x')
     public static void absoluteDelta(ExecutionContext ctx) {
-        val s = ctx.IP().stackStack.TOSS();
-        if (ctx.dimensions() == 3) {
-            s.pop3(ctx.IP().delta);
-        } else {
-            val tmp = s.pop2();
-            ctx.IP().delta.set(tmp.x, tmp.y, 0);
-        }
+        val stack = ctx.stack();
+        stack.popVecDimProof(ctx.dimensions(), ctx.IP().delta());
     }
 
     @Instr('k')
     public static void doNTimes(ExecutionContext ctx) {
-        val s = ctx.IP().stackStack.TOSS();
+        @Cleanup val mem = MemoryStack.stackPush();
+        val s = ctx.stack();
         int n = s.pop();
         if (n > 0) {
-            val snapshot = new Vector3i(ctx.IP().position);
+            val snapshot = mem.vec3i().set(ctx.IP().position());
             ctx.step(ctx.IP());
-            int i = ctx.fungeSpace().get(ctx.IP().position);
-            ctx.IP().position.set(snapshot);
+            int i = ctx.fungeSpace().get(ctx.IP().position());
+            ctx.IP().position().set(snapshot);
             for (int j = 0; j < n; j++) {
                 ctx.interpret(i);
             }
@@ -207,19 +234,19 @@ public class Funge98 implements InstructionSet {
     @SneakyThrows
     @Instr('.')
     public static void printNumber(ExecutionContext ctx) {
-        ctx.output().write(Integer.toString(ctx.IP().stackStack.TOSS().pop()).getBytes(StandardCharsets.UTF_8));
+        ctx.output().write(Integer.toString(ctx.stack().pop()).getBytes(StandardCharsets.UTF_8));
         ctx.output().write(' ');
     }
 
     @SneakyThrows
     @Instr(',')
     public static void printChar(ExecutionContext ctx) {
-        ctx.output().write(ctx.IP().stackStack.TOSS().pop());
+        ctx.output().write(ctx.stack().pop());
     }
 
     @Instr('r')
     public static void reflect(ExecutionContext ctx) {
-        ctx.IP().delta.mul(-1);
+        ctx.IP().reflect();
     }
 
     @Instr('@')
@@ -229,28 +256,28 @@ public class Funge98 implements InstructionSet {
 
     @Instr('$')
     public static void pop(ExecutionContext ctx) {
-        ctx.IP().stackStack.TOSS().pop();
+        ctx.stack().pop();
     }
 
     @Instr('n')
     public static void clearStack(ExecutionContext ctx) {
-        ctx.IP().stackStack.TOSS().clear();
+        ctx.stack().clear();
     }
 
     @Instr('_')
     public static void branchEastWest(ExecutionContext ctx) {
-        ctx.interpret(ctx.IP().stackStack.TOSS().pop() == 0 ? '>' : '<');
+        ctx.interpret(ctx.stack().pop() == 0 ? '>' : '<');
     }
 
     @Instr('|')
     public static void branchNorthSouth(ExecutionContext ctx) {
-        ctx.interpret(ctx.IP().stackStack.TOSS().pop() == 0 ? 'v' : '^');
+        ctx.interpret(ctx.stack().pop() == 0 ? 'v' : '^');
     }
 
     @Instr('m')
     public static void branchHighLow(ExecutionContext ctx) {
         if (ctx.dimensions() == 3) {
-            ctx.interpret(ctx.IP().stackStack.TOSS().pop() == 0 ? 'h' : 'l');
+            ctx.interpret(ctx.stack().pop() == 0 ? 'h' : 'l');
         } else {
             ctx.interpret('r');
         }
@@ -258,20 +285,22 @@ public class Funge98 implements InstructionSet {
 
     @Instr('\'')
     public static void getNext(ExecutionContext ctx) {
-        int i = ctx.fungeSpace().get(new Vector3i(ctx.IP().position).add(ctx.IP().delta));
-        ctx.IP().stackStack.TOSS().push(i);
+        @Cleanup val mem = MemoryStack.stackPush();
+        int i = ctx.fungeSpace().get(mem.vec3i().set(ctx.IP().position()).add(ctx.IP().delta()));
+        ctx.stack().push(i);
         ctx.interpret('#');
     }
 
     @Instr('s')
     public static void putNext(ExecutionContext ctx) {
-        ctx.fungeSpace().set(new Vector3i(ctx.IP().position).add(ctx.IP().delta), ctx.IP().stackStack.TOSS().pop());
+        @Cleanup val mem = MemoryStack.stackPush();
+        ctx.fungeSpace().set(mem.vec3i().set(ctx.IP().position()).add(ctx.IP().delta()), ctx.stack().pop());
         ctx.interpret('#');
     }
 
     @Instr('w')
     public static void conditionalTurn(ExecutionContext ctx) {
-        val s = ctx.IP().stackStack.TOSS();
+        val s = ctx.stack();
         val b = s.pop();
         val a = s.pop();
         if (a > b) {
@@ -329,30 +358,18 @@ public class Funge98 implements InstructionSet {
 
     @Instr('p')
     public static void put(ExecutionContext ctx) {
+        @Cleanup val mem = MemoryStack.stackPush();
         val ip = ctx.IP();
-        val toss = ip.stackStack.TOSS();
-        if (ctx.dimensions() == 3) {
-            val vec = toss.pop3().add(ip.storageOffset);
-            val i = toss.pop();
-            ctx.fungeSpace().set(vec, i);
-        } else {
-            val vec = toss.pop2().add(ip.storageOffset.x, ip.storageOffset.y);
-            val i = toss.pop();
-            ctx.fungeSpace().set(vec.x, vec.y, ip.storageOffset.z, i);
-        }
+        val stack = ip.stackStack().TOSS();
+        ctx.fungeSpace().set(stack.popVecDimProof(ctx.dimensions(), mem.vec3i()).add(ip.storageOffset()), stack.pop());
     }
 
     @Instr('g')
     public static void get(ExecutionContext ctx) {
+        @Cleanup val mem = MemoryStack.stackPush();
         val ip = ctx.IP();
-        val toss = ip.stackStack.TOSS();
-        if (ctx.dimensions() == 3) {
-            val vec = toss.pop3().add(ip.storageOffset);
-            toss.push(ctx.fungeSpace().get(vec));
-        } else {
-            val vec = toss.pop2().add(ip.storageOffset.x, ip.storageOffset.y);
-            toss.push(ctx.fungeSpace().get(vec.x, vec.y, ip.storageOffset.z));
-        }
+        val stack = ctx.stack();
+        stack.push(ctx.fungeSpace().get(stack.popVecDimProof(ctx.dimensions(), mem.vec3i()).add(ip.storageOffset())));
     }
 
     @Instr('!')
@@ -371,12 +388,13 @@ public class Funge98 implements InstructionSet {
 
     @Instr('{')
     public static void blockStart(ExecutionContext ctx) {
-        if (!ctx.IP().stackStack.pushStackStack()) {
+        @Cleanup val mem = MemoryStack.stackPush();
+        if (!ctx.IP().stackStack().push()) {
             ctx.interpret('r');
             return;
         }
-        val SOSS = ctx.IP().stackStack.SOSS().get();
-        val TOSS = ctx.IP().stackStack.TOSS();
+        val SOSS = ctx.IP().stackStack().SOSS().get();
+        val TOSS = ctx.stack();
         int n = SOSS.pop();
         if (n > 0) {
             val tmp = new Stack();
@@ -392,36 +410,26 @@ public class Funge98 implements InstructionSet {
                 SOSS.push(0);
             }
         }
-        if (ctx.dimensions() == 3) {
-            SOSS.push3(ctx.IP().storageOffset);
-        } else {
-            SOSS.push2(new Vector2i(ctx.IP().storageOffset.x, ctx.IP().storageOffset.y));
-        }
-        val snapshot = new Vector3i(ctx.IP().position);
+        SOSS.pushVecDimProof(ctx.dimensions(), ctx.IP().storageOffset());
+        val snapshot = mem.vec3i().set(ctx.IP().position());
         ctx.step(ctx.IP());
-        ctx.IP().storageOffset.set(ctx.IP().position);
-        ctx.IP().position.set(snapshot);
+        ctx.IP().storageOffset().set(ctx.IP().position());
+        ctx.IP().position().set(snapshot);
     }
 
     @Instr('}')
     public static void blockEnd(ExecutionContext ctx) {
-        val TOSS = ctx.IP().stackStack.TOSS();
-        val SOSSt = ctx.IP().stackStack.SOSS();
-        if (!SOSSt.isPresent() || !ctx.IP().stackStack.popStackStack()) {
+        val TOSS = ctx.stack();
+        val SOSSt = ctx.IP().stackStack().SOSS();
+        if (!SOSSt.isPresent() || !ctx.IP().stackStack().pop()) {
             ctx.interpret('r');
             return;
         }
         val SOSS = SOSSt.get();
         int n = TOSS.pop();
 
-        if (ctx.dimensions() == 3) {
-            SOSS.pop3(ctx.IP().storageOffset);
-        } else {
-            val tmp2 = SOSS.pop2();
-            ctx.IP().storageOffset.x = tmp2.x;
-            ctx.IP().storageOffset.y = tmp2.y;
-        }
-        val tmp = new Stack();
+        SOSS.popVecDimProof(ctx.dimensions(), ctx.IP().storageOffset());
+        val tmp = (IStack) new Stack();
         if (n > 0) {
             for (int i = 0; i < n; i++) {
                 tmp.push(TOSS.pop());
@@ -439,8 +447,8 @@ public class Funge98 implements InstructionSet {
 
     @Instr('u')
     public static void stackUnderStack(ExecutionContext ctx) {
-        val TOSS = ctx.IP().stackStack.TOSS();
-        val SOSSt = ctx.IP().stackStack.SOSS();
+        val TOSS = ctx.stack();
+        val SOSSt = ctx.IP().stackStack().SOSS();
         if (!SOSSt.isPresent()) {
             ctx.interpret('r');
             return;
@@ -460,67 +468,56 @@ public class Funge98 implements InstructionSet {
 
     @Instr('y')
     public static void sysInfo(ExecutionContext ctx) {
-        val s = ctx.IP().stackStack.TOSS();
-        val tossSize = ctx.IP().stackStack.TOSS().size();
+        @Cleanup val mem = MemoryStack.stackPush();
+        val s = ctx.stack();
+        val tossSize = ctx.stack().size();
         val n = s.pop();
-        val sizes = ctx.IP().stackStack.sizes();
+        val sizes = ctx.IP().stackStack().stackSizes();
         //20 envs
+        s.push(0);
         for (Map.Entry<String, String> entry : ctx.env().entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
             s.pushString(key + "=" + value);
         }
         //19 args
+        s.push(0);
+        s.push(0);
         for (String s1 : ctx.args()) {
             s.pushString(s1);
         }
-        s.push(0);
-        s.push(0);
         //18 sizes of stack stack
-        for (int i = 0; i < sizes.length; i++) {
-            s.push(sizes[i]);
+        for (int size : sizes) {
+            s.push(size);
         }
         //17 size of stack stack
-        s.push(ctx.IP().stackStack.size());
+        s.push(ctx.IP().stackStack().size());
         //16 time
         val time = LocalDateTime.now();
         s.push(time.getHour() * 256 * 256 + time.getMinute() * 256 + time.getSecond());
         //15 date
         s.push((time.getYear() - 1900) * 256 * 256 + time.getMonthValue() * 256 + time.getDayOfMonth());
         val bounds = ctx.fungeSpace().bounds();
-        if (ctx.dimensions() == 3) {
-            //14 greatest point
-            s.push3(new Vector3i(bounds.xMax() - bounds.xMin(), bounds.yMax() - bounds.yMin(), bounds.zMax() - bounds.zMin()));
-            //13 least point
-            s.push3(new Vector3i(bounds.xMin(), bounds.yMin(), bounds.zMin()));
-            //12 storage offset
-            s.push3(ctx.IP().storageOffset);
-            //11 delta
-            s.push3(ctx.IP().delta);
-            //10 position
-            s.push3(ctx.IP().position);
-        } else {
-            //14 greatest point
-            s.push2(new Vector2i(bounds.xMax() - bounds.xMin(), bounds.yMax() - bounds.yMin()));
-            //13 least point
-            s.push2(new Vector2i(bounds.xMin(), bounds.yMin()));
-            //12 storage offset
-            s.push2(new Vector2i(ctx.IP().storageOffset.x, ctx.IP().storageOffset.y));
-            //11 delta
-            s.push2(new Vector2i(ctx.IP().delta.x, ctx.IP().delta.y));
-            //10 position
-            s.push2(new Vector2i(ctx.IP().position.x, ctx.IP().position.y));
-        }
+        //14 greatest point
+        s.pushVecDimProof(ctx.dimensions(), mem.vec3i().set(bounds.xMax() - bounds.xMin(), bounds.yMax() - bounds.yMin(), bounds.zMax() - bounds.zMin()));
+        //13 least point
+        s.pushVecDimProof(ctx.dimensions(), mem.vec3i().set(bounds.xMin(), bounds.yMin(), bounds.zMin()));
+        //12 storage offset
+        s.pushVecDimProof(ctx.dimensions(), ctx.IP().storageOffset());
+        //11 delta
+        s.pushVecDimProof(ctx.dimensions(), ctx.IP().delta());
+        //10 position
+        s.pushVecDimProof(ctx.dimensions(), ctx.IP().position());
         //9 teamnumber
         s.push(0);
         //8 uuid
-        s.push(ctx.IP().UUID);
+        s.push(ctx.IP().UUID());
         //7 dimensions
         s.push(ctx.dimensions());
         //6 separator
         s.push(File.separatorChar);
         //5 operating paradigm
-        s.push(1);
+        s.push((ctx.envFlags() & 0x08) != 0 ? 1 : 0);
         //4 version
         s.push(Globals.FUNGE_VERSION);
         //3 handprint
@@ -528,7 +525,7 @@ public class Funge98 implements InstructionSet {
         //2 bpc
         s.push(4);
         //1 flags
-        s.push(0b00001111);
+        s.push(ctx.envFlags());
         if (n > 0) {
             int curr = s.pick(n - 1);
             for (int i = s.size(); i >= tossSize; i--) {
@@ -540,59 +537,80 @@ public class Funge98 implements InstructionSet {
 
     @Instr('q')
     public static void quit(ExecutionContext ctx) {
-        int q = ctx.IP().stackStack.TOSS().pop();
+        int q = ctx.stack().pop();
         ctx.stop(q);
     }
 
     @Instr('t')
     public static void split(ExecutionContext ctx) {
+        if (!ctx.concurrentAllowed()) {
+            System.err.println("Program tried to execute concurrent funge when it was disabled!");
+            reflect(ctx);
+            return;
+        }
         val clone = ctx.cloneIP();
-        clone.delta.mul(-1);
+        clone.delta().mul(-1);
     }
 
     @Instr('i')
     public static void input(ExecutionContext ctx) {
-        val s = ctx.IP().stackStack.TOSS();
+        @Cleanup val mem = MemoryStack.stackPush();
+        if ((ctx.envFlags() & 0x02) == 0) {
+            reflect(ctx);
+            return;
+        }
+        val s = ctx.stack();
         val filename = s.popString();
         val flags = s.pop();
-        val pos = new Vector3i();
-        if (ctx.dimensions() == 3) {
-            s.pop3(pos);
-        } else {
-            pos.set(s.pop2(), 0);
+        val pos = s.popVecDimProof(ctx.dimensions(), mem.vec3i());
+        pos.add(ctx.IP().storageOffset());
+        try {
+            if (!ctx.fileInputAllowed(filename)) {
+                System.err.println("Code tried to read file not on whitelist: " + filename);
+                reflect(ctx);
+                return;
+            }
+        } catch (IOException e) {
+            reflect(ctx);
+            return;
         }
-        pos.add(ctx.IP().storageOffset);
         val file = ctx.readFile(filename);
         if (file == null) {
             ctx.interpret('r');
             return;
         }
         val delta = ((flags & 1) == 1) ? ctx.fungeSpace().loadBinaryFileAt(pos.x, pos.y, pos.z, file) : ctx.fungeSpace().loadFileAt(pos.x, pos.y, pos.z, file, ctx.dimensions() == 3);
-        pos.sub(ctx.IP().storageOffset);
-        if (ctx.dimensions() == 3) {
-            s.push3(delta);
-            s.push3(pos);
-        } else {
-            s.push2(new Vector2i(delta.x, delta.y));
-            s.push2(new Vector2i(pos.x, pos.y));
-        }
+        pos.sub(ctx.IP().storageOffset());
+        s.pushVecDimProof(ctx.dimensions(), delta);
+        s.pushVecDimProof(ctx.dimensions(), pos);
     }
 
     @Instr('o')
     public static void output(ExecutionContext ctx) {
-        val s = ctx.IP().stackStack.TOSS();
+        @Cleanup val mem = MemoryStack.stackPush();
+        if ((ctx.envFlags() & 0x04) == 0) {
+            reflect(ctx);
+            return;
+        }
+        val s = ctx.stack();
         val filename = s.popString();
         val flags = s.pop();
-        val pos = new Vector3i();
-        val delta = new Vector3i();
-        if (ctx.dimensions() == 3) {
-            s.pop3(pos);
-            s.pop3(delta);
-        } else {
-            pos.set(s.pop2(), 0);
-            delta.set(s.pop2(), 1);
+        val pos = s.popVecDimProof(ctx.dimensions(), mem.vec3i());
+        val delta = s.popVecDimProof(ctx.dimensions(), mem.vec3i());
+        if (ctx.dimensions() != 3) {
+            delta.z = 1;
         }
-        pos.add(ctx.IP().storageOffset);
+        pos.add(ctx.IP().storageOffset());
+        try {
+            if (!ctx.fileOutputAllowed(filename)) {
+                System.err.println("Code tried to write file not on whitelist: " + filename);
+                reflect(ctx);
+                return;
+            }
+        } catch (IOException e) {
+            reflect(ctx);
+            return;
+        }
         val data = ctx.fungeSpace().readDataAt(pos.x, pos.y, pos.z, delta.x, delta.y, delta.z, (flags & 1) == 1);
         if (!ctx.writeFile(filename, data)) {
             ctx.interpret('r');
@@ -624,7 +642,7 @@ public class Funge98 implements InstructionSet {
             }
         }
         if (found) {
-            ctx.IP().stackStack.TOSS().push(counter);
+            ctx.stack().push(counter);
         } else {
             ctx.interpret('r');
         }
@@ -634,26 +652,31 @@ public class Funge98 implements InstructionSet {
     @SneakyThrows
     public static void readChar(ExecutionContext ctx) {
         ctx.output().flush();
-        ctx.IP().stackStack.TOSS().push(ctx.input(false));
+        ctx.stack().push(ctx.input(false));
     }
 
     @Instr('=')
     public static void sysCall(ExecutionContext ctx) {
-        val command = ctx.IP().stackStack.TOSS().popString();
+        if (!ctx.syscallAllowed()) {
+            System.err.println("Program tried to syscall while it was disabled!");
+            reflect(ctx);
+            return;
+        }
+        val command = ctx.stack().popString();
         try {
             val proc = Runtime.getRuntime().exec(command);
-            ctx.IP().stackStack.TOSS().push(proc.waitFor());
+            ctx.stack().push(proc.waitFor());
         } catch (Exception e) {
-            ctx.IP().stackStack.TOSS().push(-1);
+            ctx.stack().push(-1);
         }
     }
 
-    public static void stack(ExecutionContext ctx, Consumer<Stack> runner) {
-        runner.accept(ctx.IP().stackStack.TOSS());
+    public static void stack(ExecutionContext ctx, Consumer<IStack> runner) {
+        runner.accept(ctx.stack());
     }
 
     public static void binop(ExecutionContext ctx, BinaryOperator op) {
-        val TOSS = ctx.IP().stackStack.TOSS();
+        val TOSS = ctx.stack();
         int b = TOSS.pop();
         int a = TOSS.pop();
         TOSS.push(op.op(a, b));
@@ -664,11 +687,11 @@ public class Funge98 implements InstructionSet {
         InstructionSet.super.load(instructionSet);
         for (int i = 0; i <= 9; i++) {
             int finalI = i;
-            instructionSet.accept((ctx) -> ctx.IP().stackStack.TOSS().push(finalI), '0' + i);
+            instructionSet.accept((ctx) -> ctx.stack().push(finalI), '0' + i);
         }
         for (int i = 0; i <= 5; i++) {
             int finalI = i;
-            instructionSet.accept((ctx) -> ctx.IP().stackStack.TOSS().push(10 + finalI), 'a' + i);
+            instructionSet.accept((ctx) -> ctx.stack().push(10 + finalI), 'a' + i);
         }
     }
 

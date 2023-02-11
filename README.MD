@@ -4,9 +4,12 @@ A standard-conforming Funge-98 interpreter.
 
 ### Usage
 ```
-usage: jfunge [-f <file> | --help | --license | --version]  [-i <file>]
-       [--maxiter <iterations>] [-o <file>] [--syscall] [-t] [--trefunge]
+usage: jfunge [--env] [-f <file> | --help | --license | --version]  [-i <file>]
+       [--maxiter <iterations>] [-o <file>] [--perl] [--syscall] [-t]
+       [--trefunge]
 JFunge, a Funge98 interpeter for java.
+    --env                    Allows the interpreter to access the environment
+                             variables of the host system.
  -f,--file <file>            The file to load into the interpreter at the origin
                              on startup.
     --help                   Displays this help page
@@ -22,6 +25,10 @@ JFunge, a Funge98 interpeter for java.
                              directory (o instruction). Specify / to allow write
                              access to every file on the system (dangerous). Can
                              specify multiple files/folders.
+    --perl                   Enable the PERL fingerprint. This requires the
+                             working directory of the interpreter to be
+                             writable, and is also an arbitrary code execution
+                             risk.
     --syscall                Enables the syscall feature (= instruction). This
                              is a very dangerous permission to grant, it can
                              call any arbitrary program on your system.
@@ -33,11 +40,14 @@ JFunge, a Funge98 interpeter for java.
     --version                Prints the current program version, along with the
                              handprint and version given by befunge's y
                              instruction.
+
+Process finished with exit code 0
+
 ```
 
 ### Compatibility
 
-The interpreter's handprint is `0xfa15e9a7` (`-99227225` in decimal), which is a hexadecimal approximation of "`falsepat`" from FalsePattern.
+The interpreter's handprint is `0x74708578` ("JFUN")
 
 The version number given to befunge is `major * 256 * 256 + minor * 256 + patch`, where major, minor, patch are the 3
 primary version numbers in the standard semver format.
@@ -52,17 +62,23 @@ The interpreter supports the following Funge-98 specification extensions:
 
 Additionally, the following fingerprints are currently supported (more to come):
 - [3DSP](http://rcfunge98.com/rcsfingers.html#3DSP)
+- [BASE](https://rcfunge98.com/rcsfingers.html#BASE)
+- [CPLI](https://rcfunge98.com/rcsfingers.html#CPLI)
+- [DATE](https://rcfunge98.com/rcsfingers.html#DATE)
+- [EVAR](https://rcfunge98.com/rcsfingers.html#EVAR)
+- [FIXP](https://rcfunge98.com/rcsfingers.html#FIXP)
+- [FPDP](http://rcfunge98.com/rcsfingers.html#FPDP)
 - [FPSP](http://rcfunge98.com/rcsfingers.html#FPSP)
 - [HRTI](./docs/catseye/library/HRTI.markdown)
 - [MODE](./docs/catseye/library/MODE.markdown)
 - [MODU](./docs/catseye/library/MODU.markdown)
 - [NULL](./docs/catseye/library/NULL.markdown)
 - [ORTH](./docs/catseye/library/ORTH.markdown)
-- [PERL](./docs/catseye/library/PERL.markdown)
+- [PERL](./docs/catseye/library/PERL.markdown) (Disabled by default, needs command line flag)
 - [REFC](./docs/catseye/library/REFC.markdown)
 - [ROMA](./docs/catseye/library/ROMA.markdown)
 - [TOYS](./docs/catseye/library/TOYS.markdown)
-- [TURT](./docs/catseye/library/TURT.markdown)
+- [TURT](./docs/catseye/library/TURT.markdown) (Broken, disabled in source code, will be fixed in the future)
 
 ### Version Release Checklist
 - Update the version number inside the [pom](./pom.xml)

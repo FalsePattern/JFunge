@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class TestInterpreter {
@@ -162,10 +163,17 @@ public class TestInterpreter {
         String currentlyActiveFingerprint = null;
         boolean fingerprintHadError = false;
         boolean good = true;
+        val implementedFingerprints = new HashSet<String>();
+        val unimplementedFingerprints = new HashSet<String>();
         for (val line: txt.split("\n")) {
             if (line.startsWith("Testing fingerprint ")) {
                 int start = "Testing fingerprint ".length();
                 currentlyActiveFingerprint = line.substring(start, start + 4);
+                if (line.endsWith("not loaded.")) {
+                    unimplementedFingerprints.add(currentlyActiveFingerprint);
+                } else {
+                    implementedFingerprints.add(currentlyActiveFingerprint);
+                }
                 fingerprintHadError = false;
             } else if (line.equals("About to test detailed () behaviour with two fingerprints.")) {
                 //Fingerprint core checks are over, stop tracking.
@@ -188,6 +196,16 @@ public class TestInterpreter {
                 System.err.print("    ");
                 System.err.println(line);
             }
+        }
+        System.out.println("Implemented fingerprints: ");
+        for (val fingerprint: implementedFingerprints) {
+            System.out.print("    ");
+            System.out.println(fingerprint);
+        }
+        System.out.println("Unimplemented fingerprints: ");
+        for (val fingerprint: unimplementedFingerprints) {
+            System.out.print("    ");
+            System.out.println(fingerprint);
         }
         Assertions.assertTrue(good);
         Assertions.assertEquals(15, returnCode);

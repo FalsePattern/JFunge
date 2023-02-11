@@ -61,7 +61,7 @@ The interpreter supports the following Funge-98 specification extensions:
 - Optional Trefunge mode (experimental)
 
 Additionally, the following fingerprints are currently supported (more to come):
-- [3DSP](http://rcfunge98.com/rcsfingers.html#3DSP)
+- [3DSP](https://rcfunge98.com/rcsfingers.html#3DSP)
 - [BASE](https://rcfunge98.com/rcsfingers.html#BASE)
 - [CPLI](https://rcfunge98.com/rcsfingers.html#CPLI)
 - [DATE](https://rcfunge98.com/rcsfingers.html#DATE)

@@ -7,7 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
 import java.util.function.ObjIntConsumer;
 
 public interface InstructionSet {
@@ -26,13 +26,13 @@ public interface InstructionSet {
               });
     }
 
-    default void unload(IntConsumer instructionSet) {
+    default void unload(IntFunction<Instruction> instructionSet) {
         val clazz = this.getClass();
         Arrays.stream(clazz.getDeclaredMethods())
               .filter((method) -> Modifier.isStatic(method.getModifiers()) && method.isAnnotationPresent(Instr.class))
               .forEach((method) -> {
                   val ann = method.getAnnotation(Instr.class);
-                  instructionSet.accept(ann.value());
+                  instructionSet.apply(ann.value());
               });
     }
 

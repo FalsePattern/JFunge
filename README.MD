@@ -67,6 +67,7 @@ Additionally, the following fingerprints are currently supported (more to come):
 - [DATE](https://rcfunge98.com/rcsfingers.html#DATE)
 - [DIRF](https://rcfunge98.com/rcsfingers.html#DIRF)
 - [EVAR](https://rcfunge98.com/rcsfingers.html#EVAR)
+- [FING](https://rcfunge98.com/rcsfingers.html#FING)
 - [FIXP](https://rcfunge98.com/rcsfingers.html#FIXP)
 - [FPDP](https://rcfunge98.com/rcsfingers.html#FPDP)
 - [FPSP](https://rcfunge98.com/rcsfingers.html#FPSP)

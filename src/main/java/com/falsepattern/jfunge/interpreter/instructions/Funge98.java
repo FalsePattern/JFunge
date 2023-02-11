@@ -8,6 +8,7 @@ import com.falsepattern.jfunge.interpreter.instructions.fingerprints.CPLI;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.DATE;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.DIRF;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.EVAR;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FING;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FIXP;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FPDP;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FPSP;
@@ -20,7 +21,6 @@ import com.falsepattern.jfunge.interpreter.instructions.fingerprints.PERL;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.REFC;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ROMA;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.TOYS;
-import com.falsepattern.jfunge.interpreter.instructions.fingerprints.TURT;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints._3DSP;
 import com.falsepattern.jfunge.ip.IStack;
 import com.falsepattern.jfunge.ip.impl.Stack;
@@ -41,6 +41,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
 import java.util.function.ObjIntConsumer;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -57,6 +58,7 @@ public class Funge98 implements InstructionSet {
         addFingerprint(EVAR.INSTANCE);
         addFingerprint(FPSP.INSTANCE);
         addFingerprint(FPDP.INSTANCE);
+        addFingerprint(FING.INSTANCE);
         addFingerprint(FIXP.INSTANCE);
         addFingerprint(HRTI.INSTANCE);
         addFingerprint(MODE.INSTANCE);
@@ -691,7 +693,7 @@ public class Funge98 implements InstructionSet {
     }
 
     @Override
-    public void unload(IntConsumer instructionSet) {
+    public void unload(IntFunction<Instruction> instructionSet) {
         throw new UnsupportedOperationException("Cannot unload the base syntax");
     }
 

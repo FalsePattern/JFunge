@@ -28,11 +28,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 @Accessors(fluent = true)
 public class Interpreter implements ExecutionContext {
     public static final FileIOSupplier DEFAULT_FILE_IO_SUPPLIER = new FileIOSupplier() {
+        private Path currentDirectory = Paths.get(System.getProperty("user.dir"));
         @Override
         public byte[] readFile(String file) throws IOException {
             return Files.readAllBytes(Paths.get(file));
@@ -42,6 +42,60 @@ public class Interpreter implements ExecutionContext {
         public boolean writeFile(String file, byte[] data) throws IOException {
             Files.write(Paths.get(file), data);
             return true;
+        }
+
+        @Override
+        public Path toRealPath(String file) {
+            var path = Paths.get(file);
+            if (!path.isAbsolute()) {
+                path = currentDirectory.resolve(path);
+            }
+            try {
+                return path.toRealPath();
+            } catch (IOException e) {
+                return path.normalize();
+            }
+        }
+
+        @Override
+        public boolean changeDirectory(String dir) {
+            val path = toRealPath(dir);
+            if (Files.isDirectory(path)) {
+                currentDirectory = path;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public boolean createDirectory(String dir) {
+            val path = toRealPath(dir);
+            if (Files.exists(path)) {
+                return false;
+            } else {
+                try {
+                    Files.createDirectory(path);
+                    return true;
+                } catch (IOException e) {
+                    return false;
+                }
+            }
+        }
+
+        @Override
+        public boolean deleteDirectory(String dir) {
+            val path = toRealPath(dir);
+            if (Files.isDirectory(path)) {
+                try {
+                    Files.delete(path);
+                    return true;
+                } catch (IOException e) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
         }
     };
     @Getter
@@ -331,7 +385,10 @@ public class Interpreter implements ExecutionContext {
     }
 
     @Override
-    public byte[] readFile(String file) {
+    public byte[] readFile(String file) throws PermissionException {
+        if (fileInputBlocked(file)) {
+            throw new PermissionException("Cannot read file " + file + " (input not allowed).");
+        }
         try {
             return fileIOSupplier.readFile(file);
         } catch (IOException e) {
@@ -340,7 +397,10 @@ public class Interpreter implements ExecutionContext {
     }
 
     @Override
-    public boolean writeFile(String file, byte[] data) {
+    public boolean writeFile(String file, byte[] data) throws PermissionException {
+        if (fileOutputBlocked(file)) {
+            throw new PermissionException("Cannot write to file " + file + " (output not allowed).");
+        }
         try {
             return fileIOSupplier.writeFile(file, data);
         } catch (IOException e) {
@@ -349,23 +409,45 @@ public class Interpreter implements ExecutionContext {
     }
 
     @Override
-    public boolean fileInputAllowed(String file) throws IOException {
-        if ((envFlags & 0x02) == 0) {
-            return false;
+    public boolean changeDirectory(String dir) throws PermissionException {
+        if (fileInputBlocked(dir)) {
+            throw new PermissionException("Cannot change directory to " + dir + " (input not allowed).");
         }
-        if (unrestrictedInput) return true;
-        val path = Paths.get(file).toRealPath();
-        return Arrays.stream(allowedInputPaths).anyMatch(path::startsWith);
+        return fileIOSupplier.changeDirectory(dir);
     }
 
     @Override
-    public boolean fileOutputAllowed(String file) throws IOException {
-        if ((envFlags & 0x04) == 0) {
-            return false;
+    public boolean makeDirectory(String dir) throws PermissionException {
+        if (fileOutputBlocked(dir)) {
+            throw new PermissionException("Cannot create directory " + dir + " (output not allowed).");
         }
-        if (unrestrictedOutput) return true;
-        val path = Paths.get(file).toRealPath();
-        return Arrays.stream(allowedOutputPaths).anyMatch(path::startsWith);
+        return fileIOSupplier.createDirectory(dir);
+    }
+
+    @Override
+    public boolean removeDirectory(String dir) throws PermissionException {
+        if (fileOutputBlocked(dir)) {
+            throw new PermissionException("Cannot delete directory " + dir + " (output not allowed).");
+        }
+        return fileIOSupplier.deleteDirectory(dir);
+    }
+
+    private boolean fileInputBlocked(String file) {
+        if ((envFlags & 0x02) == 0) {
+            return true;
+        }
+        if (unrestrictedInput) return false;
+        val path = fileIOSupplier.toRealPath(file);
+        return Arrays.stream(allowedInputPaths).noneMatch(path::startsWith);
+    }
+
+    private boolean fileOutputBlocked(String file) {
+        if ((envFlags & 0x04) == 0) {
+            return true;
+        }
+        if (unrestrictedOutput) return false;
+        val path = fileIOSupplier.toRealPath(file);
+        return Arrays.stream(allowedOutputPaths).noneMatch(path::startsWith);
     }
 
     @Override
@@ -402,5 +484,13 @@ public class Interpreter implements ExecutionContext {
         byte[] readFile(String file) throws IOException;
 
         boolean writeFile(String file, byte[] data) throws IOException;
+
+        Path toRealPath(String file);
+
+        boolean changeDirectory(String dir);
+
+        boolean createDirectory(String dir);
+
+        boolean deleteDirectory(String dir);
     }
 }

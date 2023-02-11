@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,15 +24,26 @@ import java.util.Map;
 public class TestInterpreter {
     private static final Interpreter.FileIOSupplier fakeSupplier = new Interpreter.FileIOSupplier() {
 
-        private final Map<String, byte[]> files = new HashMap<>();
+        private Path currentDirectory = Paths.get("/");
+
+        private final Map<Path, byte[]> files;
+
+        {
+            files = new HashMap<>();
+            files.put(Paths.get("/"), null);
+        }
 
         @Override
-        public byte[] readFile(String file) throws IOException {
+        public byte[] readFile(String name) throws IOException {
+            val file = toRealPath(name);
             if (files.containsKey(file)) {
                 val b = files.get(file);
+                if (b == null) {
+                    return null;
+                }
                 return Arrays.copyOf(b, b.length);
             } else {
-                try (val s = TestInterpreter.class.getResourceAsStream("/" + file)) {
+                try (val s = TestInterpreter.class.getResourceAsStream(file.toString())) {
                     if (s == null) {
                         throw new FileNotFoundException("Could not find resource " + file);
                     }
@@ -49,8 +62,62 @@ public class TestInterpreter {
 
         @Override
         public boolean writeFile(String file, byte[] data) {
-            files.put(file, Arrays.copyOf(data, data.length));
+            val path = toRealPath(file);
+            if (files.containsKey(path)) {
+                if (files.get(path) == null) {
+                    return false;
+                }
+            }
+            files.put(path, Arrays.copyOf(data, data.length));
             return true;
+        }
+
+        @Override
+        public Path toRealPath(String file) {
+            var path = Paths.get(file);
+            if (path.startsWith("/")) {
+                return path;
+            }
+            if (!path.isAbsolute()) {
+                path = currentDirectory.resolve(path);
+            }
+            return path.normalize();
+        }
+
+        @Override
+        public boolean changeDirectory(String dir) {
+            val path = toRealPath(dir);
+            if (files.containsKey(path)) {
+                if (files.get(path) == null) {
+                    currentDirectory = path;
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean createDirectory(String dir) {
+            val path = toRealPath(dir);
+            if (files.containsKey(path)) {
+                return false;
+            }
+            files.put(path, null);
+            return true;
+        }
+
+        @Override
+        public boolean deleteDirectory(String dir) {
+            val path = toRealPath(dir);
+            if (files.containsKey(path)) {
+                if (files.get(path) == null) {
+                    files.remove(path);
+                    return true;
+                }
+            }
+            return false;
         }
     };
 

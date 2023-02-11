@@ -2,9 +2,11 @@ package com.falsepattern.jfunge.interpreter.instructions;
 
 import com.falsepattern.jfunge.Globals;
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
+import com.falsepattern.jfunge.interpreter.PermissionException;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.BASE;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.CPLI;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.DATE;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.DIRF;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.EVAR;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FIXP;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FPDP;
@@ -51,6 +53,7 @@ public class Funge98 implements InstructionSet {
         addFingerprint(BASE.INSTANCE);
         addFingerprint(CPLI.INSTANCE);
         addFingerprint(DATE.INSTANCE);
+        addFingerprint(DIRF.INSTANCE);
         addFingerprint(EVAR.INSTANCE);
         addFingerprint(FPSP.INSTANCE);
         addFingerprint(FPDP.INSTANCE);
@@ -564,19 +567,16 @@ public class Funge98 implements InstructionSet {
         val flags = s.pop();
         val pos = s.popVecDimProof(ctx.dimensions(), mem.vec3i());
         pos.add(ctx.IP().storageOffset());
+        byte[] file;
         try {
-            if (!ctx.fileInputAllowed(filename)) {
-                System.err.println("Code tried to read file not on whitelist: " + filename);
-                reflect(ctx);
-                return;
-            }
-        } catch (IOException e) {
+            file = ctx.readFile(filename);
+        } catch (PermissionException e) {
+            System.err.println(e.getMessage());
             reflect(ctx);
             return;
         }
-        val file = ctx.readFile(filename);
         if (file == null) {
-            ctx.interpret('r');
+            reflect(ctx);
             return;
         }
         val delta = ((flags & 1) == 1) ? ctx.fungeSpace().loadBinaryFileAt(pos.x, pos.y, pos.z, file) : ctx.fungeSpace().loadFileAt(pos.x, pos.y, pos.z, file, ctx.dimensions() == 3);
@@ -601,19 +601,14 @@ public class Funge98 implements InstructionSet {
             delta.z = 1;
         }
         pos.add(ctx.IP().storageOffset());
-        try {
-            if (!ctx.fileOutputAllowed(filename)) {
-                System.err.println("Code tried to write file not on whitelist: " + filename);
-                reflect(ctx);
-                return;
-            }
-        } catch (IOException e) {
-            reflect(ctx);
-            return;
-        }
         val data = ctx.fungeSpace().readDataAt(pos.x, pos.y, pos.z, delta.x, delta.y, delta.z, (flags & 1) == 1);
-        if (!ctx.writeFile(filename, data)) {
-            ctx.interpret('r');
+        try {
+            if (!ctx.writeFile(filename, data)) {
+                reflect(ctx);
+            }
+        } catch (PermissionException e) {
+            System.err.println(e.getMessage());
+            reflect(ctx);
         }
     }
 

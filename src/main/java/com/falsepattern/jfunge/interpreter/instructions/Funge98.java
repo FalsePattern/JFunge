@@ -281,7 +281,7 @@ public class Funge98 implements InstructionSet {
     @Instr('m')
     public static void branchHighLow(ExecutionContext ctx) {
         if (ctx.dimensions() == 3) {
-            ctx.interpret(ctx.stack().pop() == 0 ? 'h' : 'l');
+            ctx.interpret(ctx.stack().pop() == 0 ? 'l' : 'h');
         } else {
             ctx.IP().reflect();
         }

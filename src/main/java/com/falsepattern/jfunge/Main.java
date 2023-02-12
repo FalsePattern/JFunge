@@ -3,7 +3,6 @@ package com.falsepattern.jfunge;
 import com.falsepattern.jfunge.interpreter.FeatureSet;
 import com.falsepattern.jfunge.interpreter.Interpreter;
 import lombok.val;
-import lombok.var;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -69,6 +68,10 @@ public class Main {
         options.addOption(Option.builder()
                                 .longOpt("perl")
                                 .desc("Enable the PERL fingerprint. This requires the working directory of the interpreter to be writable, and is also an arbitrary code execution risk.")
+                                .build());
+        options.addOption(Option.builder()
+                                .longOpt("sock")
+                                .desc("Enable the SOCK and SCKE fingerprints. This allows the program to open a socket and listen for connections, as well as connect to external hosts. This is a very dangerous permission to grant, it can potentially allow remote code execution.")
                                 .build());
         val parser = new DefaultParser();
         val cmd = parser.parse(options, args);

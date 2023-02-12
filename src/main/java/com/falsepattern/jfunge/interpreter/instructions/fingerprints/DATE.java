@@ -4,7 +4,6 @@ import com.falsepattern.jfunge.interpreter.ExecutionContext;
 import com.falsepattern.jfunge.interpreter.instructions.Fingerprint;
 import lombok.NoArgsConstructor;
 import lombok.val;
-import lombok.var;
 
 import java.time.DateTimeException;
 import java.time.Duration;
@@ -27,7 +26,7 @@ public class DATE implements Fingerprint {
         val m = stack.pop();
         val y = stack.pop();
         if (y == 0) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val date = dateOrReflect(ctx, () -> LocalDate.of(y, m, d));
@@ -50,7 +49,7 @@ public class DATE implements Fingerprint {
         }
         var y = date.getYear();
         if (y == 0) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         if (y < 0) y--;
@@ -69,7 +68,7 @@ public class DATE implements Fingerprint {
         val m1 = stack.pop();
         val y1 = stack.pop();
         if (y1 == 0 || y2 == 0) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val date1 = dateOrReflect(ctx, () -> LocalDate.of(y1, m1, d1));
@@ -90,7 +89,7 @@ public class DATE implements Fingerprint {
         val m = stack.pop();
         var y = stack.pop();
         if (y == 0) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         if (y < 0) y++;
@@ -110,7 +109,7 @@ public class DATE implements Fingerprint {
         val day = stack.pop() + 1;
         val year = stack.pop();
         if (year == 0) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val date = dateOrReflect(ctx, () -> LocalDate.ofYearDay(year, day));
@@ -129,7 +128,7 @@ public class DATE implements Fingerprint {
         val m = stack.pop();
         val y = stack.pop();
         if (y == 0) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val date = dateOrReflect(ctx, () -> LocalDate.of(y, m, d));
@@ -146,7 +145,7 @@ public class DATE implements Fingerprint {
         val m = stack.pop();
         val y = stack.pop();
         if (y == 0) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val date = dateOrReflect(ctx, () -> LocalDate.of(y, m, d));
@@ -164,7 +163,7 @@ public class DATE implements Fingerprint {
         try {
             return supplier.supply();
         } catch (DateTimeException e) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return null;
         }
     }

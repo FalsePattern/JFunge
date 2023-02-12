@@ -33,7 +33,7 @@ public class BASE implements Fingerprint {
         //Read input until non-digit character is encountered
         StringBuilder sb = new StringBuilder();
         int c;
-        while (Character.isDigit(c = ctx.input(true))) {
+        while (Character.isLetterOrDigit(c = ctx.input(true))) {
             sb.append((char) c);
             ctx.input(false);
         }

@@ -3,9 +3,7 @@ package com.falsepattern.jfunge.interpreter;
 import com.falsepattern.jfunge.ip.IP;
 import com.falsepattern.jfunge.ip.IStack;
 import com.falsepattern.jfunge.storage.FungeSpace;
-import org.joml.Vector3i;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
@@ -47,22 +45,20 @@ public interface ExecutionContext {
 
     OutputStream output();
 
-    byte[] readFile(String file);
+    byte[] readFile(String file) throws PermissionException;
 
-    boolean writeFile(String file, byte[] data);
+    boolean writeFile(String file, byte[] data) throws PermissionException;
 
     int envFlags();
 
+    boolean changeDirectory(String dir) throws PermissionException;
+
+    boolean makeDirectory(String dir) throws PermissionException;
+
+    boolean removeDirectory(String dir) throws PermissionException;
+
     default boolean concurrentAllowed() {
         return (envFlags() & 0x01) != 0;
-    }
-
-    default boolean fileInputAllowed(String path) throws IOException {
-        return (envFlags() & 0x02) != 0;
-    }
-
-    default boolean fileOutputAllowed(String path) throws IOException {
-        return (envFlags() & 0x04) != 0;
     }
 
     default boolean syscallAllowed() {

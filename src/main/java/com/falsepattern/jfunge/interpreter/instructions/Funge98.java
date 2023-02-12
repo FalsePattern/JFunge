@@ -2,14 +2,19 @@ package com.falsepattern.jfunge.interpreter.instructions;
 
 import com.falsepattern.jfunge.Globals;
 import com.falsepattern.jfunge.interpreter.ExecutionContext;
+import com.falsepattern.jfunge.interpreter.PermissionException;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.BASE;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.CPLI;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.DATE;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.DIRF;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.EVAR;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FING;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FIXP;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FPDP;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FPSP;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.HRTI;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.INDV;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.JSTR;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODE;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODU;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.NULL;
@@ -17,8 +22,9 @@ import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ORTH;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.PERL;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.REFC;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ROMA;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.SOCK;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.STRN;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.TOYS;
-import com.falsepattern.jfunge.interpreter.instructions.fingerprints.TURT;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints._3DSP;
 import com.falsepattern.jfunge.ip.IStack;
 import com.falsepattern.jfunge.ip.impl.Stack;
@@ -30,7 +36,6 @@ import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
-import lombok.var;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +44,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
 import java.util.function.ObjIntConsumer;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -51,11 +57,15 @@ public class Funge98 implements InstructionSet {
         addFingerprint(BASE.INSTANCE);
         addFingerprint(CPLI.INSTANCE);
         addFingerprint(DATE.INSTANCE);
+        addFingerprint(DIRF.INSTANCE);
         addFingerprint(EVAR.INSTANCE);
         addFingerprint(FPSP.INSTANCE);
         addFingerprint(FPDP.INSTANCE);
+        addFingerprint(FING.INSTANCE);
         addFingerprint(FIXP.INSTANCE);
         addFingerprint(HRTI.INSTANCE);
+        addFingerprint(INDV.INSTANCE);
+        addFingerprint(JSTR.INSTANCE);
         addFingerprint(MODE.INSTANCE);
         addFingerprint(MODU.INSTANCE);
         addFingerprint(NULL.INSTANCE);
@@ -63,6 +73,9 @@ public class Funge98 implements InstructionSet {
         addFingerprint(PERL.INSTANCE);
         addFingerprint(REFC.INSTANCE);
         addFingerprint(ROMA.INSTANCE);
+        addFingerprint(SOCK.INSTANCE);
+        addFingerprint(SOCK.SCKE.INSTANCE);
+        addFingerprint(STRN.INSTANCE);
         addFingerprint(TOYS.INSTANCE);
         //TODO Fix TURT, it's broken
 //        addFingerprint(TURT.INSTANCE);
@@ -91,17 +104,17 @@ public class Funge98 implements InstructionSet {
             stack.push(1);
             ctx.IP().instructionManager().loadInstructionSet(fingerprints.get(code));
         } else {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 
     @Instr(')')
     public static void unloadFinger(ExecutionContext ctx) {
         val code = getFingerCode(ctx.stack());
-        if (fingerprints.containsKey(code)) {
+        if (fingerprints.containsKey(code) && ctx.fingerprintAllowed(code)) {
             ctx.IP().instructionManager().unloadInstructionSet(fingerprints.get(code));
         } else {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 
@@ -120,7 +133,7 @@ public class Funge98 implements InstructionSet {
         if (ctx.dimensions() == 3)
             ctx.IP().delta().set(0, 0, 1);
         else
-            ctx.interpret('r');
+            ctx.IP().reflect();
     }
 
     @Instr('l')
@@ -128,7 +141,7 @@ public class Funge98 implements InstructionSet {
         if (ctx.dimensions() == 3)
             ctx.IP().delta().set(0, 0, -1);
         else
-            ctx.interpret('r');
+            ctx.IP().reflect();
     }
 
     @Instr('?')
@@ -277,9 +290,9 @@ public class Funge98 implements InstructionSet {
     @Instr('m')
     public static void branchHighLow(ExecutionContext ctx) {
         if (ctx.dimensions() == 3) {
-            ctx.interpret(ctx.stack().pop() == 0 ? 'h' : 'l');
+            ctx.interpret(ctx.stack().pop() == 0 ? 'l' : 'h');
         } else {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 
@@ -390,7 +403,7 @@ public class Funge98 implements InstructionSet {
     public static void blockStart(ExecutionContext ctx) {
         @Cleanup val mem = MemoryStack.stackPush();
         if (!ctx.IP().stackStack().push()) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val SOSS = ctx.IP().stackStack().SOSS().get();
@@ -422,7 +435,7 @@ public class Funge98 implements InstructionSet {
         val TOSS = ctx.stack();
         val SOSSt = ctx.IP().stackStack().SOSS();
         if (!SOSSt.isPresent() || !ctx.IP().stackStack().pop()) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val SOSS = SOSSt.get();
@@ -450,7 +463,7 @@ public class Funge98 implements InstructionSet {
         val TOSS = ctx.stack();
         val SOSSt = ctx.IP().stackStack().SOSS();
         if (!SOSSt.isPresent()) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val SOSS = SOSSt.get();
@@ -564,19 +577,16 @@ public class Funge98 implements InstructionSet {
         val flags = s.pop();
         val pos = s.popVecDimProof(ctx.dimensions(), mem.vec3i());
         pos.add(ctx.IP().storageOffset());
+        byte[] file;
         try {
-            if (!ctx.fileInputAllowed(filename)) {
-                System.err.println("Code tried to read file not on whitelist: " + filename);
-                reflect(ctx);
-                return;
-            }
-        } catch (IOException e) {
+            file = ctx.readFile(filename);
+        } catch (PermissionException e) {
+            System.err.println(e.getMessage());
             reflect(ctx);
             return;
         }
-        val file = ctx.readFile(filename);
         if (file == null) {
-            ctx.interpret('r');
+            reflect(ctx);
             return;
         }
         val delta = ((flags & 1) == 1) ? ctx.fungeSpace().loadBinaryFileAt(pos.x, pos.y, pos.z, file) : ctx.fungeSpace().loadFileAt(pos.x, pos.y, pos.z, file, ctx.dimensions() == 3);
@@ -601,19 +611,14 @@ public class Funge98 implements InstructionSet {
             delta.z = 1;
         }
         pos.add(ctx.IP().storageOffset());
-        try {
-            if (!ctx.fileOutputAllowed(filename)) {
-                System.err.println("Code tried to write file not on whitelist: " + filename);
-                reflect(ctx);
-                return;
-            }
-        } catch (IOException e) {
-            reflect(ctx);
-            return;
-        }
         val data = ctx.fungeSpace().readDataAt(pos.x, pos.y, pos.z, delta.x, delta.y, delta.z, (flags & 1) == 1);
-        if (!ctx.writeFile(filename, data)) {
-            ctx.interpret('r');
+        try {
+            if (!ctx.writeFile(filename, data)) {
+                reflect(ctx);
+            }
+        } catch (PermissionException e) {
+            System.err.println(e.getMessage());
+            reflect(ctx);
         }
     }
 
@@ -644,7 +649,7 @@ public class Funge98 implements InstructionSet {
         if (found) {
             ctx.stack().push(counter);
         } else {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 
@@ -683,20 +688,20 @@ public class Funge98 implements InstructionSet {
     }
 
     @Override
-    public void load(ObjIntConsumer<Instruction> instructionSet) {
-        InstructionSet.super.load(instructionSet);
+    public void load(ObjIntConsumer<Instruction> loader) {
+        InstructionSet.super.load(loader);
         for (int i = 0; i <= 9; i++) {
             int finalI = i;
-            instructionSet.accept((ctx) -> ctx.stack().push(finalI), '0' + i);
+            loader.accept((ctx) -> ctx.stack().push(finalI), '0' + i);
         }
         for (int i = 0; i <= 5; i++) {
             int finalI = i;
-            instructionSet.accept((ctx) -> ctx.stack().push(10 + finalI), 'a' + i);
+            loader.accept((ctx) -> ctx.stack().push(10 + finalI), 'a' + i);
         }
     }
 
     @Override
-    public void unload(IntConsumer instructionSet) {
+    public void unload(IntFunction<Instruction> unLoader) {
         throw new UnsupportedOperationException("Cannot unload the base syntax");
     }
 

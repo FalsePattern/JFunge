@@ -40,7 +40,7 @@ public class HRTI implements Fingerprint {
         val marks = getMarkMap(ctx);
         val ip = ctx.IP();
         if (!marks.containsKey(ip.UUID())) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         ctx.stack().push((int)((System.nanoTime() - marks.get(ip.UUID())) / 1000L));
@@ -57,7 +57,7 @@ public class HRTI implements Fingerprint {
         val marks = getMarkMap(ctx);
         val ip = ctx.IP();
 //        if (!marks.containsKey(ip.UUID)) {
-//            ctx.interpret('r');
+//            ctx.IP().reflect();
 //            return;
 //        }
         marks.remove(ip.UUID());

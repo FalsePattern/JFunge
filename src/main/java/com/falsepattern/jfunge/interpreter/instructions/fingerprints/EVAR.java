@@ -19,7 +19,7 @@ public class EVAR implements Fingerprint {
         val key = stack.popString();
         val value = ctx.env().get(key);
         if (value == null) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         } else {
             stack.pushString(value);
@@ -37,7 +37,7 @@ public class EVAR implements Fingerprint {
         val keyValuePar = stack.popString();
         val equalsIndex = keyValuePar.indexOf('=');
         if (equalsIndex == -1) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val key = keyValuePar.substring(0, equalsIndex);
@@ -54,7 +54,7 @@ public class EVAR implements Fingerprint {
         val index = stack.pop();
         val keys = ctx.envKeys();
         if (index < 0 || index >= keys.size()) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val key = keys.get(index);

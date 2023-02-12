@@ -127,7 +127,7 @@ public class FPDP implements Fingerprint {
         try {
             stack.pushD(Double.parseDouble(str));
         } catch (NumberFormatException e) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 

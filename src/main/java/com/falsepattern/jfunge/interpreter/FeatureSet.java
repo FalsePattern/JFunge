@@ -14,5 +14,7 @@ public class FeatureSet {
     public final boolean environment;
     public final long maxIter;
 
+    //Dangerous fingerpritns
     public final boolean perl;
+    public final boolean socket;
 }

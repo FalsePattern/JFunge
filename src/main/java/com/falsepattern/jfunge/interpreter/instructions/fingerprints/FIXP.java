@@ -29,7 +29,7 @@ public class FIXP implements Fingerprint {
         val a = stack.pop();
         val result = Math.toDegrees(Math.acos(a / 10000D));
         if (Double.isNaN(result)) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         } else {
             stack.push((int) (result * 10000));
         }
@@ -62,7 +62,7 @@ public class FIXP implements Fingerprint {
         val a = stack.pop();
         val result = Math.toDegrees(Math.asin(a / 10000D));
         if (Double.isNaN(result)) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         } else {
             stack.push((int) (result * 10000));
         }
@@ -104,7 +104,7 @@ public class FIXP implements Fingerprint {
         val a = stack.pop();
         val result = Math.pow(a, b);
         if (Double.isNaN(result) || Double.isInfinite(result)) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         } else {
             stack.push((int) result);
         }

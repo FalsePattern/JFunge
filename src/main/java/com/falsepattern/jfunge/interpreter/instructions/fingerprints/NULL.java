@@ -5,7 +5,7 @@ import com.falsepattern.jfunge.interpreter.instructions.Instruction;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
 import java.util.function.ObjIntConsumer;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -13,16 +13,16 @@ public class NULL implements Fingerprint {
     public static final NULL INSTANCE = new NULL();
 
     @Override
-    public void load(ObjIntConsumer<Instruction> instructionSet) {
+    public void load(ObjIntConsumer<Instruction> loader) {
         for (int i = 'A'; i <= 'Z'; i++) {
-            instructionSet.accept((ctx) -> ctx.interpret('r'), i);
+            loader.accept((ctx) -> ctx.IP().reflect(), i);
         }
     }
 
     @Override
-    public void unload(IntConsumer instructionSet) {
+    public void unload(IntFunction<Instruction> unLoader) {
         for (int i = 'A'; i <= 'Z'; i++) {
-            instructionSet.accept(i);
+            unLoader.apply(i);
         }
     }
 

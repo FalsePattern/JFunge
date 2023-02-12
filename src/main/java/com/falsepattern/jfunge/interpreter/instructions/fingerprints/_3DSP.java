@@ -28,22 +28,49 @@ public class _3DSP implements Fingerprint {
 
     private static Matrix4f getMatrix(ExecutionContext ctx, Vector3i origin, Matrix4f output) {
         val space = ctx.fungeSpace();
-        for (int y = 0; y < 4; y++) {
-            for (int x = 0; x < 4; x++) {
-                output.set(x, y, Float.intBitsToFloat(space.get(origin.x + x, origin.y + y, origin.z)));
-            }
-        }
-        output.determineProperties();
+        val x = origin.x;
+        val y = origin.y;
+        val z = origin.z;
+        output.set(Float.intBitsToFloat(space.get(x, y, z)),
+                   Float.intBitsToFloat(space.get(x, y + 1, z)),
+                   Float.intBitsToFloat(space.get(x, y + 2, z)),
+                   Float.intBitsToFloat(space.get(x, y + 3, z)),
+                   Float.intBitsToFloat(space.get(x + 1, y, z)),
+                   Float.intBitsToFloat(space.get(x + 1, y + 1, z)),
+                   Float.intBitsToFloat(space.get(x + 1, y + 2, z)),
+                   Float.intBitsToFloat(space.get(x + 1, y + 3, z)),
+                   Float.intBitsToFloat(space.get(x + 2, y, z)),
+                   Float.intBitsToFloat(space.get(x + 2, y + 1, z)),
+                   Float.intBitsToFloat(space.get(x + 2, y + 2, z)),
+                   Float.intBitsToFloat(space.get(x + 2, y + 3, z)),
+                   Float.intBitsToFloat(space.get(x + 3, y, z)),
+                   Float.intBitsToFloat(space.get(x + 3, y + 1, z)),
+                   Float.intBitsToFloat(space.get(x + 3, y + 2, z)),
+                   Float.intBitsToFloat(space.get(x + 3, y + 3, z)));
         return output;
     }
 
     private static void putMatrix(ExecutionContext ctx, Vector3i origin, Matrix4f matrix) {
         val space = ctx.fungeSpace();
-        for (int y = 0; y < 4; y++) {
-            for (int x = 0; x < 4; x++) {
-                space.set(origin.x + x, origin.y + y, origin.z, Float.floatToRawIntBits(matrix.get(x, y)));
-            }
-        }
+        val x = origin.x;
+        val y = origin.y;
+        val z = origin.z;
+        space.set(x, y, z, Float.floatToRawIntBits(matrix.m00()));
+        space.set(x, y + 1, z, Float.floatToRawIntBits(matrix.m01()));
+        space.set(x, y + 2, z, Float.floatToRawIntBits(matrix.m02()));
+        space.set(x, y + 3, z, Float.floatToRawIntBits(matrix.m03()));
+        space.set(x + 1, y, z, Float.floatToRawIntBits(matrix.m10()));
+        space.set(x + 1, y + 1, z, Float.floatToRawIntBits(matrix.m11()));
+        space.set(x + 1, y + 2, z, Float.floatToRawIntBits(matrix.m12()));
+        space.set(x + 1, y + 3, z, Float.floatToRawIntBits(matrix.m13()));
+        space.set(x + 2, y, z, Float.floatToRawIntBits(matrix.m20()));
+        space.set(x + 2, y + 1, z, Float.floatToRawIntBits(matrix.m21()));
+        space.set(x + 2, y + 2, z, Float.floatToRawIntBits(matrix.m22()));
+        space.set(x + 2, y + 3, z, Float.floatToRawIntBits(matrix.m23()));
+        space.set(x + 3, y, z, Float.floatToRawIntBits(matrix.m30()));
+        space.set(x + 3, y + 1, z, Float.floatToRawIntBits(matrix.m31()));
+        space.set(x + 3, y + 2, z, Float.floatToRawIntBits(matrix.m32()));
+        space.set(x + 3, y + 3, z, Float.floatToRawIntBits(matrix.m33()));
     }
 
     private static void binOp(ExecutionContext ctx, Op op) {
@@ -118,7 +145,7 @@ public class _3DSP implements Fingerprint {
         val axis = stack.pop();
         val pos = stack.popVecDimProof(ctx.dimensions(), mem.vec3i());
         if (axis <= 0 || axis >= 4) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val matrix = mem.mat4f();

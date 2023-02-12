@@ -127,7 +127,7 @@ public class FPSP implements Fingerprint {
         try {
             stack.pushF(Float.parseFloat(str));
         } catch (NumberFormatException e) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 

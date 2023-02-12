@@ -5,7 +5,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.NoArgsConstructor;
 import lombok.val;
-import lombok.var;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -31,14 +30,16 @@ public class InstructionManager implements Copiable<InstructionManager> {
         q.push(instr);
     }
 
-    private void unloadInstruction(int c) {
+    private Instruction unloadInstruction(int c) {
+        Instruction instr = null;
         var q = instructionMap.get(c);
         if (q != null) {
-            q.pop();
+            instr = q.pop();
             if (q.isEmpty()) {
                 instructionMap.remove(c);
             }
         }
+        return instr;
     }
 
     public void loadInstructionSet(InstructionSet set) {

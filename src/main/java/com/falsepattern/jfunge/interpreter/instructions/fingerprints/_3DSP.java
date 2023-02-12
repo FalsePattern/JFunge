@@ -145,7 +145,7 @@ public class _3DSP implements Fingerprint {
         val axis = stack.pop();
         val pos = stack.popVecDimProof(ctx.dimensions(), mem.vec3i());
         if (axis <= 0 || axis >= 4) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val matrix = mem.mat4f();

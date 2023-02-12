@@ -267,9 +267,9 @@ public class TOYS implements Fingerprint {
     public static void storeBehind(ExecutionContext ctx) {
         @Cleanup val mem = MemoryStack.stackPush();
         val pos = mem.vec3i().set(ctx.IP().position());
-        ctx.interpret('r');
+        ctx.IP().reflect();
         ctx.interpret('s');
-        ctx.interpret('r');
+        ctx.IP().reflect();
         ctx.IP().position().set(pos);
     }
 
@@ -285,7 +285,7 @@ public class TOYS implements Fingerprint {
                 break;
             case 2:
                 if (ctx.dimensions() != 3) {
-                    ctx.interpret('r');
+                    ctx.IP().reflect();
                 } else {
                     ctx.interpret('m');
                 }
@@ -318,7 +318,7 @@ public class TOYS implements Fingerprint {
             stack.pushVecDimProof(ctx.dimensions(), pos);
             ctx.IP().position().sub(ctx.IP().delta());
         } else if (valueAtCell > value) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 
@@ -337,7 +337,7 @@ public class TOYS implements Fingerprint {
         if (ctx.dimensions() == 3) {
             ctx.IP().position().z++;
         } else {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 

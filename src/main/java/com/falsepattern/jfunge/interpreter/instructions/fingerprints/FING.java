@@ -53,11 +53,11 @@ public class FING implements Fingerprint {
         val a = stack.pop();
         val b = stack.pop();
         if (invalidValue(a) || invalidValue(b)) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
-        val aI = Optional.ofNullable(popInstr(ctx, a)).orElse((c) -> c.interpret('r'));
-        val bI = Optional.ofNullable(popInstr(ctx, b)).orElse((c) -> c.interpret('r'));
+        val aI = Optional.ofNullable(popInstr(ctx, a)).orElse((c) -> c.IP().reflect());
+        val bI = Optional.ofNullable(popInstr(ctx, b)).orElse((c) -> c.IP().reflect());
         pushInstr(ctx, a, bI);
         pushInstr(ctx, b, aI);
     }
@@ -67,7 +67,7 @@ public class FING implements Fingerprint {
         val stack = ctx.stack();
         val a = stack.pop();
         if (invalidValue(a)) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         popInstr(ctx, a);
@@ -80,13 +80,13 @@ public class FING implements Fingerprint {
         val b = stack.pop();
         val a = stack.pop();
         if (invalidValue(a) || invalidValue(b)) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val aI = popInstr(ctx, a);
         if (aI != null) {
             pushInstr(ctx, a, aI);
         }
-        pushInstr(ctx, b, Optional.ofNullable(aI).orElse((c) -> c.interpret('r')));
+        pushInstr(ctx, b, Optional.ofNullable(aI).orElse((c) -> c.IP().reflect()));
     }
 }

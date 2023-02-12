@@ -182,7 +182,7 @@ public class TURT implements Fingerprint {
             ImageIO.write(image, "PNG", file);
         } catch (IOException e) {
             e.printStackTrace();
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 

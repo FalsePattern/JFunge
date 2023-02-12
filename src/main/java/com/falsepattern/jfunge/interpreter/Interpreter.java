@@ -310,9 +310,7 @@ public class Interpreter implements ExecutionContext {
             if ((instr = IP().instructionManager().fetch(opcode)) != null || (instr = baseInstructionManager.fetch(opcode)) != null) {
                 instr.process(this);
             } else {
-                if (opcode == 'r')
-                    throw new IllegalArgumentException("Language does not implement 'r' reflect instruction.");
-                interpret('r');
+                IP().reflect();
             }
         }
     }

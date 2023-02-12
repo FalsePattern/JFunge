@@ -15,7 +15,7 @@ public class NULL implements Fingerprint {
     @Override
     public void load(ObjIntConsumer<Instruction> loader) {
         for (int i = 'A'; i <= 'Z'; i++) {
-            loader.accept((ctx) -> ctx.interpret('r'), i);
+            loader.accept((ctx) -> ctx.IP().reflect(), i);
         }
     }
 

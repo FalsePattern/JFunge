@@ -95,7 +95,7 @@ public class Funge98 implements InstructionSet {
             stack.push(1);
             ctx.IP().instructionManager().loadInstructionSet(fingerprints.get(code));
         } else {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 
@@ -105,7 +105,7 @@ public class Funge98 implements InstructionSet {
         if (fingerprints.containsKey(code) && ctx.fingerprintAllowed(code)) {
             ctx.IP().instructionManager().unloadInstructionSet(fingerprints.get(code));
         } else {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 
@@ -124,7 +124,7 @@ public class Funge98 implements InstructionSet {
         if (ctx.dimensions() == 3)
             ctx.IP().delta().set(0, 0, 1);
         else
-            ctx.interpret('r');
+            ctx.IP().reflect();
     }
 
     @Instr('l')
@@ -132,7 +132,7 @@ public class Funge98 implements InstructionSet {
         if (ctx.dimensions() == 3)
             ctx.IP().delta().set(0, 0, -1);
         else
-            ctx.interpret('r');
+            ctx.IP().reflect();
     }
 
     @Instr('?')
@@ -283,7 +283,7 @@ public class Funge98 implements InstructionSet {
         if (ctx.dimensions() == 3) {
             ctx.interpret(ctx.stack().pop() == 0 ? 'h' : 'l');
         } else {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 
@@ -394,7 +394,7 @@ public class Funge98 implements InstructionSet {
     public static void blockStart(ExecutionContext ctx) {
         @Cleanup val mem = MemoryStack.stackPush();
         if (!ctx.IP().stackStack().push()) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val SOSS = ctx.IP().stackStack().SOSS().get();
@@ -426,7 +426,7 @@ public class Funge98 implements InstructionSet {
         val TOSS = ctx.stack();
         val SOSSt = ctx.IP().stackStack().SOSS();
         if (!SOSSt.isPresent() || !ctx.IP().stackStack().pop()) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val SOSS = SOSSt.get();
@@ -454,7 +454,7 @@ public class Funge98 implements InstructionSet {
         val TOSS = ctx.stack();
         val SOSSt = ctx.IP().stackStack().SOSS();
         if (!SOSSt.isPresent()) {
-            ctx.interpret('r');
+            ctx.IP().reflect();
             return;
         }
         val SOSS = SOSSt.get();
@@ -640,7 +640,7 @@ public class Funge98 implements InstructionSet {
         if (found) {
             ctx.stack().push(counter);
         } else {
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 

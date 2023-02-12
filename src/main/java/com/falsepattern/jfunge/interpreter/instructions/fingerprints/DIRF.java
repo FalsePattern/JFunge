@@ -21,11 +21,11 @@ public class DIRF implements Fingerprint {
         val path = stack.popString();
         try {
             if (!ctx.changeDirectory(path)) {
-                ctx.interpret('r');
+                ctx.IP().reflect();
             }
         } catch (PermissionException e) {
             System.err.println(e.getMessage());
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 
@@ -35,11 +35,11 @@ public class DIRF implements Fingerprint {
         val path = stack.popString();
         try {
             if (!ctx.makeDirectory(path)) {
-                ctx.interpret('r');
+                ctx.IP().reflect();
             }
         } catch (PermissionException e) {
             System.err.println(e.getMessage());
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 
@@ -49,11 +49,11 @@ public class DIRF implements Fingerprint {
         val path = stack.popString();
         try {
             if (!ctx.removeDirectory(path)) {
-                ctx.interpret('r');
+                ctx.IP().reflect();
             }
         } catch (PermissionException e) {
             System.err.println(e.getMessage());
-            ctx.interpret('r');
+            ctx.IP().reflect();
         }
     }
 }

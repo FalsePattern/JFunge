@@ -20,6 +20,7 @@ import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ORTH;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.PERL;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.REFC;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.ROMA;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.STRN;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.TOYS;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints._3DSP;
 import com.falsepattern.jfunge.ip.IStack;
@@ -67,6 +68,7 @@ public class Funge98 implements InstructionSet {
         addFingerprint(PERL.INSTANCE);
         addFingerprint(REFC.INSTANCE);
         addFingerprint(ROMA.INSTANCE);
+        addFingerprint(STRN.INSTANCE);
         addFingerprint(TOYS.INSTANCE);
         //TODO Fix TURT, it's broken
 //        addFingerprint(TURT.INSTANCE);

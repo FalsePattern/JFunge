@@ -250,6 +250,6 @@ public class TestInterpreter {
                                    .perl(true)
                                    .maxIter(300000L)
                                    .build();
-        execMycoProgram("mycouser.b98", 0, featureSet, "123\nt\n16\nf0f0\n");
+        execMycoProgram("mycouser.b98", 0, featureSet, "123\nt\n16\nf0f0\nHello\n");
     }
 }

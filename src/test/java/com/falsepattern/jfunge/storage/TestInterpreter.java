@@ -252,4 +252,19 @@ public class TestInterpreter {
                                    .build();
         execMycoProgram("mycouser.b98", 0, featureSet, "123\nt\n16\nf0f0\nHello\n");
     }
+
+    @Test
+    public void testMycoTre() {
+        val featureSet = FeatureSet.builder()
+                                   .allowedInputFiles(new String[]{"/"})
+                                   .allowedOutputFiles(new String[]{"/"})
+                                   .sysCall(false)
+                                   .concurrent(true)
+                                   .environment(false)
+                                   .trefunge(true)
+                                   .perl(true)
+                                   .maxIter(300000L)
+                                   .build();
+        execMycoProgram("mycotre.b98", 0, featureSet, "");
+    }
 }

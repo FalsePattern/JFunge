@@ -1,6 +1,5 @@
 package com.falsepattern.jfunge.interpreter.instructions;
 
-import com.falsepattern.jfunge.interpreter.LambdaHelper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.val;

@@ -13,16 +13,16 @@ public class NULL implements Fingerprint {
     public static final NULL INSTANCE = new NULL();
 
     @Override
-    public void load(ObjIntConsumer<Instruction> instructionSet) {
+    public void load(ObjIntConsumer<Instruction> loader) {
         for (int i = 'A'; i <= 'Z'; i++) {
-            instructionSet.accept((ctx) -> ctx.interpret('r'), i);
+            loader.accept((ctx) -> ctx.interpret('r'), i);
         }
     }
 
     @Override
-    public void unload(IntFunction<Instruction> instructionSet) {
+    public void unload(IntFunction<Instruction> unLoader) {
         for (int i = 'A'; i <= 'Z'; i++) {
-            instructionSet.apply(i);
+            unLoader.apply(i);
         }
     }
 

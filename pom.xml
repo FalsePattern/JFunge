@@ -9,11 +9,12 @@
     <version>1.1.0</version>
 
     <properties>
-        <java.version>8</java.version>
+        <java.version>17</java.version>
         <lombok.version>1.18.24</lombok.version>
         <trove.version>3.0.3</trove.version>
         <joml.version>1.10.2</joml.version>
         <commons-cli.version>1.5.0</commons-cli.version>
+        <asm.version>9.4</asm.version>
         <project.encoding>UTF-8</project.encoding>
         <project.distribution.name>mavenpattern</project.distribution.name>
         <project.distribution.url>https://mvn.falsepattern.com/releases/</project.distribution.url>
@@ -57,6 +58,26 @@
             <artifactId>commons-io</artifactId>
             <version>${commons-io.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>${asm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-tree</artifactId>
+            <version>${asm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-commons</artifactId>
+            <version>${asm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-util</artifactId>
+            <version>${asm.version}</version>
         </dependency>
     </dependencies>
 

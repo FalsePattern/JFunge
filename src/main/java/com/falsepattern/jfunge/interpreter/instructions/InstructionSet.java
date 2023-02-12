@@ -1,6 +1,5 @@
 package com.falsepattern.jfunge.interpreter.instructions;
 
-import com.falsepattern.jfunge.interpreter.LambdaHelper;
 import lombok.val;
 
 import java.lang.annotation.Retention;
@@ -11,29 +10,12 @@ import java.util.function.IntFunction;
 import java.util.function.ObjIntConsumer;
 
 public interface InstructionSet {
-    default void load(ObjIntConsumer<Instruction> instructionSet) {
-        val clazz = this.getClass();
-        Arrays.stream(clazz.getDeclaredMethods())
-              .filter((method) -> Modifier.isStatic(method.getModifiers()) && method.isAnnotationPresent(Instr.class))
-              .forEach((method) -> {
-                  try {
-                      val lambda = (Instruction) LambdaHelper.newLambdaMetaFactory(Instruction.class, method).invokeExact();
-                      val ann = method.getAnnotation(Instr.class);
-                      instructionSet.accept(lambda, ann.value());
-                  } catch (Throwable e) {
-                      throw new RuntimeException(e);
-                  }
-              });
+    default void load(ObjIntConsumer<Instruction> loader) {
+        InstructionSetHelper.loadInstructionSet(this.getClass(), loader);
     }
 
-    default void unload(IntFunction<Instruction> instructionSet) {
-        val clazz = this.getClass();
-        Arrays.stream(clazz.getDeclaredMethods())
-              .filter((method) -> Modifier.isStatic(method.getModifiers()) && method.isAnnotationPresent(Instr.class))
-              .forEach((method) -> {
-                  val ann = method.getAnnotation(Instr.class);
-                  instructionSet.apply(ann.value());
-              });
+    default void unload(IntFunction<Instruction> unLoader) {
+        InstructionSetHelper.unloadInstructionSet(this.getClass(), unLoader);
     }
 
     @Retention(RetentionPolicy.RUNTIME)

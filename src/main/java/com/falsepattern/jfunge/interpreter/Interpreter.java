@@ -15,7 +15,6 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import lombok.val;
-import lombok.var;
 
 import java.io.IOException;
 import java.io.InputStream;

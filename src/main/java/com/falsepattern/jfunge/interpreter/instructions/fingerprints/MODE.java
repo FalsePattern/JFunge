@@ -7,7 +7,6 @@ import com.falsepattern.jfunge.interpreter.instructions.InstructionSet;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.val;
-import lombok.var;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MODE implements Fingerprint {

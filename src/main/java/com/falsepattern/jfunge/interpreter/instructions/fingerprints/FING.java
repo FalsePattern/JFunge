@@ -26,8 +26,8 @@ public class FING implements Fingerprint {
         val result = new AtomicReference<Instruction>();
         ctx.IP().instructionManager().unloadInstructionSet(new InstructionSet() {
             @Override
-            public void unload(IntFunction<Instruction> instructionSet) {
-                result.set(instructionSet.apply(instruction <= 25 ? instruction + 'A' : instruction));
+            public void unload(IntFunction<Instruction> unLoader) {
+                result.set(unLoader.apply(instruction <= 25 ? instruction + 'A' : instruction));
             }
         });
         return result.get();
@@ -36,8 +36,8 @@ public class FING implements Fingerprint {
     private static void pushInstr(ExecutionContext ctx, int instruction, Instruction value) {
         ctx.IP().instructionManager().loadInstructionSet(new InstructionSet() {
             @Override
-            public void load(ObjIntConsumer<Instruction> instructionSet) {
-                instructionSet.accept(value, instruction <= 25 ? instruction + 'A' : instruction);
+            public void load(ObjIntConsumer<Instruction> loader) {
+                loader.accept(value, instruction <= 25 ? instruction + 'A' : instruction);
             }
         });
     }

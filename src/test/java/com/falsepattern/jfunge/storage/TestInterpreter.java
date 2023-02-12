@@ -3,7 +3,6 @@ package com.falsepattern.jfunge.storage;
 import com.falsepattern.jfunge.interpreter.FeatureSet;
 import com.falsepattern.jfunge.interpreter.Interpreter;
 import lombok.val;
-import lombok.var;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

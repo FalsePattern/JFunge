@@ -32,7 +32,6 @@ import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
-import lombok.var;
 
 import java.io.File;
 import java.io.IOException;
@@ -680,20 +679,20 @@ public class Funge98 implements InstructionSet {
     }
 
     @Override
-    public void load(ObjIntConsumer<Instruction> instructionSet) {
-        InstructionSet.super.load(instructionSet);
+    public void load(ObjIntConsumer<Instruction> loader) {
+        InstructionSet.super.load(loader);
         for (int i = 0; i <= 9; i++) {
             int finalI = i;
-            instructionSet.accept((ctx) -> ctx.stack().push(finalI), '0' + i);
+            loader.accept((ctx) -> ctx.stack().push(finalI), '0' + i);
         }
         for (int i = 0; i <= 5; i++) {
             int finalI = i;
-            instructionSet.accept((ctx) -> ctx.stack().push(10 + finalI), 'a' + i);
+            loader.accept((ctx) -> ctx.stack().push(10 + finalI), 'a' + i);
         }
     }
 
     @Override
-    public void unload(IntFunction<Instruction> instructionSet) {
+    public void unload(IntFunction<Instruction> unLoader) {
         throw new UnsupportedOperationException("Cannot unload the base syntax");
     }
 

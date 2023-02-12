@@ -5,7 +5,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.NoArgsConstructor;
 import lombok.val;
-import lombok.var;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

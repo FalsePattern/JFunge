@@ -4,7 +4,6 @@ import com.falsepattern.jfunge.Copiable;
 import com.falsepattern.jfunge.Releasable;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import lombok.var;
 import org.joml.Vector3ic;
 
 import java.util.Arrays;

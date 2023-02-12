@@ -4,7 +4,6 @@ import com.falsepattern.jfunge.interpreter.ExecutionContext;
 import com.falsepattern.jfunge.interpreter.instructions.Fingerprint;
 import lombok.NoArgsConstructor;
 import lombok.val;
-import lombok.var;
 
 import java.time.DateTimeException;
 import java.time.Duration;

@@ -3,7 +3,6 @@ package com.falsepattern.jfunge;
 import com.falsepattern.jfunge.interpreter.FeatureSet;
 import com.falsepattern.jfunge.interpreter.Interpreter;
 import lombok.val;
-import lombok.var;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;

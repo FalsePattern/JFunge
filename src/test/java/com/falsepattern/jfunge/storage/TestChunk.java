@@ -3,7 +3,6 @@ package com.falsepattern.jfunge.storage;
 
 import lombok.Cleanup;
 import lombok.val;
-import lombok.var;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

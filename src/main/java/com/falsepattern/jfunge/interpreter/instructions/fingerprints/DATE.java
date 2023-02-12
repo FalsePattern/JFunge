@@ -13,10 +13,6 @@ import java.time.temporal.JulianFields;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class DATE implements Fingerprint {
     public static final DATE INSTANCE = new DATE();
-    @Override
-    public int code() {
-        return 0x44415445;
-    }
 
     @Instr('A')
     public static void addDaysToDate(ExecutionContext ctx) {
@@ -52,7 +48,9 @@ public class DATE implements Fingerprint {
             ctx.IP().reflect();
             return;
         }
-        if (y < 0) y--;
+        if (y < 0) {
+            y--;
+        }
         stack.push(y);
         stack.push(date.getMonthValue());
         stack.push(date.getDayOfMonth());
@@ -92,7 +90,9 @@ public class DATE implements Fingerprint {
             ctx.IP().reflect();
             return;
         }
-        if (y < 0) y++;
+        if (y < 0) {
+            y++;
+        }
         int finalY = y;
         val date = dateOrReflect(ctx, () -> LocalDate.of(finalY, m, d));
         if (date == null) {
@@ -155,10 +155,6 @@ public class DATE implements Fingerprint {
         stack.push(date.getDayOfYear() - 1);
     }
 
-    private interface DateSupplier {
-        LocalDate supply() throws DateTimeException;
-    }
-
     private static LocalDate dateOrReflect(ExecutionContext ctx, DateSupplier supplier) {
         try {
             return supplier.supply();
@@ -166,5 +162,14 @@ public class DATE implements Fingerprint {
             ctx.IP().reflect();
             return null;
         }
+    }
+
+    @Override
+    public int code() {
+        return 0x44415445;
+    }
+
+    private interface DateSupplier {
+        LocalDate supply() throws DateTimeException;
     }
 }

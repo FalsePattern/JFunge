@@ -23,39 +23,13 @@ import static com.falsepattern.jfunge.storage.Chunk.toChunkZ;
 
 @RequiredArgsConstructor
 public class FungeSpace implements Copiable<FungeSpace> {
-    private static class KeyTrackingMap<T> extends TIntObjectHashMap<T> {
-        public final TIntList keys = new TIntArrayList();
-
-        public KeyTrackingMap() {
-        }
-
-        @Override
-        public T remove(int key) {
-            val ret = super.remove(key);
-            if (ret != null) {
-                keys.remove(key);
-            }
-            return ret;
-        }
-
-        @Override
-        public T put(int key, T value) {
-            val ret = super.put(key, value);
-            if (ret == null) {
-                keys.add(key);
-            }
-            return ret;
-        }
-    }
     private final KeyTrackingMap<KeyTrackingMap<KeyTrackingMap<Chunk>>> storage = new KeyTrackingMap<>();
-
     private final Vector3i cachePos = new Vector3i();
     private final Bounds bounds = new Bounds();
     private final int defaultValue;
     private Chunk cacheChunk;
     private boolean boundsRecheck = false;
     private boolean needGC = false;
-
     private FungeSpace(FungeSpace original) {
         original.storage.forEachEntry((z, oPlane) -> {
             val nPlane = new KeyTrackingMap<KeyTrackingMap<Chunk>>();
@@ -135,8 +109,9 @@ public class FungeSpace implements Copiable<FungeSpace> {
         }
         var chunk = row.get(cX);
         if (chunk == null) {
-            if (value == defaultValue)
+            if (value == defaultValue) {
                 return;
+            }
             chunk = Chunk.allocate(defaultValue);
             row.put(cX, chunk);
         }
@@ -189,8 +164,9 @@ public class FungeSpace implements Copiable<FungeSpace> {
             int c = Byte.toUnsignedInt(data[i]);
             switch (c) {
                 case '\r':
-                    if (i < data.length - 1 && data[i + 1] == '\n')
+                    if (i < data.length - 1 && data[i + 1] == '\n') {
                         continue;
+                    }
                 case '\n':
                     X = x;
                     Y++;
@@ -230,12 +206,15 @@ public class FungeSpace implements Copiable<FungeSpace> {
                         if (c == defaultValue) {
                             accumulatedSpaces++;
                         } else {
-                            for (; accumulatedFormFeeds > 0; accumulatedFormFeeds--)
+                            for (; accumulatedFormFeeds > 0; accumulatedFormFeeds--) {
                                 out.write('\f');
-                            for (; accumulatedLineFeeds > 0; accumulatedLineFeeds--)
+                            }
+                            for (; accumulatedLineFeeds > 0; accumulatedLineFeeds--) {
                                 out.write('\n');
-                            for (; accumulatedSpaces > 0; accumulatedSpaces--)
+                            }
+                            for (; accumulatedSpaces > 0; accumulatedSpaces--) {
                                 out.write(defaultValue);
+                            }
                             out.write(c);
                         }
                     } else {
@@ -259,8 +238,9 @@ public class FungeSpace implements Copiable<FungeSpace> {
     }
 
     public void recheckBounds() {
-        if (!boundsRecheck)
+        if (!boundsRecheck) {
             return;
+        }
         if (needGC) {
             gc();
             needGC = false;
@@ -357,5 +337,30 @@ public class FungeSpace implements Copiable<FungeSpace> {
     @Override
     public FungeSpace deepCopy() {
         return new FungeSpace(this);
+    }
+
+    private static class KeyTrackingMap<T> extends TIntObjectHashMap<T> {
+        public final TIntList keys = new TIntArrayList();
+
+        public KeyTrackingMap() {
+        }
+
+        @Override
+        public T remove(int key) {
+            val ret = super.remove(key);
+            if (ret != null) {
+                keys.remove(key);
+            }
+            return ret;
+        }
+
+        @Override
+        public T put(int key, T value) {
+            val ret = super.put(key, value);
+            if (ret == null) {
+                keys.add(key);
+            }
+            return ret;
+        }
     }
 }

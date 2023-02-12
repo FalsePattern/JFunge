@@ -10,11 +10,6 @@ import lombok.SneakyThrows;
 public class BASE implements Fingerprint {
     public static final BASE INSTANCE = new BASE();
 
-    @Override
-    public int code() {
-        return 0x42415345;
-    }
-
     @SneakyThrows
     @Instr('B')
     public static void printBinary(ExecutionContext ctx) {
@@ -52,6 +47,11 @@ public class BASE implements Fingerprint {
     @Instr('O')
     public static void printOctal(ExecutionContext ctx) {
         ctx.output().write(Integer.toOctalString(ctx.stack().pop()).getBytes());
+    }
+
+    @Override
+    public int code() {
+        return 0x42415345;
     }
 
 }

@@ -27,6 +27,7 @@ public class InstructionPointer implements IP {
     private final InstructionManager instructionManager;
     @Getter
     private final TObjectIntMap<String> customStorage;
+    private final SecureRandom rng;
     @Setter
     @Getter
     private boolean stringMode = false;
@@ -35,8 +36,6 @@ public class InstructionPointer implements IP {
     private int UUID;
     @Getter
     private boolean dead = false;
-
-    private final SecureRandom rng;
 
     @SneakyThrows
     public InstructionPointer() {

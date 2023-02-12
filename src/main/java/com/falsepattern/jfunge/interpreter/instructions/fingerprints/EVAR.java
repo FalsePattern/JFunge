@@ -8,10 +8,6 @@ import lombok.val;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class EVAR implements Fingerprint {
     public static final EVAR INSTANCE = new EVAR();
-    @Override
-    public int code() {
-        return 0x45564152;
-    }
 
     @Instr('G')
     public static void getEnvironmentVariable(ExecutionContext ctx) {
@@ -20,7 +16,6 @@ public class EVAR implements Fingerprint {
         val value = ctx.env().get(key);
         if (value == null) {
             ctx.IP().reflect();
-            return;
         } else {
             stack.pushString(value);
         }
@@ -59,5 +54,10 @@ public class EVAR implements Fingerprint {
         }
         val key = keys.get(index);
         stack.pushString(key + "=" + ctx.env().get(key));
+    }
+
+    @Override
+    public int code() {
+        return 0x45564152;
     }
 }

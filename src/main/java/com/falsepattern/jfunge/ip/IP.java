@@ -9,21 +9,29 @@ import org.joml.Vector3i;
 
 public interface IP extends Copiable<IP> {
     Vector3i position();
+
     Vector3i delta();
+
     Vector3i storageOffset();
+
     IStackStack stackStack();
+
     InstructionManager instructionManager();
+
     TObjectIntMap<String> customStorage();
 
     void stringMode(boolean state);
+
     boolean stringMode();
 
     int UUID();
+
     void UUID(int newUUID);
 
     int nextRandom();
 
     boolean dead();
+
     void die();
 
     default void step() {

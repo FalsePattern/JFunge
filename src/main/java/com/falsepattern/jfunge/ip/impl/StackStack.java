@@ -53,8 +53,9 @@ public class StackStack implements IStackStack {
     }
 
     public boolean pop() {
-        if (stackStack.size() == 0)
+        if (stackStack.size() == 0) {
             return false;
+        }
         TOSS(stackStack.pop());
         return true;
     }

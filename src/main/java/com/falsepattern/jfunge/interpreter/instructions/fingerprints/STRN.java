@@ -12,10 +12,6 @@ import lombok.val;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class STRN implements Fingerprint {
     public static final STRN INSTANCE = new STRN();
-    @Override
-    public int code() {
-        return 0x5354524E;
-    }
 
     @Instr('A')
     public static void append(ExecutionContext ctx) {
@@ -47,10 +43,11 @@ public class STRN implements Fingerprint {
         val b = stack.popString();
         val a = stack.popString();
         val index = b.indexOf(a);
-        if (index < 0)
+        if (index < 0) {
             stack.push(0);
-        else
+        } else {
             stack.pushString(b.substring(index));
+        }
     }
 
     @Instr('G')
@@ -69,8 +66,10 @@ public class STRN implements Fingerprint {
         val str = new StringBuilder();
         while (bounds.inBounds(vec)) {
             val c = fs.get(vec);
-            if (c == 0) break;
-            str.append((char)c);
+            if (c == 0) {
+                break;
+            }
+            str.append((char) c);
             vec.add(1, 0, 0);
         }
         stack.pushString(str.toString());
@@ -85,7 +84,7 @@ public class STRN implements Fingerprint {
         }
         int c;
         while ((c = ctx.input(true)) != -1 && c != 0 && c != '\n') {
-            str.append((char)ctx.input(false));
+            str.append((char) ctx.input(false));
         }
         stack.pushString(str.toString());
     }
@@ -167,12 +166,21 @@ public class STRN implements Fingerprint {
     private static void subString(ExecutionContext ctx, String str, int start, int end) {
         val stack = ctx.stack();
         val length = str.length();
-        if (start < 0) start = 0;
-        if (end > length) end = length;
+        if (start < 0) {
+            start = 0;
+        }
+        if (end > length) {
+            end = length;
+        }
         if (start > end) {
             ctx.IP().reflect();
         } else {
             stack.pushString(str.substring(start, end));
         }
+    }
+
+    @Override
+    public int code() {
+        return 0x5354524E;
     }
 }

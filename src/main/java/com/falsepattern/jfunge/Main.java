@@ -21,29 +21,27 @@ public class Main {
         val masterGroup = new OptionGroup();
         masterGroup.setRequired(false);
         masterGroup.addOption(Option.builder("f")
-                                        .longOpt("file")
-                                        .hasArg(true)
-                                        .argName("file")
-                                        .numberOfArgs(1)
-                                        .desc("The file to load into the interpreter at the origin on startup.")
-                                        .build());
+                                    .longOpt("file")
+                                    .hasArg(true)
+                                    .argName("file")
+                                    .numberOfArgs(1)
+                                    .desc("The file to load into the interpreter at the origin on startup.")
+                                    .build());
         masterGroup.addOption(Option.builder()
-                                        .longOpt("version")
-                                        .desc("Prints the current program version, along with the handprint and version given by befunge's y instruction.")
-                                        .build());
-        masterGroup.addOption(Option.builder()
-                                        .longOpt("license")
-                                        .desc("Prints the license of the program.")
-                                        .build());
-        masterGroup.addOption(Option.builder()
-                                        .longOpt("help")
-                                        .desc("Displays this help page")
-                                        .build());
+                                    .longOpt("version")
+                                    .desc("Prints the current program version, along with the handprint and version given by befunge's y instruction.")
+                                    .build());
+        masterGroup.addOption(Option.builder().longOpt("license").desc("Prints the license of the program.").build());
+        masterGroup.addOption(Option.builder().longOpt("help").desc("Displays this help page").build());
         options.addOptionGroup(masterGroup);
-        options.addOption(null, "trefunge", false, "Enable 3D (Trefunge) mode. By default, the interpreter emulates 2D Befunge for compatibility.");
-        options.addOption("t", "concurrent", false, "Enables the Concurrent Funge extension (t instruction). Buggy programs can potentially forkbomb the interpreter.");
-        options.addOption(null, "env", false, "Allows the interpreter to access the environment variables of the host system.");
-        options.addOption(null, "syscall", false, "Enables the syscall feature (= instruction). This is a very dangerous permission to grant, it can call any arbitrary program on your system.");
+        options.addOption(null, "trefunge", false,
+                          "Enable 3D (Trefunge) mode. By default, the interpreter emulates 2D Befunge for compatibility.");
+        options.addOption("t", "concurrent", false,
+                          "Enables the Concurrent Funge extension (t instruction). Buggy programs can potentially forkbomb the interpreter.");
+        options.addOption(null, "env", false,
+                          "Allows the interpreter to access the environment variables of the host system.");
+        options.addOption(null, "syscall", false,
+                          "Enables the syscall feature (= instruction). This is a very dangerous permission to grant, it can call any arbitrary program on your system.");
         options.addOption(Option.builder("i")
                                 .longOpt("readperm")
                                 .hasArg(true)
@@ -83,7 +81,8 @@ public class Main {
         if (cmd.hasOption("license")) {
             try (val res = Main.class.getResourceAsStream("/LICENSE")) {
                 if (res == null) {
-                    System.out.println("Could not read embedded license file, however, this program (JFunge) is licensed under LGPLv3.");
+                    System.out.println(
+                            "Could not read embedded license file, however, this program (JFunge) is licensed under LGPLv3.");
                     return;
                 }
                 val buf = new byte[256];
@@ -127,7 +126,9 @@ public class Main {
         } else {
             program = Files.readAllBytes(Paths.get(file));
         }
-        int returnCode = Interpreter.executeProgram(args, program, System.in, System.out, Interpreter.DEFAULT_FILE_IO_SUPPLIER, featureSet.build());
+        int returnCode =
+                Interpreter.executeProgram(args, program, System.in, System.out, Interpreter.DEFAULT_FILE_IO_SUPPLIER,
+                                           featureSet.build());
         System.out.flush();
         System.exit(returnCode);
     }

@@ -10,10 +10,6 @@ import java.util.Random;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class FIXP implements Fingerprint {
     public static final FIXP INSTANCE = new FIXP();
-    @Override
-    public int code() {
-        return 0x46495850;
-    }
 
     @Instr('A')
     public static void and(ExecutionContext ctx) {
@@ -39,7 +35,7 @@ public class FIXP implements Fingerprint {
     public static void cos(ExecutionContext ctx) {
         val stack = ctx.stack();
         val a = stack.pop();
-        stack.push((int)(Math.cos(Math.toRadians(a / 10000D)) * 10000));
+        stack.push((int) (Math.cos(Math.toRadians(a / 10000D)) * 10000));
     }
 
     @Instr('D')
@@ -53,7 +49,7 @@ public class FIXP implements Fingerprint {
     public static void sin(ExecutionContext ctx) {
         val stack = ctx.stack();
         val a = stack.pop();
-        stack.push((int)(Math.sin(Math.toRadians(a / 10000D)) * 10000));
+        stack.push((int) (Math.sin(Math.toRadians(a / 10000D)) * 10000));
     }
 
     @Instr('J')
@@ -87,14 +83,14 @@ public class FIXP implements Fingerprint {
     public static void mulPi(ExecutionContext ctx) {
         val stack = ctx.stack();
         val a = stack.pop();
-        stack.push((int)(a * Math.PI));
+        stack.push((int) (a * Math.PI));
     }
 
     @Instr('Q')
     public static void sqrt(ExecutionContext ctx) {
         val stack = ctx.stack();
         val a = stack.pop();
-        stack.push((int)Math.sqrt(a));
+        stack.push((int) Math.sqrt(a));
     }
 
     @Instr('R')
@@ -121,14 +117,14 @@ public class FIXP implements Fingerprint {
     public static void tan(ExecutionContext ctx) {
         val stack = ctx.stack();
         val a = stack.pop();
-        stack.push((int)(Math.tan(Math.toRadians(a / 10000D)) * 10000));
+        stack.push((int) (Math.tan(Math.toRadians(a / 10000D)) * 10000));
     }
 
     @Instr('U')
     public static void atan(ExecutionContext ctx) {
         val stack = ctx.stack();
         val a = stack.pop();
-        stack.push((int)(Math.toDegrees(Math.atan(a / 10000D)) * 10000));
+        stack.push((int) (Math.toDegrees(Math.atan(a / 10000D)) * 10000));
     }
 
     @Instr('V')
@@ -144,5 +140,10 @@ public class FIXP implements Fingerprint {
         val b = stack.pop();
         val a = stack.pop();
         stack.push(a ^ b);
+    }
+
+    @Override
+    public int code() {
+        return 0x46495850;
     }
 }

@@ -41,10 +41,15 @@ public class REFC implements Fingerprint {
         stack.pushVecDimProof(ctx.dimensions(), vec);
     }
 
+    @Override
+    public int code() {
+        return 0x52454643;
+    }
+
     public static class Vectors {
+        private static int counter = 0;
         private final TIntObjectMap<Vector3i> references = new TIntObjectHashMap<>();
         private final TObjectIntMap<Vector3i> dereferences = new TObjectIntHashMap<>();
-        private static int counter = 0;
 
         public int reference(Vector3i vec) {
             vec = new Vector3i(vec);
@@ -65,10 +70,5 @@ public class REFC implements Fingerprint {
                 return null;
             }
         }
-    }
-
-    @Override
-    public int code() {
-        return 0x52454643;
     }
 }

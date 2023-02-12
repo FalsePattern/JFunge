@@ -21,14 +21,23 @@ import java.nio.charset.StandardCharsets;
 
 public interface IStack extends Copiable<IStack> {
     void push(int x);
+
     int peek();
+
     int pop();
+
     void clear();
+
     int pick(int index);
+
     int size();
+
     void invertMode(boolean state);
+
     boolean invertMode();
+
     void queueMode(boolean state);
+
     boolean queueMode();
 
     default void push2(Vector2ic v) {
@@ -119,7 +128,7 @@ public interface IStack extends Copiable<IStack> {
         while ((b = (byte) pop()) != 0) {
             data.write(b);
         }
-        return data.toString("UTF-8");
+        return data.toString(StandardCharsets.UTF_8);
     }
 
     default void pushL(long value) {

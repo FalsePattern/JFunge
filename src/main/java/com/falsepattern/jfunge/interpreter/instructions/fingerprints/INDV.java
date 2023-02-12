@@ -13,14 +13,11 @@ import org.joml.Vector3i;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class INDV implements Fingerprint {
     public static final INDV INSTANCE = new INDV();
-    @Override
-    public int code() {
-        return 0x494e4456;
-    }
 
     private static void getVector(FungeSpace fs, int dimensions, int x, int y, int z, Vector3i output) {
         switch (dimensions) {
-            default: throw new IllegalStateException("Pointer logic only works on 3d or lower funge");
+            default:
+                throw new IllegalStateException("Pointer logic only works on 3d or lower funge");
             case 3:
                 output.z = fs.get(x, y, z);
                 x++;
@@ -34,7 +31,8 @@ public class INDV implements Fingerprint {
 
     private static void putVector(FungeSpace fs, int dimensions, int x, int y, int z, Vector3i input) {
         switch (dimensions) {
-            default: throw new IllegalStateException("Pointer logic only works on 3d or lower funge");
+            default:
+                throw new IllegalStateException("Pointer logic only works on 3d or lower funge");
             case 3:
                 fs.set(x, y, z, input.z);
                 x++;
@@ -107,5 +105,10 @@ public class INDV implements Fingerprint {
         val vec = mStack.vec3i();
         stack.popVecDimProof(ctx.dimensions(), vec);
         putVector(ctx.fungeSpace(), ctx.dimensions(), pointer.x, pointer.y, pointer.z, vec);
+    }
+
+    @Override
+    public int code() {
+        return 0x494e4456;
     }
 }

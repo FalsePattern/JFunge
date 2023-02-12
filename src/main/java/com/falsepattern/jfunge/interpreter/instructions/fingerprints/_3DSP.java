@@ -17,36 +17,19 @@ import org.joml.Vector3i;
 public class _3DSP implements Fingerprint {
     public static final _3DSP INSTANCE = new _3DSP();
 
-    @Override
-    public int code() {
-        return 0x33445350;
-    }
-
-    private interface Op {
-        void operate(Vector3fc a, Vector3fc b, Vector3f result);
-    }
-
     private static Matrix4f getMatrix(ExecutionContext ctx, Vector3i origin, Matrix4f output) {
         val space = ctx.fungeSpace();
         val x = origin.x;
         val y = origin.y;
         val z = origin.z;
-        output.set(Float.intBitsToFloat(space.get(x, y, z)),
-                   Float.intBitsToFloat(space.get(x, y + 1, z)),
-                   Float.intBitsToFloat(space.get(x, y + 2, z)),
-                   Float.intBitsToFloat(space.get(x, y + 3, z)),
-                   Float.intBitsToFloat(space.get(x + 1, y, z)),
-                   Float.intBitsToFloat(space.get(x + 1, y + 1, z)),
-                   Float.intBitsToFloat(space.get(x + 1, y + 2, z)),
-                   Float.intBitsToFloat(space.get(x + 1, y + 3, z)),
-                   Float.intBitsToFloat(space.get(x + 2, y, z)),
-                   Float.intBitsToFloat(space.get(x + 2, y + 1, z)),
-                   Float.intBitsToFloat(space.get(x + 2, y + 2, z)),
-                   Float.intBitsToFloat(space.get(x + 2, y + 3, z)),
-                   Float.intBitsToFloat(space.get(x + 3, y, z)),
-                   Float.intBitsToFloat(space.get(x + 3, y + 1, z)),
-                   Float.intBitsToFloat(space.get(x + 3, y + 2, z)),
-                   Float.intBitsToFloat(space.get(x + 3, y + 3, z)));
+        output.set(Float.intBitsToFloat(space.get(x, y, z)), Float.intBitsToFloat(space.get(x, y + 1, z)),
+                   Float.intBitsToFloat(space.get(x, y + 2, z)), Float.intBitsToFloat(space.get(x, y + 3, z)),
+                   Float.intBitsToFloat(space.get(x + 1, y, z)), Float.intBitsToFloat(space.get(x + 1, y + 1, z)),
+                   Float.intBitsToFloat(space.get(x + 1, y + 2, z)), Float.intBitsToFloat(space.get(x + 1, y + 3, z)),
+                   Float.intBitsToFloat(space.get(x + 2, y, z)), Float.intBitsToFloat(space.get(x + 2, y + 1, z)),
+                   Float.intBitsToFloat(space.get(x + 2, y + 2, z)), Float.intBitsToFloat(space.get(x + 2, y + 3, z)),
+                   Float.intBitsToFloat(space.get(x + 3, y, z)), Float.intBitsToFloat(space.get(x + 3, y + 1, z)),
+                   Float.intBitsToFloat(space.get(x + 3, y + 2, z)), Float.intBitsToFloat(space.get(x + 3, y + 3, z)));
         return output;
     }
 
@@ -223,5 +206,14 @@ public class _3DSP implements Fingerprint {
         val vec = stack.popF3(mem.vec3f());
         vec.mul(stack.popF());
         stack.pushF3(vec);
+    }
+
+    @Override
+    public int code() {
+        return 0x33445350;
+    }
+
+    private interface Op {
+        void operate(Vector3fc a, Vector3fc b, Vector3f result);
     }
 }

@@ -27,33 +27,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class SOCK implements Fingerprint {
+    public static final SOCK INSTANCE = new SOCK();
     private static final int AF_UNIX = 1;
     private static final int AF_INET = 2;
-
     private static final int SO_DEBUG = 1;
     private static final int SO_REUSEADDR = 2;
     private static final int SO_KEEPALIVE = 3;
     private static final int SO_DONTROUTE = 4;
     private static final int SO_BROADCAST = 5;
     private static final int OOBINLINE = 6;
-
     private static final int PF_UNIX = 1;
     private static final int PF_INET = 2;
-
     private static final int SOCK_DGRAM = 1;
     private static final int SOCK_STREAM = 2;
-
     private static final int PROTO_TCP = 1;
     private static final int PROTO_UDP = 2;
-
     private static final Map<Integer, SocketWrapper> sockets = Collections.synchronizedMap(new HashMap<>());
     private static final AtomicInteger indexCounter = new AtomicInteger(0);
-
-    public static final SOCK INSTANCE = new SOCK();
-    @Override
-    public int code() {
-        return 0x534f434b;
-    }
 
     @Instr('A')
     public static void accept(ExecutionContext ctx) {
@@ -103,7 +93,8 @@ public class SOCK implements Fingerprint {
         }
 
         try {
-            socket.bind(new InetSocketAddress(InetAddress.getByAddress(new byte[]{(byte) (addr >> 24), (byte) (addr >> 16), (byte) (addr >> 8), (byte) addr}), prt));
+            socket.bind(new InetSocketAddress(InetAddress.getByAddress(
+                    new byte[]{(byte) (addr >> 24), (byte) (addr >> 16), (byte) (addr >> 8), (byte) addr}), prt));
         } catch (IOException e) {
             e.printStackTrace();
             ctx.IP().reflect();
@@ -130,7 +121,8 @@ public class SOCK implements Fingerprint {
         }
 
         try {
-            socket.connect(new InetSocketAddress(InetAddress.getByAddress(new byte[]{(byte) (addr >> 24), (byte) (addr >> 16), (byte) (addr >> 8), (byte) addr}), prt));
+            socket.connect(new InetSocketAddress(InetAddress.getByAddress(
+                    new byte[]{(byte) (addr >> 24), (byte) (addr >> 16), (byte) (addr >> 8), (byte) addr}), prt));
         } catch (IOException e) {
             e.printStackTrace();
             ctx.IP().reflect();
@@ -276,7 +268,6 @@ public class SOCK implements Fingerprint {
         }
     }
 
-
     @Instr('W')
     public static void writeSocket(ExecutionContext ctx) {
         val stack = ctx.stack();
@@ -298,7 +289,7 @@ public class SOCK implements Fingerprint {
         val y = ptr.y();
         val z = ptr.z();
         for (int i = 0; i < l; i++) {
-            data[i] = (byte)fs.get(x + i, y, z);
+            data[i] = (byte) fs.get(x + i, y, z);
         }
         try {
             stack.push(socket.send(data));
@@ -308,13 +299,18 @@ public class SOCK implements Fingerprint {
         }
     }
 
+    @Override
+    public int code() {
+        return 0x534f434b;
+    }
+
     private static class SocketWrapper {
         private final int kind;
+        private final Map<SocketOption<Boolean>, Boolean> options = new HashMap<>();
         private ServerSocket streamListen = null;
         private Socket streamConn = null;
         private DatagramSocket dgram = null;
         private InetSocketAddress bindAddress = null;
-        private final Map<SocketOption<Boolean>, Boolean> options = new HashMap<>();
 
         public SocketWrapper(int kind) {
             this.kind = kind;
@@ -376,17 +372,15 @@ public class SOCK implements Fingerprint {
         }
 
         public SocketWrapper accept() throws IOException {
-            switch (kind) {
-                case SOCK_STREAM -> {
-                    if (streamListen == null) {
-                        throw new IOException("Socket not listening");
-                    }
-                    val newSocket = streamListen.accept();
-                    val sock = new SocketWrapper(SOCK_STREAM);
-                    sock.bindAddress = bindAddress;
-                    sock.streamConn = newSocket;
-                    return sock;
+            if (kind == SOCK_STREAM) {
+                if (streamListen == null) {
+                    throw new IOException("Socket not listening");
                 }
+                val newSocket = streamListen.accept();
+                val sock = new SocketWrapper(SOCK_STREAM);
+                sock.bindAddress = bindAddress;
+                sock.streamConn = newSocket;
+                return sock;
             }
             throw new IllegalStateException("Invalid socket type");
         }
@@ -418,8 +412,8 @@ public class SOCK implements Fingerprint {
         }
 
         public void listen(int backlog) throws IOException {
-            switch (kind) {
-                case SOCK_STREAM -> streamListen().bind(bindAddress, backlog);
+            if (kind == SOCK_STREAM) {
+                streamListen().bind(bindAddress, backlog);
             }
         }
 
@@ -466,13 +460,11 @@ public class SOCK implements Fingerprint {
         }
 
         public int available() throws IOException {
-            switch (kind) {
-                case SOCK_STREAM -> {
-                    if (streamConn == null) {
-                        throw new IOException("Socket not connected");
-                    }
-                    return streamConn.getInputStream().available();
+            if (kind == SOCK_STREAM) {
+                if (streamConn == null) {
+                    throw new IOException("Socket not connected");
                 }
+                return streamConn.getInputStream().available();
             }
             throw new IOException("Invalid socket type");
         }
@@ -481,10 +473,6 @@ public class SOCK implements Fingerprint {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class SCKE implements Fingerprint {
         public static final SCKE INSTANCE = new SCKE();
-        @Override
-        public int code() {
-            return 0x53434B45;
-        }
 
         @Instr('H')
         public static void parseDomainName(ExecutionContext ctx) {
@@ -518,6 +506,11 @@ public class SOCK implements Fingerprint {
                 e.printStackTrace();
                 ctx.IP().reflect();
             }
+        }
+
+        @Override
+        public int code() {
+            return 0x53434B45;
         }
     }
 }

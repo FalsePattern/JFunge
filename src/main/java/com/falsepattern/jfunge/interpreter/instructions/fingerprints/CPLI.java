@@ -9,11 +9,7 @@ import lombok.val;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CPLI implements Fingerprint {
-public static final CPLI INSTANCE = new CPLI();
-    @Override
-    public int code() {
-        return 0x43504C49;
-    }
+    public static final CPLI INSTANCE = new CPLI();
 
     @Instr('A')
     public static void add(ExecutionContext ctx) {
@@ -77,6 +73,11 @@ public static final CPLI INSTANCE = new CPLI();
         val stack = ctx.stack();
         val i = stack.pop();
         val r = stack.pop();
-        stack.push((int)Math.sqrt(r * r + i * i));
+        stack.push((int) Math.sqrt(r * r + i * i));
+    }
+
+    @Override
+    public int code() {
+        return 0x43504C49;
     }
 }

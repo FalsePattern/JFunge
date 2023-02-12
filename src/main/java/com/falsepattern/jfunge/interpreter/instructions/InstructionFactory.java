@@ -15,35 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 class InstructionFactory extends ClassLoader {
     private static final InstructionFactory INSTANCE = new InstructionFactory();
-    private final Map<Method, Instruction> proxies = new HashMap<>();
-    private final Map<String, Class<?>> nameToClass = new HashMap<>();
-
-    private InstructionFactory() {}
-
-    @Override
-    protected Class<?> findClass(String name) throws ClassNotFoundException {
-        if (nameToClass.containsKey(name)) {
-            return nameToClass.get(name);
-        }
-        return super.findClass(name);
-    }
-
     private static final AtomicLong counter = new AtomicLong();
-
-    static Instruction createInstruction(Method method) {
-        return INSTANCE.createInstructionImpl(method);
-    }
-
-    private Instruction createInstructionImpl(Method method) {
-        if (!Modifier.isStatic(method.getModifiers()) || !Modifier.isPublic(method.getModifiers())) {
-            throw new IllegalArgumentException("createInstruction only works with public static methods! " + method.getDeclaringClass().getName() + "." + method.getName() + " is not an interface!");
-        }
-        if (!proxies.containsKey(method)) {
-            defineInstructionProxy(method);
-        }
-        return proxies.get(method);
-    }
-
     private static final String[] INTERFACES_INTERNAL_NAME;
     private static final String DESCRIPTOR;
 
@@ -56,16 +28,51 @@ class InstructionFactory extends ClassLoader {
         }
     }
 
+    private final Map<Method, Instruction> proxies = new HashMap<>();
+    private final Map<String, Class<?>> nameToClass = new HashMap<>();
+
+    private InstructionFactory() {
+    }
+
+    static Instruction createInstruction(Method method) {
+        return INSTANCE.createInstructionImpl(method);
+    }
+
+    @Override
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
+        if (nameToClass.containsKey(name)) {
+            return nameToClass.get(name);
+        }
+        return super.findClass(name);
+    }
+
+    private Instruction createInstructionImpl(Method method) {
+        if (!Modifier.isStatic(method.getModifiers()) || !Modifier.isPublic(method.getModifiers())) {
+            throw new IllegalArgumentException(
+                    "createInstruction only works with public static methods! " + method.getDeclaringClass().getName() +
+                    "." + method.getName() + " is not an interface!");
+        }
+        if (!proxies.containsKey(method)) {
+            defineInstructionProxy(method);
+        }
+        return proxies.get(method);
+    }
+
     @SuppressWarnings("unchecked")
     private void defineInstructionProxy(Method targetMethod) {
         try {
             val declClass = targetMethod.getDeclaringClass();
-            val newClassName = "com/falsepattern/jfunge/interpreter/instructions/proxy/" + (declClass.getName() + "." + targetMethod.getName()).replace('.', '_').replace('$', '_') + "_" + counter.incrementAndGet();
+            val newClassName = "com/falsepattern/jfunge/interpreter/instructions/proxy/" +
+                               (declClass.getName() + "." + targetMethod.getName()).replace('.', '_')
+                                                                                   .replace('$', '_') + "_" +
+                               counter.incrementAndGet();
             val writer = new ClassWriter(0);
-            writer.visit(Opcodes.V17, Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, newClassName, null, "java/lang/Object", INTERFACES_INTERNAL_NAME);
+            writer.visit(Opcodes.V17, Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, newClassName, null, "java/lang/Object",
+                         INTERFACES_INTERNAL_NAME);
             val method = writer.visitMethod(Opcodes.ACC_PUBLIC, "process", DESCRIPTOR, null, null);
             method.visitVarInsn(Opcodes.ALOAD, 1);
-            method.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(declClass), targetMethod.getName(), DESCRIPTOR, false);
+            method.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(declClass), targetMethod.getName(),
+                                   DESCRIPTOR, false);
             method.visitInsn(Opcodes.RETURN);
             method.visitMaxs(1, 2);
             method.visitEnd();
@@ -82,7 +89,8 @@ class InstructionFactory extends ClassLoader {
             var constructor = cl.getConstructor();
             proxies.put(targetMethod, constructor.newInstance());
             nameToClass.put(name, cl);
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+                 InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }

@@ -13,14 +13,7 @@ import org.joml.Vector3i;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TOYS implements Fingerprint {
     public static final TOYS INSTANCE = new TOYS();
-
-    private interface TransferOperation {
-        void operate(FungeSpace space, Vector3i src, Vector3i dst, int x, int y, int z);
-    }
-
-    private interface IterationOperation {
-        void operate(FungeSpace space, Vector3i dst, Vector3i delta, Vector3i src, TransferOperation op);
-    }
+    private static final int[] branchDirs = new int[]{'<', '>', '^', 'v', 'h', 'l'};
 
     private static void copy(FungeSpace space, Vector3i src, Vector3i dst, int x, int y, int z) {
         space.set(dst.x + x, dst.y + y, dst.z + z, space.get(src.x + x, src.y + y, src.z + z));
@@ -32,17 +25,23 @@ public class TOYS implements Fingerprint {
     }
 
     private static void lowOrder(FungeSpace space, Vector3i dst, Vector3i delta, Vector3i src, TransferOperation op) {
-        for (int z = 0; z < delta.z; z++)
-            for (int y = 0; y < delta.y; y++)
-                for (int x = 0; x < delta.x; x++)
+        for (int z = 0; z < delta.z; z++) {
+            for (int y = 0; y < delta.y; y++) {
+                for (int x = 0; x < delta.x; x++) {
                     op.operate(space, src, dst, x, y, z);
+                }
+            }
+        }
     }
 
     private static void highOrder(FungeSpace space, Vector3i dst, Vector3i delta, Vector3i src, TransferOperation op) {
-        for (int z = delta.z - 1; z >= 0; z--)
-            for (int y = delta.y - 1; y >= 0; y--)
-                for (int x = delta.x - 1; x >= 0; x--)
+        for (int z = delta.z - 1; z >= 0; z--) {
+            for (int y = delta.y - 1; y >= 0; y--) {
+                for (int x = delta.x - 1; x >= 0; x--) {
                     op.operate(space, src, dst, x, y, z);
+                }
+            }
+        }
     }
 
     private static void executeOperation(ExecutionContext ctx, IterationOperation iter, TransferOperation op) {
@@ -94,7 +93,8 @@ public class TOYS implements Fingerprint {
         }
         val cellValue = stack.pop();
         val space = ctx.fungeSpace();
-        lowOrder(space, dst, delta, null, (space1, src, dst1, x, y, z) -> space.set(dst1.x + x, dst1.y + y, dst1.z + z, cellValue));
+        lowOrder(space, dst, delta, null,
+                 (space1, src, dst1, x, y, z) -> space.set(dst1.x + x, dst1.y + y, dst1.z + z, cellValue));
     }
 
     @Instr('J')
@@ -293,8 +293,6 @@ public class TOYS implements Fingerprint {
         }
     }
 
-    private static final int[] branchDirs = new int[]{'<', '>', '^', 'v', 'h', 'l'};
-
     @Instr('U')
     public static void transmutableBranch(ExecutionContext ctx) {
         int random = ctx.IP().nextRandom() & 0xffff;
@@ -344,5 +342,13 @@ public class TOYS implements Fingerprint {
     @Override
     public int code() {
         return 0x544f5953;
+    }
+
+    private interface TransferOperation {
+        void operate(FungeSpace space, Vector3i src, Vector3i dst, int x, int y, int z);
+    }
+
+    private interface IterationOperation {
+        void operate(FungeSpace space, Vector3i dst, Vector3i delta, Vector3i src, TransferOperation op);
     }
 }

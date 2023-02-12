@@ -10,10 +10,6 @@ import lombok.val;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DIRF implements Fingerprint {
     public static final DIRF INSTANCE = new DIRF();
-    @Override
-    public int code() {
-        return 0x44495246;
-    }
 
     @Instr('C')
     public static void changeDirectory(ExecutionContext ctx) {
@@ -55,5 +51,10 @@ public class DIRF implements Fingerprint {
             System.err.println(e.getMessage());
             ctx.IP().reflect();
         }
+    }
+
+    @Override
+    public int code() {
+        return 0x44495246;
     }
 }

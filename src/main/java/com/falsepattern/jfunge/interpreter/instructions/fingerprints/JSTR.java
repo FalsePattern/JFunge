@@ -11,10 +11,6 @@ import lombok.val;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JSTR implements Fingerprint {
     public static final JSTR INSTANCE = new JSTR();
-    @Override
-    public int code() {
-        return 0x4a535452;
-    }
 
     @Instr('P')
     public static void putString(ExecutionContext ctx) {
@@ -55,5 +51,10 @@ public class JSTR implements Fingerprint {
             stack.push(fs.get(position));
             position.add(delta);
         }
+    }
+
+    @Override
+    public int code() {
+        return 0x4a535452;
     }
 }

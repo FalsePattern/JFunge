@@ -111,7 +111,8 @@ public class Chunk implements Releasable, Copiable<Chunk> {
         int old = storage[i];
         storage[i] = value;
         int c;
-        populatedCells += c = (old == defaultValue && value != defaultValue ? 1 : old != defaultValue && value == defaultValue ? -1 : 0);
+        populatedCells +=
+        c = (old == defaultValue && value != defaultValue ? 1 : old != defaultValue && value == defaultValue ? -1 : 0);
         if (c != 0) {
             bounds.set(-1, -1, -1, -1, -1, -1);
             return true;
@@ -149,20 +150,28 @@ public class Chunk implements Releasable, Copiable<Chunk> {
     }
 
     private int min(Getter g) {
-        for (var a = 0; a < g.sa(); a++)
-            for (var b = 0; b < g.sb(); b++)
-                for (var c = 0; c < g.sc(); c++)
-                    if (storage[g.toIndex(a, b, c)] != defaultValue)
+        for (var a = 0; a < g.sa(); a++) {
+            for (var b = 0; b < g.sb(); b++) {
+                for (var c = 0; c < g.sc(); c++) {
+                    if (storage[g.toIndex(a, b, c)] != defaultValue) {
                         return a;
+                    }
+                }
+            }
+        }
         throw new IllegalStateException();
     }
 
     private int max(Getter g) {
-        for (var a = g.sa() - 1; a >= 0; a--)
-            for (var b = 0; b < g.sb(); b++)
-                for (var c = 0; c < g.sc(); c++)
-                    if (storage[g.toIndex(a, b, c)] != defaultValue)
+        for (var a = g.sa() - 1; a >= 0; a--) {
+            for (var b = 0; b < g.sb(); b++) {
+                for (var c = 0; c < g.sc(); c++) {
+                    if (storage[g.toIndex(a, b, c)] != defaultValue) {
                         return a;
+                    }
+                }
+            }
+        }
         throw new IllegalStateException();
     }
 

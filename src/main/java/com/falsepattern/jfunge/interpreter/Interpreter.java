@@ -33,6 +33,7 @@ import java.util.Map;
 public class Interpreter implements ExecutionContext {
     public static final FileIOSupplier DEFAULT_FILE_IO_SUPPLIER = new FileIOSupplier() {
         private Path currentDirectory = Paths.get(System.getProperty("user.dir"));
+
         @Override
         public byte[] readFile(String file) throws IOException {
             return Files.readAllBytes(Paths.get(file));
@@ -235,8 +236,9 @@ public class Interpreter implements ExecutionContext {
                 interpreter.tick();
                 step++;
             }
-            if (!interpreter.stopped())
+            if (!interpreter.stopped()) {
                 throw new IllegalStateException("Program exceeded max iteration count!");
+            }
         } else {
             while (!interpreter.stopped()) {
                 interpreter.tick();
@@ -313,7 +315,8 @@ public class Interpreter implements ExecutionContext {
             IP().stackStack().TOSS().push(opcode);
         } else {
             Instruction instr;
-            if ((instr = IP().instructionManager().fetch(opcode)) != null || (instr = baseInstructionManager.fetch(opcode)) != null) {
+            if ((instr = IP().instructionManager().fetch(opcode)) != null ||
+                (instr = baseInstructionManager.fetch(opcode)) != null) {
                 instr.process(this);
             } else {
                 IP().reflect();
@@ -365,7 +368,9 @@ public class Interpreter implements ExecutionContext {
                 }
             }
             if (flipCount == 1000) {
-                throw new IllegalStateException("IP " + ip.UUID() + " is stuck on a blank strip!\nPos: " + ip.position() + ", Delta: " + ip.delta() + (ip.position().equals(0, 0, 0) && ip.UUID() == 0 ? "\nIs the file empty?" : ""));
+                throw new IllegalStateException(
+                        "IP " + ip.UUID() + " is stuck on a blank strip!\nPos: " + ip.position() + ", Delta: " +
+                        ip.delta() + (ip.position().equals(0, 0, 0) && ip.UUID() == 0 ? "\nIs the file empty?" : ""));
             }
         } while (p == ' ');
     }
@@ -383,7 +388,8 @@ public class Interpreter implements ExecutionContext {
                 } catch (IOException ignored) {
                 }
                 value = input.read();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
         }
         if (stagger) {
             inputStagger = value;
@@ -443,7 +449,9 @@ public class Interpreter implements ExecutionContext {
         if ((envFlags & 0x02) == 0) {
             return true;
         }
-        if (unrestrictedInput) return false;
+        if (unrestrictedInput) {
+            return false;
+        }
         val path = fileIOSupplier.toRealPath(file);
         return Arrays.stream(allowedInputPaths).noneMatch(path::startsWith);
     }
@@ -452,7 +460,9 @@ public class Interpreter implements ExecutionContext {
         if ((envFlags & 0x04) == 0) {
             return true;
         }
-        if (unrestrictedOutput) return false;
+        if (unrestrictedOutput) {
+            return false;
+        }
         val path = fileIOSupplier.toRealPath(file);
         return Arrays.stream(allowedOutputPaths).noneMatch(path::startsWith);
     }

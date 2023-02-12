@@ -38,12 +38,10 @@ import lombok.SneakyThrows;
 import lombok.val;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.ObjIntConsumer;
 
@@ -78,7 +76,7 @@ public class Funge98 implements InstructionSet {
         addFingerprint(STRN.INSTANCE);
         addFingerprint(TOYS.INSTANCE);
         //TODO Fix TURT, it's broken
-//        addFingerprint(TURT.INSTANCE);
+        //        addFingerprint(TURT.INSTANCE);
     }
 
     private static void addFingerprint(Fingerprint print) {
@@ -130,18 +128,20 @@ public class Funge98 implements InstructionSet {
 
     @Instr('h')
     public static void high(ExecutionContext ctx) {
-        if (ctx.dimensions() == 3)
+        if (ctx.dimensions() == 3) {
             ctx.IP().delta().set(0, 0, 1);
-        else
+        } else {
             ctx.IP().reflect();
+        }
     }
 
     @Instr('l')
     public static void low(ExecutionContext ctx) {
-        if (ctx.dimensions() == 3)
+        if (ctx.dimensions() == 3) {
             ctx.IP().delta().set(0, 0, -1);
-        else
+        } else {
             ctx.IP().reflect();
+        }
     }
 
     @Instr('?')
@@ -512,7 +512,9 @@ public class Funge98 implements InstructionSet {
         s.push((time.getYear() - 1900) * 256 * 256 + time.getMonthValue() * 256 + time.getDayOfMonth());
         val bounds = ctx.fungeSpace().bounds();
         //14 greatest point
-        s.pushVecDimProof(ctx.dimensions(), mem.vec3i().set(bounds.xMax() - bounds.xMin(), bounds.yMax() - bounds.yMin(), bounds.zMax() - bounds.zMin()));
+        s.pushVecDimProof(ctx.dimensions(), mem.vec3i()
+                                               .set(bounds.xMax() - bounds.xMin(), bounds.yMax() - bounds.yMin(),
+                                                    bounds.zMax() - bounds.zMin()));
         //13 least point
         s.pushVecDimProof(ctx.dimensions(), mem.vec3i().set(bounds.xMin(), bounds.yMin(), bounds.zMin()));
         //12 storage offset
@@ -589,7 +591,8 @@ public class Funge98 implements InstructionSet {
             reflect(ctx);
             return;
         }
-        val delta = ((flags & 1) == 1) ? ctx.fungeSpace().loadBinaryFileAt(pos.x, pos.y, pos.z, file) : ctx.fungeSpace().loadFileAt(pos.x, pos.y, pos.z, file, ctx.dimensions() == 3);
+        val delta = ((flags & 1) == 1) ? ctx.fungeSpace().loadBinaryFileAt(pos.x, pos.y, pos.z, file)
+                                       : ctx.fungeSpace().loadFileAt(pos.x, pos.y, pos.z, file, ctx.dimensions() == 3);
         pos.sub(ctx.IP().storageOffset());
         s.pushVecDimProof(ctx.dimensions(), delta);
         s.pushVecDimProof(ctx.dimensions(), pos);

@@ -25,7 +25,8 @@ public class PERL implements Fingerprint {
             name = UUID.randomUUID() + ".pl";
         } while (Files.exists(Paths.get(name)));
         try {
-            try (val os = Files.newOutputStream(Paths.get(name), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
+            try (val os = Files.newOutputStream(Paths.get(name), StandardOpenOption.CREATE,
+                                                StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
                 os.write("print eval(".getBytes(StandardCharsets.UTF_8));
                 os.write(ctx.stack().popString().getBytes(StandardCharsets.UTF_8));
                 os.write(");".getBytes(StandardCharsets.UTF_8));
@@ -55,7 +56,7 @@ public class PERL implements Fingerprint {
                 while ((read = input.read(buf)) > 0) {
                     res.write(buf, 0, read);
                 }
-                return res.toString("UTF-8");
+                return res.toString(StandardCharsets.UTF_8);
             } catch (IOException e) {
                 e.printStackTrace();
                 Funge98.reflect(ctx);

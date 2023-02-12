@@ -15,14 +15,7 @@ import java.text.DecimalFormat;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FPDP implements Fingerprint {
     public static final FPDP INSTANCE = new FPDP();
-    @Override
-    public int code() {
-        return 0x46504450;
-    }
-
-    private interface BinOp {
-        double op(double a, double b);
-    }
+    private static final DecimalFormat PRINT_FORMAT = new DecimalFormat("0.###### ");
 
     private static void binop(ExecutionContext ctx, BinOp op) {
         val stack = ctx.stack();
@@ -43,7 +36,7 @@ public class FPDP implements Fingerprint {
 
     @Instr('B')
     public static void sin(ExecutionContext ctx) {
-       unop(ctx, Math::sin);
+        unop(ctx, Math::sin);
     }
 
     @Instr('C')
@@ -80,7 +73,7 @@ public class FPDP implements Fingerprint {
     @Instr('I')
     public static void fToI(ExecutionContext ctx) {
         val stack = ctx.stack();
-        stack.push((int)stack.popD());
+        stack.push((int) stack.popD());
     }
 
     @Instr('K')
@@ -102,8 +95,6 @@ public class FPDP implements Fingerprint {
     public static void negate(ExecutionContext ctx) {
         unop(ctx, (x) -> -x);
     }
-
-    private static final DecimalFormat PRINT_FORMAT = new DecimalFormat("0.###### ");
 
     @SneakyThrows
     @Instr('P')
@@ -154,5 +145,14 @@ public class FPDP implements Fingerprint {
     @Instr('Y')
     public static void pow(ExecutionContext ctx) {
         binop(ctx, java.lang.Math::pow);
+    }
+
+    @Override
+    public int code() {
+        return 0x46504450;
+    }
+
+    private interface BinOp {
+        double op(double a, double b);
     }
 }

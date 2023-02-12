@@ -17,11 +17,6 @@ import java.util.function.ObjIntConsumer;
 public class FING implements Fingerprint {
     public static final FING INSTANCE = new FING();
 
-    @Override
-    public int code() {
-        return 0x46494e47;
-    }
-
     private static Instruction popInstr(ExecutionContext ctx, int instruction) {
         val result = new AtomicReference<Instruction>();
         ctx.IP().instructionManager().unloadInstructionSet(new InstructionSet() {
@@ -88,5 +83,10 @@ public class FING implements Fingerprint {
             pushInstr(ctx, a, aI);
         }
         pushInstr(ctx, b, Optional.ofNullable(aI).orElse((c) -> c.IP().reflect()));
+    }
+
+    @Override
+    public int code() {
+        return 0x46494e47;
     }
 }

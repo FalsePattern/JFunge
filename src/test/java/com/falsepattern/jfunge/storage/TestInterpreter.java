@@ -144,21 +144,10 @@ public class TestInterpreter {
         return new ByteArrayInputStream(new byte[0]);
     }
 
-    @Test
-    public void testMycology() {
+    private static void execMycoProgram(String program, int expectedReturnCode, FeatureSet featureSet, String input) {
         val checkingOutput = new ByteArrayOutputStream();
         val output = new TeeOutputStream(checkingOutput, System.out);
-        val program = readProgram("/mycology.b98");
-        val featureSet = FeatureSet.builder()
-                                   .allowedInputFiles(new String[]{"/"})
-                                   .allowedOutputFiles(new String[]{"/"})
-                                   .sysCall(false)
-                                   .concurrent(true)
-                                   .environment(false)
-                                   .perl(true)
-                                   .maxIter(300000L)
-                                   .build();
-        val returnCode = interpret(new String[]{"mycology.b98"}, program, nullStream(), output, featureSet);
+        val returnCode = interpret(new String[]{program}, readProgram("/" + program), new ByteArrayInputStream(input.getBytes()), output, featureSet);
         val txt = checkingOutput.toString();
         String currentlyActiveFingerprint = null;
         boolean fingerprintHadError = false;
@@ -208,7 +197,35 @@ public class TestInterpreter {
             System.out.println(fingerprint);
         }
         Assertions.assertTrue(good);
-        Assertions.assertEquals(15, returnCode);
+        Assertions.assertEquals(expectedReturnCode, returnCode);
+    }
+
+    @Test
+    public void testMycology() {
+        val featureSet = FeatureSet.builder()
+                                   .allowedInputFiles(new String[]{"/"})
+                                   .allowedOutputFiles(new String[]{"/"})
+                                   .sysCall(false)
+                                   .concurrent(true)
+                                   .environment(false)
+                                   .perl(true)
+                                   .maxIter(300000L)
+                                   .build();
+        execMycoProgram("mycology.b98", 15, featureSet, "");
+    }
+
+    @Test
+    public void testMycoUser() {
+        val featureSet = FeatureSet.builder()
+                                   .allowedInputFiles(new String[]{"/"})
+                                   .allowedOutputFiles(new String[]{"/"})
+                                   .sysCall(false)
+                                   .concurrent(true)
+                                   .environment(false)
+                                   .perl(true)
+                                   .maxIter(300000L)
+                                   .build();
+        execMycoProgram("mycouser.b98", 0, featureSet, "123\nt\n16\nf0f0\n");
     }
 
     @Test

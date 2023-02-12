@@ -79,6 +79,7 @@ Additionally, the following fingerprints are currently supported (more to come):
 - [PERL](./docs/catseye/library/PERL.markdown) (Disabled by default, needs command line flag)
 - [REFC](./docs/catseye/library/REFC.markdown)
 - [ROMA](./docs/catseye/library/ROMA.markdown)
+- [STRN](https://rcfunge98.com/rcsfingers.html#STRN)
 - [TOYS](./docs/catseye/library/TOYS.markdown)
 - [TURT](./docs/catseye/library/TURT.markdown) (Broken, disabled in source code, will be fixed in the future)
 

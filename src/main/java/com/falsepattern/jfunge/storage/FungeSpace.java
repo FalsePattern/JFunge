@@ -1,7 +1,8 @@
 package com.falsepattern.jfunge.storage;
 
 import com.falsepattern.jfunge.Copiable;
-import gnu.trove.map.TIntObjectMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -22,20 +23,45 @@ import static com.falsepattern.jfunge.storage.Chunk.toChunkZ;
 
 @RequiredArgsConstructor
 public class FungeSpace implements Copiable<FungeSpace> {
-    private final TIntObjectMap<TIntObjectMap<TIntObjectMap<Chunk>>> storage = new TIntObjectHashMap<>();
+    private static class KeyTrackingMap<T> extends TIntObjectHashMap<T> {
+        public final TIntList keys = new TIntArrayList();
+
+        public KeyTrackingMap() {
+        }
+
+        @Override
+        public T remove(int key) {
+            val ret = super.remove(key);
+            if (ret != null) {
+                keys.remove(key);
+            }
+            return ret;
+        }
+
+        @Override
+        public T put(int key, T value) {
+            val ret = super.put(key, value);
+            if (ret == null) {
+                keys.add(key);
+            }
+            return ret;
+        }
+    }
+    private final KeyTrackingMap<KeyTrackingMap<KeyTrackingMap<Chunk>>> storage = new KeyTrackingMap<>();
 
     private final Vector3i cachePos = new Vector3i();
     private final Bounds bounds = new Bounds();
     private final int defaultValue;
     private Chunk cacheChunk;
     private boolean boundsRecheck = false;
+    private boolean needGC = false;
 
     private FungeSpace(FungeSpace original) {
         original.storage.forEachEntry((z, oPlane) -> {
-            val nPlane = new TIntObjectHashMap<TIntObjectMap<Chunk>>();
+            val nPlane = new KeyTrackingMap<KeyTrackingMap<Chunk>>();
             storage.put(z, nPlane);
             oPlane.forEachEntry((y, oRow) -> {
-                val nRow = new TIntObjectHashMap<Chunk>();
+                val nRow = new KeyTrackingMap<Chunk>();
                 nPlane.put(y, nRow);
                 oRow.forEachEntry((x, oChunk) -> {
                     val nChunk = oChunk.deepCopy();
@@ -99,12 +125,12 @@ public class FungeSpace implements Copiable<FungeSpace> {
         }
         var plane = storage.get(cZ);
         if (plane == null) {
-            plane = new TIntObjectHashMap<>();
+            plane = new KeyTrackingMap<>();
             storage.put(cZ, plane);
         }
         var row = plane.get(cY);
         if (row == null) {
-            row = new TIntObjectHashMap<>();
+            row = new KeyTrackingMap<>();
             plane.put(cY, row);
         }
         var chunk = row.get(cX);
@@ -115,6 +141,7 @@ public class FungeSpace implements Copiable<FungeSpace> {
             row.put(cX, chunk);
         }
         boundsRecheck |= chunk.set(inChunkX(x), inChunkY(y), inChunkZ(z), value);
+        needGC |= boundsRecheck && chunk.isEmpty();
         cacheChunk = chunk;
         cachePos.set(cX, cY, cZ);
     }
@@ -125,14 +152,11 @@ public class FungeSpace implements Copiable<FungeSpace> {
 
     public void gc() {
         cacheChunk = null;
-        val planes = storage.keys();
-        for (val iPlane : planes) {
+        for (val iPlane : storage.keys.toArray()) {
             val plane = storage.get(iPlane);
-            val rows = plane.keys();
-            for (val iRow : rows) {
+            for (val iRow : plane.keys.toArray()) {
                 val row = plane.get(iRow);
-                val chunks = row.keys();
-                for (val iChunk : chunks) {
+                for (val iChunk : row.keys.toArray()) {
                     val chunk = row.get(iChunk);
                     if (chunk.isEmpty()) {
                         row.remove(iChunk);
@@ -237,7 +261,10 @@ public class FungeSpace implements Copiable<FungeSpace> {
     public void recheckBounds() {
         if (!boundsRecheck)
             return;
-        gc();
+        if (needGC) {
+            gc();
+            needGC = false;
+        }
         boundsRecheck = false;
         if (storage.size() == 0) {
             bounds.zero();
@@ -250,15 +277,15 @@ public class FungeSpace implements Copiable<FungeSpace> {
         int xMinFinal = Integer.MAX_VALUE;
         int xMaxFinal = Integer.MIN_VALUE;
         int[] mm = new int[2];
-        int[] cZArr = storage.keys();
+        int[] cZArr = storage.keys.toArray();
         minMax(cZArr, mm);
         int cZMin = mm[0];
         int cZMax = mm[1];
         int best = Integer.MAX_VALUE;
         var plane = storage.get(cZMin);
-        for (val iRow : plane.keys()) {
+        for (val iRow : plane.keys.toArray()) {
             val row = plane.get(iRow);
-            for (val iChunk : row.keys()) {
+            for (val iChunk : row.keys.toArray()) {
                 val chunk = row.get(iChunk);
                 int minZ = chunk.minZ();
                 if (minZ < best) {
@@ -269,9 +296,9 @@ public class FungeSpace implements Copiable<FungeSpace> {
         zMinFinal = fromChunkZ(cZMin) + best;
         best = Integer.MIN_VALUE;
         plane = storage.get(cZMax);
-        for (val iRow : plane.keys()) {
+        for (val iRow : plane.keys.toArray()) {
             val row = plane.get(iRow);
-            for (val iChunk : row.keys()) {
+            for (val iChunk : row.keys.toArray()) {
                 val chunk = row.get(iChunk);
                 int maxZ = chunk.maxZ();
                 if (maxZ > best) {
@@ -284,13 +311,13 @@ public class FungeSpace implements Copiable<FungeSpace> {
             plane = storage.get(cZ);
             int yMin;
             int yMax;
-            int[] cYArr = plane.keys();
+            int[] cYArr = plane.keys.toArray();
             minMax(cYArr, mm);
             int cYMin = mm[0];
             int cYMax = mm[1];
             best = Integer.MAX_VALUE;
             var row = plane.get(cYMin);
-            for (val iChunk : row.keys()) {
+            for (val iChunk : row.keys.toArray()) {
                 val chunk = row.get(iChunk);
                 int minY = chunk.minY();
                 if (minY < best) {
@@ -300,7 +327,7 @@ public class FungeSpace implements Copiable<FungeSpace> {
             yMin = fromChunkY(cYMin) + best;
             best = Integer.MIN_VALUE;
             row = plane.get(cYMax);
-            for (val iChunk : row.keys()) {
+            for (val iChunk : row.keys.toArray()) {
                 val chunk = row.get(iChunk);
                 int maxY = chunk.maxY();
                 if (maxY > best) {
@@ -314,7 +341,7 @@ public class FungeSpace implements Copiable<FungeSpace> {
                 row = plane.get(cY);
                 int xMin;
                 int xMax;
-                int[] cXArr = row.keys();
+                int[] cXArr = row.keys.toArray();
                 minMax(cXArr, mm);
                 int cXMin = mm[0];
                 int cXMax = mm[1];

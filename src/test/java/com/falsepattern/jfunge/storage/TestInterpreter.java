@@ -230,9 +230,8 @@ public class TestInterpreter {
         val featureSet = FeatureSet.builder()
                                    .allowedInputFiles(new String[]{"/"})
                                    .allowedOutputFiles(new String[]{"/"})
-                                   .sysCall(false)
                                    .concurrent(true)
-                                   .environment(false)
+                                   .socket(true)
                                    .perl(true)
                                    .maxIter(300000L)
                                    .build();
@@ -244,10 +243,6 @@ public class TestInterpreter {
         val featureSet = FeatureSet.builder()
                                    .allowedInputFiles(new String[]{"/"})
                                    .allowedOutputFiles(new String[]{"/"})
-                                   .sysCall(false)
-                                   .concurrent(true)
-                                   .environment(false)
-                                   .perl(true)
                                    .maxIter(300000L)
                                    .build();
         execMycoProgram("mycouser.b98", 0, featureSet, "123\nt\n16\nf0f0\nHello\n");
@@ -258,11 +253,7 @@ public class TestInterpreter {
         val featureSet = FeatureSet.builder()
                                    .allowedInputFiles(new String[]{"/"})
                                    .allowedOutputFiles(new String[]{"/"})
-                                   .sysCall(false)
-                                   .concurrent(true)
-                                   .environment(false)
                                    .trefunge(true)
-                                   .perl(true)
                                    .maxIter(300000L)
                                    .build();
         execMycoProgram("mycotre.b98", 0, featureSet, "");

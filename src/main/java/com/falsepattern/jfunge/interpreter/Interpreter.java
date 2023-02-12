@@ -4,6 +4,7 @@ import com.falsepattern.jfunge.interpreter.instructions.Funge98;
 import com.falsepattern.jfunge.interpreter.instructions.Instruction;
 import com.falsepattern.jfunge.interpreter.instructions.InstructionManager;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.PERL;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.SOCK;
 import com.falsepattern.jfunge.ip.IP;
 import com.falsepattern.jfunge.ip.impl.InstructionPointer;
 import com.falsepattern.jfunge.storage.FungeSpace;
@@ -202,6 +203,11 @@ public class Interpreter implements ExecutionContext {
 
         if (!featureSet.perl) {
             fingerprintBlackList.add(PERL.INSTANCE.code());
+        }
+
+        if (!featureSet.socket) {
+            fingerprintBlackList.add(SOCK.INSTANCE.code());
+            fingerprintBlackList.add(SOCK.SCKE.INSTANCE.code());
         }
     }
 

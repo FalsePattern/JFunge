@@ -464,12 +464,13 @@ public class Interpreter implements ExecutionContext {
         currentIP = null;
         for (int i = 0; i < IPs.size(); i++) {
             currentIP = IPs.get(i);
+            if (!IP().dead()) {
+                interpret(fungeSpace().get(IP().position()));
+            }
             if (IP().dead()) {
                 IPs.remove(i);
                 i--;
-                continue;
             }
-            interpret(fungeSpace().get(IP().position()));
             if (clone != null) {
                 IPs.add(i++, clone);
                 clone = null;

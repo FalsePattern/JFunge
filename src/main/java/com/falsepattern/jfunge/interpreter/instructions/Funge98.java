@@ -103,7 +103,7 @@ public class Funge98 implements InstructionSet {
     @Instr(')')
     public static void unloadFinger(ExecutionContext ctx) {
         val code = getFingerCode(ctx.stack());
-        if (fingerprints.containsKey(code)) {
+        if (fingerprints.containsKey(code) && ctx.fingerprintAllowed(code)) {
             ctx.IP().instructionManager().unloadInstructionSet(fingerprints.get(code));
         } else {
             ctx.interpret('r');

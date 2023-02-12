@@ -155,6 +155,7 @@ public class TestInterpreter {
                                    .allowedOutputFiles(new String[]{"/"})
                                    .sysCall(false)
                                    .concurrent(true)
+                                   .environment(false)
                                    .perl(true)
                                    .maxIter(300000L)
                                    .build();

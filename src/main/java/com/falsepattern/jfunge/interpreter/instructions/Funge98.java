@@ -14,6 +14,7 @@ import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FPDP;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.FPSP;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.HRTI;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.INDV;
+import com.falsepattern.jfunge.interpreter.instructions.fingerprints.JSTR;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODE;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.MODU;
 import com.falsepattern.jfunge.interpreter.instructions.fingerprints.NULL;
@@ -63,6 +64,7 @@ public class Funge98 implements InstructionSet {
         addFingerprint(FIXP.INSTANCE);
         addFingerprint(HRTI.INSTANCE);
         addFingerprint(INDV.INSTANCE);
+        addFingerprint(JSTR.INSTANCE);
         addFingerprint(MODE.INSTANCE);
         addFingerprint(MODU.INSTANCE);
         addFingerprint(NULL.INSTANCE);

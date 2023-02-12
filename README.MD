@@ -72,6 +72,8 @@ Additionally, the following fingerprints are currently supported (more to come):
 - [FPDP](https://rcfunge98.com/rcsfingers.html#FPDP)
 - [FPSP](https://rcfunge98.com/rcsfingers.html#FPSP)
 - [HRTI](./docs/catseye/library/HRTI.markdown)
+- [INDV](https://rcfunge98.com/rcsfingers.html#INDV)
+- [JSTR](https://web.archive.org/web/20070525220700/http://www.jess2.net:80/code/funge/myexts.txt)
 - [MODE](./docs/catseye/library/MODE.markdown)
 - [MODU](./docs/catseye/library/MODU.markdown)
 - [NULL](./docs/catseye/library/NULL.markdown)

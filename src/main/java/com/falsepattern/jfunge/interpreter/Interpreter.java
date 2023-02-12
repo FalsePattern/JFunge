@@ -372,6 +372,10 @@ public class Interpreter implements ExecutionContext {
             inputStagger = -1;
         } else {
             try {
+                try {
+                    output.flush();
+                } catch (IOException ignored) {
+                }
                 value = input.read();
             } catch (IOException ignored) {}
         }

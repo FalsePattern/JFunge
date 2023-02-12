@@ -5,7 +5,7 @@ A standard-conforming Funge-98 interpreter.
 ### Usage
 ```
 usage: jfunge [--env] [-f <file> | --help | --license | --version]  [-i <file>]
-       [--maxiter <iterations>] [-o <file>] [--perl] [--syscall] [-t]
+       [--maxiter <iterations>] [-o <file>] [--perl] [--sock] [--syscall] [-t]
        [--trefunge]
 JFunge, a Funge98 interpeter for java.
     --env                    Allows the interpreter to access the environment
@@ -29,6 +29,11 @@ JFunge, a Funge98 interpeter for java.
                              working directory of the interpreter to be
                              writable, and is also an arbitrary code execution
                              risk.
+    --sock                   Enable the SOCK and SCKE fingerprints. This allows
+                             the program to open a socket and listen for
+                             connections, as well as connect to external hosts.
+                             This is a very dangerous permission to grant, it
+                             can potentially allow remote code execution.
     --syscall                Enables the syscall feature (= instruction). This
                              is a very dangerous permission to grant, it can
                              call any arbitrary program on your system.
@@ -40,9 +45,6 @@ JFunge, a Funge98 interpeter for java.
     --version                Prints the current program version, along with the
                              handprint and version given by befunge's y
                              instruction.
-
-Process finished with exit code 0
-
 ```
 
 ### Compatibility

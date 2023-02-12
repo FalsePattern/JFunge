@@ -6,6 +6,8 @@ import lombok.val;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junitpioneer.jupiter.DisableIfTestFails;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,6 +23,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+@DisableIfTestFails
+@TestMethodOrder(AsWrittenMethodOrderer.class)
 public class TestInterpreter {
     private static final Interpreter.FileIOSupplier fakeSupplier = new Interpreter.FileIOSupplier() {
 
@@ -200,6 +204,27 @@ public class TestInterpreter {
         Assertions.assertEquals(expectedReturnCode, returnCode);
     }
 
+
+    @Test
+    public void testPutCharAtStart() {
+        System.out.println("Testing edge case 'a,@");
+        val output = new ByteArrayOutputStream();
+        val returnCode = interpret(new String[0], "'a,@".getBytes(StandardCharsets.UTF_8), nullStream(), output, FeatureSet.builder().maxIter(50).build());
+        val txt = output.toString();
+        Assertions.assertEquals("a", txt);
+        Assertions.assertEquals(0, returnCode);
+    }
+
+    @Test
+    public void testSemicolonAtStart() {
+        System.out.println("Testing edge case ;;.@");
+        val output = new ByteArrayOutputStream();
+        val returnCode = interpret(new String[0], ";;.@".getBytes(StandardCharsets.UTF_8), nullStream(), output, FeatureSet.builder().maxIter(50).build());
+        val txt = output.toString();
+        Assertions.assertEquals("0 ", txt);
+        Assertions.assertEquals(0, returnCode);
+    }
+
     @Test
     public void testMycology() {
         val featureSet = FeatureSet.builder()
@@ -226,25 +251,5 @@ public class TestInterpreter {
                                    .maxIter(300000L)
                                    .build();
         execMycoProgram("mycouser.b98", 0, featureSet, "123\nt\n16\nf0f0\n");
-    }
-
-    @Test
-    public void testSemicolonAtStart() {
-        System.out.println("Testing edge case ;;.@");
-        val output = new ByteArrayOutputStream();
-        val returnCode = interpret(new String[0], ";;.@".getBytes(StandardCharsets.UTF_8), nullStream(), output, FeatureSet.builder().maxIter(50).build());
-        val txt = output.toString();
-        Assertions.assertEquals("0 ", txt);
-        Assertions.assertEquals(0, returnCode);
-    }
-
-    @Test
-    public void testPutCharAtStart() {
-        System.out.println("Testing edge case 'a,@");
-        val output = new ByteArrayOutputStream();
-        val returnCode = interpret(new String[0], "'a,@".getBytes(StandardCharsets.UTF_8), nullStream(), output, FeatureSet.builder().maxIter(50).build());
-        val txt = output.toString();
-        Assertions.assertEquals("a", txt);
-        Assertions.assertEquals(0, returnCode);
     }
 }

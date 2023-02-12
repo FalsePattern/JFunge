@@ -3,6 +3,8 @@ package com.falsepattern.jfunge.storage;
 import lombok.val;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junitpioneer.jupiter.DisableIfTestFails;
 
 import java.nio.charset.StandardCharsets;
 
@@ -10,6 +12,8 @@ import static com.falsepattern.jfunge.storage.Chunk.CHUNK_EDGE_SIZE_X;
 import static com.falsepattern.jfunge.storage.Chunk.CHUNK_EDGE_SIZE_Y;
 import static com.falsepattern.jfunge.storage.Chunk.CHUNK_EDGE_SIZE_Z;
 
+@DisableIfTestFails
+@TestMethodOrder(AsWrittenMethodOrderer.class)
 public class TestFungeSpace {
     private static int toPos(int fragment, int es) {
         int sign = -((fragment >>> 1) & 1);

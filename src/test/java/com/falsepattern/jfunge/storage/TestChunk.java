@@ -5,9 +5,13 @@ import lombok.Cleanup;
 import lombok.val;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junitpioneer.jupiter.DisableIfTestFails;
 
 import java.util.Random;
 
+@DisableIfTestFails
+@TestMethodOrder(AsWrittenMethodOrderer.class)
 public class TestChunk {
     @Test
     public void testSetGet() {
